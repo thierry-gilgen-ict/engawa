@@ -18,18 +18,18 @@
     "format:write": "prettier --write ."
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
-    "globals": "^16.0.0",
+    "@eslint/js": "^10.0.1",
+    "globals": "^17.11.0",
     "@modelcontextprotocol/client": "2.0.0",
     "@modelcontextprotocol/server": "2.0.0",
     "@thierry-gilgen-ict/engawa-core": "workspace:*",
     "@thierry-gilgen-ict/engawa-discovery": "workspace:*",
     "@thierry-gilgen-ict/engawa-mcp": "workspace:*",
-    "@types/node": "^24.0.0",
-    "eslint": "^9.39.2",
+    "@types/node": "^26.2.0",
+    "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "3.6.2",
-    "typescript": "^5.9.3",
+    "prettier": "3.9.6",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.48.1",
     "vitest": "^4.0.15"
   }
