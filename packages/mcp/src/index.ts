@@ -1,5 +1,9 @@
 import { createMcpHandler, McpServer } from "@modelcontextprotocol/server";
-import { buildResourceUri, type Engawa, type EngawaResource } from "@thierry-gilgen-ict/engawa-core";
+import {
+  buildResourceUri,
+  type Engawa,
+  type EngawaResource,
+} from "@thierry-gilgen-ict/engawa-core";
 import * as z from "zod/v4";
 
 const META_RESOURCE_ID = "_meta";
