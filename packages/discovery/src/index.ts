@@ -55,7 +55,6 @@ export function getLlmsTxtUrl(config: EngawaConfig, basePath = "/llms.txt"): str
 
 export function getDiscoveryLinks(
   config: EngawaConfig,
-  pageCanonicalUrl: string,
   markdownAlternateUrl?: string,
   llmsTxtPath = "/llms.txt",
 ): DiscoveryLink[] {

@@ -16,20 +16,22 @@
 - Adapters do not silently expand authority
 - Tools registered via explicit allow-list
 - Future authenticated tools architecturally separate from public tools
+- Public MCP (`createEngawaPublicMcpHandler`) requires `agentInterface.enabled` and `agentInterface.public`; disabled or private configs fail closed with `EngawaAgentInterfaceError`
+- Adapter output validated at core boundary before MCP or discovery consumption
 
 ## Threat analysis
 
-| Threat                                            | v0.1 status                                                                                  |
-| ------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Prompt / content injection via registered content | Partially mitigated — content is site-controlled; agents must treat untrusted text carefully |
-| Malicious content source (compromised adapter)    | Partially mitigated — adapter is site operator responsibility; bounds limit blast radius     |
-| Path traversal                                    | Mitigated — no filesystem adapter in v0.1                                                    |
-| SSRF via tools                                    | Mitigated — no outbound HTTP in tools                                                        |
-| Tool abuse (spam search)                          | Partially mitigated — query length and result limits; rate limiting recommended at edge      |
-| Resource enumeration                              | Accepted — public resources are intentionally listable                                       |
-| DoS / oversized queries                           | Partially mitigated — byte and length bounds; edge rate limiting recommended                 |
-| Accidental secret leakage                         | Mitigated — tools return only adapter content; no env access                                 |
-| Unsafe future mutation                            | Future — mutating tools require auth and separate review                                     |
-| Cross-tenant leakage (future SaaS)                | Future — multi-tenant isolation not in v0.1                                                  |
+| Threat                                            | v0.1 status                                                                                       |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Prompt / content injection via registered content | Partially mitigated — content is site-controlled; agents must treat untrusted text carefully      |
+| Malicious content source (compromised adapter)    | Partially mitigated — schema validation at core boundary; adapter is site operator responsibility |
+| Path traversal                                    | Mitigated — no filesystem adapter in v0.1                                                         |
+| SSRF via tools                                    | Mitigated — no outbound HTTP in tools                                                             |
+| Tool abuse (spam search)                          | Partially mitigated — query length and result limits; rate limiting recommended at edge           |
+| Resource enumeration                              | Accepted — public resources are intentionally listable                                            |
+| DoS / oversized queries                           | Partially mitigated — byte and length bounds; edge rate limiting recommended                      |
+| Accidental secret leakage                         | Mitigated — tools return only adapter content; no env access                                      |
+| Unsafe future mutation                            | Future — mutating tools require auth and separate review                                          |
+| Cross-tenant leakage (future SaaS)                | Future — multi-tenant isolation not in v0.1                                                       |
 
 Phase 0 does not permanently solve all threats. It establishes defaults and boundaries for the public read-only surface.

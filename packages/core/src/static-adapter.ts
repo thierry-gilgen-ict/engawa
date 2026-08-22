@@ -1,4 +1,9 @@
-import { buildResourceUri, type EngawaResource, normalizeCanonicalUrl } from "./index.js";
+import {
+  buildResourceUri,
+  type EngawaResource,
+  normalizeCanonicalUrl,
+  validateResourceId,
+} from "./index.js";
 
 export interface StaticResourceInput {
   id: string;
@@ -21,11 +26,16 @@ export class StaticContentAdapter {
     this.uriIndex = new Map();
 
     for (const input of inputs) {
-      const path = input.path ?? `/${input.id}.md`;
+      const id = validateResourceId(input.id);
+      if (this.resources.has(id)) {
+        throw new Error(`Duplicate resource id "${id}"`);
+      }
+
+      const path = input.path ?? `/${id}.md`;
       const canonical = `${normalizedBase}${path.startsWith("/") ? path : `/${path}`}`;
       const resource: EngawaResource = {
-        id: input.id,
-        uri: buildResourceUri(normalizedBase, input.id),
+        id,
+        uri: buildResourceUri(normalizedBase, id),
         title: input.title,
         description: input.description,
         mimeType: input.mimeType ?? "text/markdown",

@@ -22,8 +22,9 @@ No MCP, HTTP, or UI dependencies.
 
 ### `engawa-mcp`
 
-- `createEngawaMcpServer()` — registers resources and `search_site`
-- `createEngawaMcpHandler()` — stateless HTTP handler via MCP SDK v2
+- `createEngawaPublicMcpServer()` / `createEngawaPublicMcpHandler()` — fail-closed public MCP (requires enabled + public agent interface)
+- `assertPublicAgentInterface()` — explicit gate for public v0.1 surface
+- Registers resources and bounded `search_site` using config-derived limits
 
 Uses `createMcpHandler` with a **per-request factory** (MCP 2026-07-28 stateless core).
 

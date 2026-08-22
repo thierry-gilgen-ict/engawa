@@ -5,13 +5,13 @@ import {
   toNodeHandler,
 } from "@modelcontextprotocol/node";
 import { generateLlmsTxt } from "@thierry-gilgen-ict/engawa-discovery";
-import { createEngawaMcpHandler } from "@thierry-gilgen-ict/engawa-mcp";
+import { createEngawaPublicMcpHandler } from "@thierry-gilgen-ict/engawa-mcp";
 import { exampleEngawa } from "./site.js";
 
 const PORT = 3847;
 const HOST = "127.0.0.1";
 
-const mcpHandler = createEngawaMcpHandler(exampleEngawa);
+const mcpHandler = createEngawaPublicMcpHandler(exampleEngawa);
 const nodeMcpHandler = toNodeHandler(mcpHandler);
 const validateHost = localhostHostValidation();
 const validateOrigin = localhostOriginValidation();

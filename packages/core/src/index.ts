@@ -4,17 +4,30 @@ export const ENGAWA_VERSION = "0.1.0";
 export const IMPLEMENTATION_PROFILE_VERSION = "0.1";
 export const MCP_PROTOCOL_BASELINE = "2026-07-28";
 
-const absoluteUrlSchema = z
+/** Documented absolute safety ceilings for Engawa config (not hidden MCP-specific limits). */
+export const MAX_SEARCH_QUERY_LENGTH_CEILING = 500;
+export const MAX_SEARCH_RESULTS_CEILING = 50;
+
+const httpAbsoluteUrlSchema = z
   .string()
   .url()
   .refine((url) => url.startsWith("http://") || url.startsWith("https://"), {
     message: "canonicalUrl must be an absolute http(s) URL",
   });
 
+export const resourceIdSchema = z
+  .string()
+  .min(1)
+  .max(128)
+  .regex(
+    /^[a-zA-Z0-9._-]+$/,
+    "Resource id must contain only letters, digits, dots, underscores, and hyphens",
+  );
+
 export const engawaConfigSchema = z.object({
   site: z.object({
     name: z.string().min(1),
-    canonicalUrl: absoluteUrlSchema,
+    canonicalUrl: httpAbsoluteUrlSchema,
     description: z.string().min(1),
     language: z.string().min(1).default("en"),
   }),
@@ -25,8 +38,13 @@ export const engawaConfigSchema = z.object({
   content: z
     .object({
       maxResourceBytes: z.number().int().positive().default(65536),
-      maxSearchResults: z.number().int().positive().max(50).default(10),
-      maxSearchQueryLength: z.number().int().positive().max(500).default(200),
+      maxSearchResults: z.number().int().positive().max(MAX_SEARCH_RESULTS_CEILING).default(10),
+      maxSearchQueryLength: z
+        .number()
+        .int()
+        .positive()
+        .max(MAX_SEARCH_QUERY_LENGTH_CEILING)
+        .default(200),
     })
     .default({
       maxResourceBytes: 65536,
@@ -44,13 +62,13 @@ export const engawaConfigSchema = z.object({
 export type EngawaConfig = z.infer<typeof engawaConfigSchema>;
 
 export const engawaResourceSchema = z.object({
-  id: z.string().min(1),
+  id: resourceIdSchema,
   uri: z.string().min(1),
   title: z.string().min(1),
   description: z.string().optional(),
   mimeType: z.string().min(1),
   content: z.string(),
-  canonicalUrl: absoluteUrlSchema,
+  canonicalUrl: httpAbsoluteUrlSchema,
   lastModified: z.string().datetime().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
@@ -78,30 +96,80 @@ export interface Engawa {
   search(query: string): Promise<EngawaResource[]>;
 }
 
+export function validateResourceId(id: string): string {
+  return resourceIdSchema.parse(id);
+}
+
 export function normalizeCanonicalUrl(url: string): string {
   const parsed = new URL(url);
+
+  if (parsed.username || parsed.password) {
+    throw new Error("canonicalUrl must not contain username or password credentials");
+  }
+  if (parsed.search) {
+    throw new Error("canonicalUrl must not contain a query string");
+  }
+  if (parsed.hash) {
+    throw new Error("canonicalUrl must not contain a fragment");
+  }
+
   let path = parsed.pathname;
   if (path.length > 1 && path.endsWith("/")) {
     path = path.slice(0, -1);
   }
   parsed.pathname = path;
-  return parsed.toString().replace(/\/$/, "") || parsed.origin;
+
+  const normalized = parsed.toString().replace(/\/$/, "");
+  return normalized || parsed.origin;
+}
+
+export function getCanonicalPath(canonicalUrl: string): string {
+  const pathname = new URL(canonicalUrl).pathname;
+  if (pathname === "/" || pathname === "") {
+    return "";
+  }
+  return pathname;
 }
 
 export function buildResourceUri(canonicalUrl: string, id: string): string {
-  const host = new URL(canonicalUrl).host;
-  return `engawa://${host}/${id}`;
+  validateResourceId(id);
+  const parsed = new URL(canonicalUrl);
+  const path = getCanonicalPath(canonicalUrl);
+  const encodedId = encodeURIComponent(id);
+  return `engawa://${parsed.host}${path}/r/${encodedId}`;
 }
 
 export function validateEngawaConfig(input: unknown): EngawaConfig {
   const parsed = engawaConfigSchema.parse(input);
+  const canonicalUrl = normalizeCanonicalUrl(parsed.site.canonicalUrl);
   return {
     ...parsed,
     site: {
       ...parsed.site,
-      canonicalUrl: normalizeCanonicalUrl(parsed.site.canonicalUrl),
+      canonicalUrl,
     },
   };
+}
+
+export function validateAdapterResource(raw: unknown, config: EngawaConfig): EngawaResource {
+  const resource = engawaResourceSchema.parse(raw);
+  const siteBase = config.site.canonicalUrl;
+
+  const expectedUri = buildResourceUri(siteBase, resource.id);
+  if (resource.uri !== expectedUri) {
+    throw new Error(
+      `Resource URI mismatch for id "${resource.id}": expected "${expectedUri}", got "${resource.uri}"`,
+    );
+  }
+
+  const normalizedPageUrl = normalizeCanonicalUrl(resource.canonicalUrl);
+  if (normalizedPageUrl !== siteBase && !normalizedPageUrl.startsWith(`${siteBase}/`)) {
+    throw new Error(
+      `Resource canonicalUrl "${resource.canonicalUrl}" is outside site base "${siteBase}"`,
+    );
+  }
+
+  return { ...resource, canonicalUrl: normalizedPageUrl };
 }
 
 function enforceContentBounds(resource: EngawaResource, maxBytes: number): EngawaResource {
@@ -131,6 +199,14 @@ function normalizeSearchQuery(query: string, maxLength: number): string {
   return trimmed;
 }
 
+function validateAndBoundResource(
+  raw: unknown,
+  config: EngawaConfig,
+  maxBytes: number,
+): EngawaResource {
+  return enforceContentBounds(validateAdapterResource(raw, config), maxBytes);
+}
+
 export function createEngawa(configInput: unknown, adapter: ContentAdapter): Engawa {
   const config = validateEngawaConfig(configInput);
   const maxBytes = config.content.maxResourceBytes;
@@ -149,17 +225,17 @@ export function createEngawa(configInput: unknown, adapter: ContentAdapter): Eng
     metadata,
     async listResources(): Promise<EngawaResource[]> {
       const resources = await adapter.listResources();
-      return resources.map((r) => enforceContentBounds(r, maxBytes));
+      return resources.map((r) => validateAndBoundResource(r, config, maxBytes));
     },
     async getResource(idOrUri: string): Promise<EngawaResource | undefined> {
       const resource = await adapter.getResource(idOrUri);
       if (!resource) return undefined;
-      return enforceContentBounds(resource, maxBytes);
+      return validateAndBoundResource(resource, config, maxBytes);
     },
     async search(query: string): Promise<EngawaResource[]> {
       const normalized = normalizeSearchQuery(query, maxQueryLength);
       const results = await adapter.search(normalized);
-      return results.slice(0, maxResults).map((r) => enforceContentBounds(r, maxBytes));
+      return results.slice(0, maxResults).map((r) => validateAndBoundResource(r, config, maxBytes));
     },
   };
 }

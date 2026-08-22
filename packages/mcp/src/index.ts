@@ -2,22 +2,30 @@ import { createMcpHandler, McpServer } from "@modelcontextprotocol/server";
 import {
   buildResourceUri,
   type Engawa,
+  type EngawaConfig,
   type EngawaResource,
 } from "@thierry-gilgen-ict/engawa-core";
 import * as z from "zod/v4";
 
 const META_RESOURCE_ID = "_meta";
 
-const searchInputSchema = z.object({
-  query: z.string().min(1).max(200).describe("Search query for site content"),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(10)
-    .optional()
-    .describe("Maximum number of results (default 10)"),
-});
+export class EngawaAgentInterfaceError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "EngawaAgentInterfaceError";
+  }
+}
+
+export function assertPublicAgentInterface(config: EngawaConfig): void {
+  if (!config.agentInterface.enabled) {
+    throw new EngawaAgentInterfaceError("Agent interface is disabled");
+  }
+  if (!config.agentInterface.public) {
+    throw new EngawaAgentInterfaceError(
+      "Public agent interface is not enabled for this configuration",
+    );
+  }
+}
 
 const searchResultSchema = z.object({
   results: z.array(
@@ -30,7 +38,26 @@ const searchResultSchema = z.object({
   ),
 });
 
-export async function createEngawaMcpServer(engawa: Engawa): Promise<McpServer> {
+function buildSearchInputSchema(config: EngawaConfig) {
+  const maxQuery = config.content.maxSearchQueryLength;
+  const maxResults = config.content.maxSearchResults;
+  return z.object({
+    query: z
+      .string()
+      .min(1)
+      .max(maxQuery)
+      .describe(`Search query for site content (max ${maxQuery} characters)`),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(maxResults)
+      .optional()
+      .describe(`Maximum number of results (default ${maxResults}, max ${maxResults})`),
+  });
+}
+
+async function createEngawaMcpServerInternal(engawa: Engawa): Promise<McpServer> {
   const server = new McpServer({
     name: "engawa",
     version: engawa.metadata.engawaVersion,
@@ -71,6 +98,9 @@ export async function createEngawaMcpServer(engawa: Engawa): Promise<McpServer> 
     registerEngawaResource(server, resource);
   }
 
+  const searchInputSchema = buildSearchInputSchema(engawa.config);
+  const defaultLimit = engawa.config.content.maxSearchResults;
+
   server.registerTool(
     "search_site",
     {
@@ -81,9 +111,9 @@ export async function createEngawaMcpServer(engawa: Engawa): Promise<McpServer> 
       outputSchema: searchResultSchema,
     },
     async ({ query, limit }) => {
-      const max = limit ?? engawa.config.content.maxSearchResults;
+      const max = limit ?? defaultLimit;
       const results = await engawa.search(query);
-      const bounded = results.slice(0, Math.min(max, 10)).map(toSearchHit);
+      const bounded = results.slice(0, max).map(toSearchHit);
       const output = { results: bounded };
       return {
         content: [{ type: "text" as const, text: JSON.stringify(output) }],
@@ -125,6 +155,12 @@ function toSearchHit(resource: EngawaResource) {
   };
 }
 
-export function createEngawaMcpHandler(engawa: Engawa) {
-  return createMcpHandler(() => createEngawaMcpServer(engawa));
+export async function createEngawaPublicMcpServer(engawa: Engawa): Promise<McpServer> {
+  assertPublicAgentInterface(engawa.config);
+  return createEngawaMcpServerInternal(engawa);
+}
+
+export function createEngawaPublicMcpHandler(engawa: Engawa) {
+  assertPublicAgentInterface(engawa.config);
+  return createMcpHandler(() => createEngawaPublicMcpServer(engawa));
 }

@@ -46,6 +46,8 @@ pnpm build
 pnpm --filter minimal-site start
 ```
 
+Requires Node.js 24 LTS (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+
 ## Packages
 
 | Package                                | Purpose                              |

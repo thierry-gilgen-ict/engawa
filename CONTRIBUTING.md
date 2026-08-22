@@ -4,7 +4,7 @@ Thank you for your interest in Engawa.
 
 ## Development
 
-Requirements: Node.js 24 LTS (Node 22+ works for local dev), pnpm 9.
+Requirements: Node.js 24 LTS, pnpm 9.
 
 ```bash
 pnpm install

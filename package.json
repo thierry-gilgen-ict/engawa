@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "packageManager": "pnpm@9.15.9",
   "scripts": {
@@ -25,7 +25,7 @@
     "@thierry-gilgen-ict/engawa-core": "workspace:*",
     "@thierry-gilgen-ict/engawa-discovery": "workspace:*",
     "@thierry-gilgen-ict/engawa-mcp": "workspace:*",
-    "@types/node": "^22.15.29",
+    "@types/node": "^24.0.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "3.6.2",

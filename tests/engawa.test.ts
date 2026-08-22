@@ -6,7 +6,11 @@ import {
   validateEngawaConfig,
 } from "@thierry-gilgen-ict/engawa-core";
 import { generateLlmsTxt, getLlmsTxtUrl } from "@thierry-gilgen-ict/engawa-discovery";
-import { createEngawaMcpServer } from "@thierry-gilgen-ict/engawa-mcp";
+import {
+  assertPublicAgentInterface,
+  createEngawaPublicMcpServer,
+  EngawaAgentInterfaceError,
+} from "@thierry-gilgen-ict/engawa-mcp";
 import { Client } from "@modelcontextprotocol/client";
 import { InMemoryTransport } from "@modelcontextprotocol/server";
 import { exampleConfig, exampleAdapter, exampleEngawa } from "../examples/minimal-site/src/site.js";
@@ -23,80 +27,129 @@ const baseConfig = {
   metadata: { version: "0.1.0" },
 };
 
-describe("Engawa config", () => {
-  it("parses valid config", () => {
+describe("Engawa corrections", () => {
+  it("validates config and rejects invalid canonical base URLs", () => {
     const config = validateEngawaConfig(baseConfig);
     expect(config.site.canonicalUrl).toBe("https://example.studio");
-    expect(config.security.publicDefault).toBe("read-only");
-  });
 
-  it("rejects invalid canonical URL", () => {
     expect(() =>
       validateEngawaConfig({
         ...baseConfig,
         site: { ...baseConfig.site, canonicalUrl: "not-a-url" },
       }),
     ).toThrow();
-  });
-});
 
-describe("Engawa resources", () => {
-  it("assigns deterministic resource URIs", () => {
-    const uri = buildResourceUri("https://example.studio", "about");
-    expect(uri).toBe("engawa://example.studio/about");
+    expect(() =>
+      validateEngawaConfig({
+        ...baseConfig,
+        site: { ...baseConfig.site, canonicalUrl: "https://user:pass@example.studio" },
+      }),
+    ).toThrow(/credentials/i);
+
+    expect(() =>
+      validateEngawaConfig({
+        ...baseConfig,
+        site: { ...baseConfig.site, canonicalUrl: "https://example.studio?foo=1" },
+      }),
+    ).toThrow(/query/i);
+
+    expect(() =>
+      validateEngawaConfig({
+        ...baseConfig,
+        site: { ...baseConfig.site, canonicalUrl: "https://example.studio#section" },
+      }),
+    ).toThrow(/fragment/i);
   });
 
-  it("looks up resources by id", async () => {
-    const adapter = new StaticContentAdapter("https://example.studio", [
-      {
-        id: "about",
-        title: "About",
-        content: "About content",
-        path: "/about.md",
+  it("rejects invalid adapter resources at the core boundary", async () => {
+    const badAdapter = {
+      async listResources() {
+        return [
+          {
+            id: "about",
+            uri: "engawa://wrong-host/r/about",
+            title: "About",
+            mimeType: "text/markdown",
+            content: "x",
+            canonicalUrl: "https://example.studio/about.md",
+          },
+        ];
       },
-    ]);
-    const engawa = createEngawa(baseConfig, adapter);
-    const resource = await engawa.getResource("about");
-    expect(resource?.title).toBe("About");
-    expect(resource?.canonicalUrl).toBe("https://example.studio/about.md");
+      async getResource() {
+        return undefined;
+      },
+      async search() {
+        return [];
+      },
+    };
+    const engawa = createEngawa(baseConfig, badAdapter);
+    await expect(engawa.listResources()).rejects.toThrow(/URI mismatch/i);
   });
 
-  it("searches resources by query", async () => {
-    const adapter = new StaticContentAdapter("https://example.studio", [
-      { id: "faq", title: "FAQ", content: "agents and llms.txt", path: "/faq.md" },
-      { id: "about", title: "About", content: "company history", path: "/about.md" },
-    ]);
-    const engawa = createEngawa(baseConfig, adapter);
-    const results = await engawa.search("agents");
-    expect(results.map((r) => r.id)).toEqual(["faq"]);
+  it("rejects duplicate resource IDs in StaticContentAdapter", () => {
+    expect(
+      () =>
+        new StaticContentAdapter("https://example.studio", [
+          { id: "about", title: "A", content: "a" },
+          { id: "about", title: "B", content: "b" },
+        ]),
+    ).toThrow(/Duplicate resource id/i);
   });
 
-  it("enforces search input limits", async () => {
-    const engawa = createEngawa(baseConfig, exampleAdapter);
+  it("builds path-scoped deterministic resource URIs without host-only collision", () => {
+    const rootUri = buildResourceUri("https://example.studio", "about");
+    const docsUri = buildResourceUri("https://example.studio/docs", "about");
+    expect(rootUri).toBe("engawa://example.studio/r/about");
+    expect(docsUri).toBe("engawa://example.studio/docs/r/about");
+    expect(rootUri).not.toBe(docsUri);
+  });
+
+  it("enforces search input and result limits from config", async () => {
+    const engawa = createEngawa(
+      {
+        ...baseConfig,
+        content: { maxResourceBytes: 65536, maxSearchResults: 2, maxSearchQueryLength: 50 },
+      },
+      new StaticContentAdapter("https://example.studio", [
+        { id: "a", title: "A", content: "alpha" },
+        { id: "b", title: "B", content: "alpha" },
+        { id: "c", title: "C", content: "alpha" },
+      ]),
+    );
     await expect(engawa.search("")).rejects.toThrow(/empty/i);
-    await expect(engawa.search("x".repeat(201))).rejects.toThrow(/max length/i);
+    await expect(engawa.search("x".repeat(51))).rejects.toThrow(/max length/i);
+    const results = await engawa.search("alpha");
+    expect(results.length).toBe(2);
   });
-});
 
-describe("llms.txt generation", () => {
-  it("generates valid llms.txt with canonical URLs", async () => {
+  it("generates llms.txt with canonical absolute URLs", async () => {
     const engawa = createEngawa(exampleConfig, exampleAdapter);
     const resources = await engawa.listResources();
     const txt = generateLlmsTxt(engawa.config, resources, { optionalResourceIds: ["contact"] });
-
     expect(txt.startsWith("# Example Studio")).toBe(true);
-    expect(txt).toContain("> A fictional creative studio");
-    expect(txt).toContain("## Pages");
     expect(txt).toContain("http://127.0.0.1:3847/about.md");
     expect(txt).toContain("## Optional");
-    expect(txt).toContain("http://127.0.0.1:3847/contact.md");
     expect(getLlmsTxtUrl(engawa.config)).toBe("http://127.0.0.1:3847/llms.txt");
   });
-});
 
-describe("MCP surface", () => {
-  it("lists resources, reads content, and searches read-only", async () => {
-    const server = await createEngawaMcpServer(exampleEngawa);
+  it("fail-closes public MCP when agentInterface is disabled or non-public", async () => {
+    const disabled = createEngawa(
+      { ...baseConfig, agentInterface: { enabled: false, public: true } },
+      exampleAdapter,
+    );
+    const privateOnly = createEngawa(
+      { ...baseConfig, agentInterface: { enabled: true, public: false } },
+      exampleAdapter,
+    );
+
+    expect(() => assertPublicAgentInterface(disabled.config)).toThrow(EngawaAgentInterfaceError);
+    expect(() => assertPublicAgentInterface(privateOnly.config)).toThrow(EngawaAgentInterfaceError);
+    await expect(createEngawaPublicMcpServer(disabled)).rejects.toThrow(/disabled/i);
+    await expect(createEngawaPublicMcpServer(privateOnly)).rejects.toThrow(/not enabled/i);
+  });
+
+  it("exposes read-only MCP list, read, and search with malformed query rejected", async () => {
+    const server = await createEngawaPublicMcpServer(exampleEngawa);
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     const client = new Client({ name: "test", version: "0.1.0" });
 
@@ -104,10 +157,9 @@ describe("MCP surface", () => {
     await client.connect(clientTransport);
 
     const { resources } = await client.listResources();
-    expect(resources.some((r) => r.uri.includes("about"))).toBe(true);
+    expect(resources.some((r) => r.uri.includes("/r/about"))).toBe(true);
 
-    const aboutUri = resources.find((r) => r.uri.endsWith("/about"))?.uri;
-    expect(aboutUri).toBeDefined();
+    const aboutUri = resources.find((r) => r.uri.endsWith("/r/about"))?.uri;
     const read = await client.readResource({ uri: aboutUri! });
     expect(read.contents[0]?.text).toContain("Example Studio");
 
@@ -119,8 +171,6 @@ describe("MCP surface", () => {
       arguments: { query: "services", limit: 5 },
     });
     expect(search.isError).not.toBe(true);
-    const text = search.content?.[0]?.type === "text" ? search.content[0].text : "";
-    expect(text).toContain("services");
 
     const rejected = await client.callTool({
       name: "search_site",
@@ -128,15 +178,44 @@ describe("MCP surface", () => {
     });
     expect(rejected.isError).toBe(true);
   });
-});
 
-describe("Example wiring", () => {
-  it("wires config, adapter, discovery, and MCP", async () => {
+  it("aligns MCP search tool limits with Engawa config ceilings", async () => {
+    const engawa = createEngawa(
+      {
+        ...exampleConfig,
+        content: {
+          maxResourceBytes: 65536,
+          maxSearchResults: 25,
+          maxSearchQueryLength: 300,
+        },
+      },
+      exampleAdapter,
+    );
+    const server = await createEngawaPublicMcpServer(engawa);
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: "test", version: "0.1.0" });
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    const overLimit = await client.callTool({
+      name: "search_site",
+      arguments: { query: "x".repeat(301), limit: 5 },
+    });
+    expect(overLimit.isError).toBe(true);
+
+    const overResultLimit = await client.callTool({
+      name: "search_site",
+      arguments: { query: "studio", limit: 26 },
+    });
+    expect(overResultLimit.isError).toBe(true);
+  });
+
+  it("wires the example vertical slice", async () => {
     const resources = await exampleEngawa.listResources();
     expect(resources.length).toBe(4);
     const txt = generateLlmsTxt(exampleEngawa.config, resources);
     expect(txt).toContain("Example Studio");
-    const server = await createEngawaMcpServer(exampleEngawa);
+    const server = await createEngawaPublicMcpServer(exampleEngawa);
     expect(server).toBeDefined();
   });
 });

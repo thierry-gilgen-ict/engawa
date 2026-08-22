@@ -17,9 +17,12 @@ Profile version: **0.1**
 
 ## Engawa-specific choices
 
-- Deterministic resource URIs: `engawa://{host}/{id}`
-- `ContentAdapter` interface for content registration
+- Deterministic path-scoped resource URIs: `engawa://{host}{path}/r/{id}` (see ADR 0007)
+- Resource ID charset: letters, digits, dots, underscores, hyphens
+- `ContentAdapter` interface for content registration; adapter output validated at core boundary
 - Public read-only default for unauthenticated agent access
+- Public MCP only via `createEngawaPublicMcpHandler` when `agentInterface.enabled` and `agentInterface.public`
+- Search limits from `EngawaConfig.content` (ceilings: 500 query chars, 50 results)
 - Implementation profile versioning independent of package semver
 
 ## REQUIRED for Engawa v0.1
