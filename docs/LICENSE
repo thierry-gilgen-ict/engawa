@@ -1,0 +1,11 @@
+Creative Commons Attribution 4.0 International License
+
+Copyright (c) 2026 Thierry Gilgen ICT
+
+This work is licensed under the Creative Commons Attribution 4.0 International License.
+To view a copy of this license, visit https://creativecommons.org/licenses/by/4.0/.
+
+Documentation, architecture notes, implementation profiles, and ADRs in the `docs/` directory
+are licensed under CC BY 4.0 unless otherwise noted.
+
+Source code in this repository is licensed under the MIT License (see `/LICENSE`).
