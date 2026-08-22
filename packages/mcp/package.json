@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.0.0",
-    "@thierry-gilgen-ict/engawa-core": "workspace:*",
+    "@thierry-gilgen-ict/engawa-core": "0.1.0",
     "zod": "^4.2.0"
   },
   "publishConfig": {
