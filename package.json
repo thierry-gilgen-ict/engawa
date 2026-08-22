@@ -1,0 +1,36 @@
+{
+  "name": "engawa",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Engawa — the open toolkit for agent-native websites. Bring your agent.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "build": "pnpm --filter @thierry-gilgen-ict/engawa-core build && pnpm --filter @thierry-gilgen-ict/engawa-discovery build && pnpm --filter @thierry-gilgen-ict/engawa-mcp build && pnpm --filter minimal-site build",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:write": "prettier --write ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "globals": "^16.0.0",
+    "@modelcontextprotocol/client": "2.0.0",
+    "@modelcontextprotocol/server": "2.0.0",
+    "@thierry-gilgen-ict/engawa-core": "workspace:*",
+    "@thierry-gilgen-ict/engawa-discovery": "workspace:*",
+    "@thierry-gilgen-ict/engawa-mcp": "workspace:*",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "3.6.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.48.1",
+    "vitest": "^4.0.15"
+  }
+}

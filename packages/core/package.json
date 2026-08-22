@@ -1,0 +1,29 @@
+{
+  "name": "@thierry-gilgen-ict/engawa-core",
+  "version": "0.1.0",
+  "description": "Framework-independent core for Engawa agent-native websites",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config ../../vitest.config.ts packages/core"
+  },
+  "dependencies": {
+    "zod": "^4.2.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

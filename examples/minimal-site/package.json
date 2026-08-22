@@ -1,0 +1,18 @@
+{
+  "name": "minimal-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/server.js",
+    "dev": "node --watch dist/server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/node": "2.0.0",
+    "@thierry-gilgen-ict/engawa-core": "workspace:*",
+    "@thierry-gilgen-ict/engawa-discovery": "workspace:*",
+    "@thierry-gilgen-ict/engawa-mcp": "workspace:*"
+  }
+}
