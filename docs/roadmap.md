@@ -25,7 +25,11 @@
 - Provider handoff UX where technically supported
 - Analytics for agent interactions
 - CLI for local development
-- npm publication of packages
+- npm publication of packages — **done for v0.1.0**
+
+## Patch v0.1.1 (planned)
+
+- Add `"engines": { "node": ">=24" }` to each publishable package manifest (`engawa-core`, `engawa-discovery`, `engawa-mcp`). v0.1.0 tarballs omit package-level `engines` metadata.
 
 ## Package boundaries (planned)
 
