@@ -15,6 +15,9 @@ function stagePackage(name) {
   mkdirSync(dest, { recursive: true });
   cpSync(join(src, "dist"), join(dest, "dist"), { recursive: true });
   cpSync(join(src, "README.md"), join(dest, "README.md"));
+  if (existsSync(join(src, "LICENSE"))) {
+    cpSync(join(src, "LICENSE"), join(dest, "LICENSE"));
+  }
   const pkg = JSON.parse(readFileSync(join(src, "package.json"), "utf8"));
   if (pkg.dependencies?.["@thierry-gilgen-ict/engawa-core"]?.startsWith("workspace:")) {
     pkg.dependencies["@thierry-gilgen-ict/engawa-core"] = "0.1.0";
