@@ -30,22 +30,27 @@ Engawa UI derives provider actions from this matrix. Do not invent deep-link URL
 
 ## ChatGPT (OpenAI)
 
-| Field                         | Value                                                                                                     |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------- |
-| MCP_SUPPORT                   | SUPPORTED                                                                                                 |
-| REMOTE_MCP_SUPPORT            | SUPPORTED                                                                                                 |
-| CUSTOM_SERVER_SUPPORT         | SUPPORTED (Custom Connectors / MCP)                                                                       |
-| DIRECT_CONNECT_DEEP_LINK      | NOT_SUPPORTED — no official third-party URL to pre-register a connector                                   |
-| PREPOPULATED_PROMPT_DEEP_LINK | NOT_SUPPORTED for MCP setup                                                                               |
-| BROWSER_HANDOFF               | SUPPORTED — user opens ChatGPT and adds connector manually                                                |
-| MANUAL_CONNECTION_REQUIRED    | YES — Settings → Connectors → Create custom connector → MCP server URL                                    |
-| OFFICIAL_LOGO_ASSET           | Use text label "ChatGPT"; OpenAI brand assets require brand guidelines compliance                         |
-| BRAND_USAGE_RESTRICTIONS      | Follow [OpenAI brand guidelines](https://openai.com/brand); do not redistribute logos without permission  |
-| DOCUMENTATION_URL             | https://platform.openai.com/docs/mcp , https://help.openai.com/en/articles/11487775-connectors-in-chatgpt |
+| Field                         | Value                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MCP_SUPPORT                   | PARTIALLY_SUPPORTED — plan and workspace gated; Pro (individual) and workspace plans only; not Free/Go/Plus                                                                                                                                                                                                                                                                               |
+| REMOTE_MCP_SUPPORT            | PARTIALLY_SUPPORTED — remote HTTPS MCP where Pro Developer Mode or workspace policy allows                                                                                                                                                                                                                                                                                                |
+| CUSTOM_SERVER_SUPPORT         | PARTIALLY_SUPPORTED — Pro read/fetch MCP (individual); full MCP / custom apps beta on Business/Enterprise/Edu (admin controls)                                                                                                                                                                                                                                                            |
+| PLAN_AVAILABILITY             | Free: no documented custom MCP Developer Mode; Go: no documented custom MCP Developer Mode; Plus: no documented custom MCP Developer Mode; Pro: Developer Mode can connect MCPs with read/fetch permissions (full MCP/write not currently available); Business: full MCP / custom apps beta (admin/owner controls); Enterprise/Edu: full MCP / custom apps beta (admin controls and RBAC) |
+| WORKSPACE_LIMITATIONS         | Business/Enterprise/Edu admins enable Developer Mode, publish/test apps; RBAC on Enterprise/Edu; members cannot add custom apps without permission                                                                                                                                                                                                                                        |
+| CURRENT_SETUP_PATH            | Pro (individual): Settings → Security and login → Developer Mode → add MCP connector (read/fetch per docs); Business/Enterprise/Edu (workspace): Settings → Apps → Create custom MCP connector; remote HTTPS MCP only; not documented for Free/Go/Plus                                                                                                                                    |
+| DIRECT_CONNECT_DEEP_LINK      | NOT_SUPPORTED — no official third-party URL to pre-register a connector                                                                                                                                                                                                                                                                                                                   |
+| PREPOPULATED_PROMPT_DEEP_LINK | NOT_SUPPORTED for MCP setup                                                                                                                                                                                                                                                                                                                                                               |
+| BROWSER_HANDOFF               | SUPPORTED — user opens ChatGPT and adds connector manually                                                                                                                                                                                                                                                                                                                                |
+| MANUAL_CONNECTION_REQUIRED    | YES — Pro Developer Mode or workspace Apps flow where policy allows; custom MCP connector with server URL                                                                                                                                                                                                                                                                                 |
+| OFFICIAL_LOGO_ASSET           | Use text label "ChatGPT"; OpenAI brand assets require brand guidelines compliance                                                                                                                                                                                                                                                                                                         |
+| BRAND_USAGE_RESTRICTIONS      | Follow [OpenAI brand guidelines](https://openai.com/brand); do not redistribute logos without permission                                                                                                                                                                                                                                                                                  |
+| DOCUMENTATION_URL             | https://developers.openai.com/api/docs/guides/developer-mode , https://help.openai.com/en/articles/12584461 , https://help.openai.com/en/articles/11509118                                                                                                                                                                                                                                |
 
 **Engawa UI actions:** `OPEN_PROVIDER`, `COPY_MCP_URL`, `COPY_CONTEXT`, `SHOW_CONNECTION_INSTRUCTIONS`
 
 **Honest button labels:** "Open ChatGPT", "Copy MCP URL", "Copy context for your agent", "Setup instructions"
+
+**Notes:** Generic MCP remains the canonical fallback when ChatGPT custom MCP is unavailable for the user's plan or workspace.
 
 ---
 
@@ -149,7 +154,7 @@ Engawa UI derives provider actions from this matrix. Do not invent deep-link URL
 
 | Provider | Remote MCP | Deep link connect           | Manual setup | Primary Engawa actions                          |
 | -------- | ---------- | --------------------------- | ------------ | ----------------------------------------------- |
-| ChatGPT  | SUPPORTED  | NOT_SUPPORTED               | YES          | Open provider, copy URL/context, instructions   |
+| ChatGPT  | PARTIAL    | NOT_SUPPORTED               | YES          | Open provider, copy URL/context, instructions   |
 | Claude   | SUPPORTED  | NOT_SUPPORTED               | YES          | Open provider, copy URL/context, instructions   |
 | Grok     | SUPPORTED  | NOT_SUPPORTED               | YES          | Open connectors, copy URL/context, instructions |
 | Cursor   | SUPPORTED  | PARTIAL (author links only) | YES          | Copy config, copy URL, instructions, docs       |

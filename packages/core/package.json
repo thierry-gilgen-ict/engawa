@@ -1,6 +1,6 @@
 {
   "name": "@thierry-gilgen-ict/engawa-core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Framework-independent core for Engawa agent-native websites",
   "license": "MIT",
   "repository": {
@@ -36,5 +36,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

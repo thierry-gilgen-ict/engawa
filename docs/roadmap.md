@@ -1,44 +1,54 @@
 # Roadmap
 
-## Phase 0 (current) — Foundation + vertical slice
+## Completed — Foundation (Phase 0)
 
-- Core, discovery, MCP packages
-- Minimal example site
-- CI and documentation
+- `engawa-core`, `engawa-discovery`, `engawa-mcp` packages
+- Minimal example site (`examples/minimal-site`)
+- CI, security model, implementation profile v0.1
+- npm publication v0.1.0
 
-## Phase 1 — Integration and UX
+## Completed — First production integration (Phase 1)
 
-- Production site integration (first consumer)
-- Ask Your Agent React UI — **shipped (engawa-react v0.1.0)**
-- Framework adapters (e.g. Next.js)
-- Markdown alternate helpers for HTML pages
-- Optional filesystem adapter with strict sandboxing
+- [thierry-gilgen-ict.ch](https://www.thierry-gilgen-ict.ch) — first npm consumer
+- `@thierry-gilgen-ict/engawa-react@0.1.0` — Bring Your Agent UI
+- Provider capability matrix and open provider-neutral UX (ADR-0006)
 
-## Phase 2 — Authenticated capabilities
+## Completed — Second reference integration (Phase 2A)
+
+- [theoldhandofasia.ch](https://theoldhandofasia.ch) — bilingual DE/EN, mixed CMS/static human-public sources
+- Content publication parity rule documented (`HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE`)
+- No Engawa core changes; no `engawa-nextjs` extraction
+
+## In progress — Open-source launch & DX (Phase 2B)
+
+- README and getting-started for external developers
+- Next.js integration guide (documentation only)
+- Production references doc, CHANGELOG, releasing guide
+- External npm consumer smoke in CI
+- Package metadata `engines.node >=24` (v0.1.1 patch for core/discovery/mcp)
+
+## Future — Authenticated capabilities (not started)
 
 - OAuth and authenticated MCP tools
 - User-scoped resources
 - Mutating operations with explicit policy
+- **Do not** implement in v0.1.x without a dedicated security phase
 
-## Phase 3 — Ecosystem
+## Future — Ecosystem (deferred)
 
-- Provider handoff UX where technically supported
-- Analytics for agent interactions
-- CLI for local development
-- npm publication of packages — **done for v0.1.0**
+- Optional provider handoff UX where vendors document support
+- Analytics helpers (metadata-only patterns exist in reference sites)
+- CLI for local Engawa development
+- `engawa-nextjs` — only if duplication across consumers justifies extraction
 
-## Patch v0.1.1 (planned)
+## Package status
 
-- Add `"engines": { "node": ">=24" }` to each publishable package manifest (`engawa-core`, `engawa-discovery`, `engawa-mcp`). v0.1.0 tarballs omit package-level `engines` metadata.
-
-## Package boundaries (planned)
-
-| Package            | Status             |
-| ------------------ | ------------------ |
-| `engawa-core`      | v0.1               |
-| `engawa-discovery` | v0.1               |
-| `engawa-mcp`       | v0.1               |
-| `engawa-react`     | v0.1 (shipped)     |
-| `engawa-nextjs`    | Planned            |
-| `engawa-cli`       | Planned            |
-| `engawa-analytics` | Planned            |
+| Package            | npm status         | Notes                     |
+| ------------------ | ------------------ | ------------------------- |
+| `engawa-core`      | 0.1.0 → 0.1.1 prep | engines metadata in 0.1.1 |
+| `engawa-discovery` | 0.1.0 → 0.1.1 prep | depends on core           |
+| `engawa-mcp`       | 0.1.0 → 0.1.1 prep | depends on core           |
+| `engawa-react`     | 0.1.0              | engines already present   |
+| `engawa-nextjs`    | Not shipped        | Document pattern only     |
+| `engawa-cli`       | Planned            |                           |
+| `engawa-analytics` | Planned            |                           |

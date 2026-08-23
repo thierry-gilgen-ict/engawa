@@ -1,15 +1,59 @@
 /**
- * Stage discovery/mcp packages with 0.1.0 semver deps for npm publish tarballs.
+ * Stage discovery/mcp packages for npm publish tarballs.
+ * Rewrites workspace:* @thierry-gilgen-ict/engawa-core to the published core semver
+ * from packages/core/package.json before packing.
  * Run from engawa root after pnpm build.
  */
-import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
 
 const root = process.cwd();
 const staging = join(root, ".npm-staging");
+const scopeCore = "@thierry-gilgen-ict/engawa-core";
 
-function stagePackage(name) {
+function expectedTarballName(name, version) {
+  return `${name.replace("@", "").replace("/", "-")}-${version}.tgz`;
+}
+
+function cleanTarballsInDir(dir) {
+  if (!existsSync(dir)) return;
+  for (const file of readdirSync(dir)) {
+    if (file.endsWith(".tgz")) {
+      rmSync(join(dir, file), { force: true });
+    }
+  }
+}
+
+function cleanReleaseArtifacts() {
+  cleanTarballsInDir(join(root, "packages/core"));
+  cleanTarballsInDir(join(root, "packages/react"));
+  for (const name of ["discovery", "mcp"]) {
+    const dest = join(staging, name);
+    if (existsSync(dest)) {
+      rmSync(dest, { recursive: true, force: true });
+    }
+  }
+}
+
+function assertTarballExists(dir, name, version) {
+  const filename = expectedTarballName(name, version);
+  const path = join(dir, filename);
+  if (!existsSync(path)) {
+    throw new Error(`Expected tarball missing: ${path}`);
+  }
+  return path;
+}
+
+function stagePackage(name, coreVersion) {
   const src = join(root, "packages", name);
   const dest = join(staging, name);
   mkdirSync(dest, { recursive: true });
@@ -19,12 +63,13 @@ function stagePackage(name) {
     cpSync(join(src, "LICENSE"), join(dest, "LICENSE"));
   }
   const pkg = JSON.parse(readFileSync(join(src, "package.json"), "utf8"));
-  if (pkg.dependencies?.["@thierry-gilgen-ict/engawa-core"]?.startsWith("workspace:")) {
-    pkg.dependencies["@thierry-gilgen-ict/engawa-core"] = "0.1.0";
+  if (pkg.dependencies?.[scopeCore]?.startsWith("workspace:")) {
+    pkg.dependencies[scopeCore] = coreVersion;
   }
   delete pkg.scripts;
   writeFileSync(join(dest, "package.json"), JSON.stringify(pkg, null, 2) + "\n");
   execSync("npm pack", { cwd: dest, stdio: "inherit" });
+  return assertTarballExists(dest, pkg.name, pkg.version);
 }
 
 if (!existsSync(join(root, "packages/core/dist/index.js"))) {
@@ -32,13 +77,30 @@ if (!existsSync(join(root, "packages/core/dist/index.js"))) {
   process.exit(1);
 }
 
+const corePkg = JSON.parse(readFileSync(join(root, "packages/core/package.json"), "utf8"));
+const coreVersion = corePkg.version;
+
+cleanReleaseArtifacts();
 mkdirSync(staging, { recursive: true });
+
 execSync("npm pack", { cwd: join(root, "packages/core"), stdio: "inherit" });
-stagePackage("discovery");
-stagePackage("mcp");
+const coreTarball = assertTarballExists(join(root, "packages/core"), corePkg.name, coreVersion);
+
+const discoveryTarball = stagePackage("discovery", coreVersion);
+const mcpTarball = stagePackage("mcp", coreVersion);
 
 if (existsSync(join(root, "packages/react/dist/index.js"))) {
   execSync("npm pack", { cwd: join(root, "packages/react"), stdio: "inherit" });
 }
 
-console.log("Tarballs ready in packages/core, packages/react and .npm-staging/*/");
+const discoveryStaged = JSON.parse(readFileSync(join(staging, "discovery/package.json"), "utf8"));
+const mcpStaged = JSON.parse(readFileSync(join(staging, "mcp/package.json"), "utf8"));
+
+console.log("Tarballs ready:");
+console.log(`  core: ${coreTarball}`);
+console.log(`  discovery: ${discoveryTarball}`);
+console.log(`  mcp: ${mcpTarball}`);
+console.log("Verification summary:");
+console.log(`  core version: ${coreVersion}`);
+console.log(`  discovery ${scopeCore} dep: ${discoveryStaged.dependencies[scopeCore]}`);
+console.log(`  mcp ${scopeCore} dep: ${mcpStaged.dependencies[scopeCore]}`);

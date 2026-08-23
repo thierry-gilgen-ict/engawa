@@ -34,4 +34,25 @@
 | Unsafe future mutation                            | Future — mutating tools require auth and separate review                                          |
 | Cross-tenant leakage (future SaaS)                | Future — multi-tenant isolation not in v0.1                                                       |
 
-Phase 0 does not permanently solve all threats. It establishes defaults and boundaries for the public read-only surface.
+Phase 0 established defaults and boundaries for the public read-only surface. Production reference integrations (Phase 1–2A) validated the model on live sites; operators must still enforce host-specific guards and [content publication parity](content-publication.md).
+
+## Launch checklist (public Engawa)
+
+Before enabling public MCP and machine markdown on a production domain:
+
+- [ ] **Human-public corpus only** — adapter matches anonymous HTML routes ([content-publication.md](content-publication.md))
+- [ ] **Read-only public tools** — v0.1: `search_site` only; no custom mutating tools on public handler
+- [ ] **Host validation** — reject requests with unexpected `Host` in production
+- [ ] **Origin validation** — where browser clients call MCP, validate `Origin`
+- [ ] **Rate limits** — application or edge limits on `/mcp` and search
+- [ ] **Query length limits** — `maxSearchQueryLength` in config (default 200, ceiling 500)
+- [ ] **Result limits** — `maxSearchResults` bounded (default 10, ceiling 50)
+- [ ] **No drafts** — unpublished CMS rows not in adapter
+- [ ] **No private files** — `source-material/`, `knowledge/`, admin media excluded
+- [ ] **No contact submissions** — form bodies never in Engawa corpus
+- [ ] **No session data** — cookies, tokens, user IDs not in resources or tools
+- [ ] **No env/secrets** — tools do not read `process.env` or config secrets
+- [ ] **No raw database tool** — search goes through adapter, not SQL MCP tools
+- [ ] **No unauthenticated mutation** — writes belong in authenticated future surface
+- [ ] **Markdown `noindex`** — if alternates should not compete with HTML in search indexes
+- [ ] **Analytics metadata only** — BYA `onEvent`: no prompt, context, or MCP query body logging

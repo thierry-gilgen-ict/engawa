@@ -4,41 +4,174 @@ The open toolkit for agent-native websites.
 
 **Bring your agent.**
 
-Engawa helps websites expose a first-class interface for AI agents alongside the human-facing site. Visitors can bring the agent they already trust instead of using another embedded chatbot.
+A website gets two first-class interfaces: one for humans (HTML) and one for AI agents (structured discovery, markdown, MCP). Visitors can use the agent they already trust instead of another embedded chatbot on your site.
 
 ## Why Engawa
 
-Traditional websites optimize for humans browsing HTML. Agents scraping that HTML get noisy, incomplete context. Engawa sits between your site and the agent ecosystem—like an _engawa_, the transitional space between inside and outside in Japanese architecture.
+Traditional websites optimize for humans browsing HTML. Agents scraping that HTML get noisy, incomplete, or stale context. Engawa gives agents a deliberate read surface—markdown pages, `llms.txt`, and MCP resources—while you keep full control of what is public.
 
+Engawa does not replace your site CMS or framework. It sits beside your human routes and exposes only what you register through a **content adapter**.
+
+## What Engawa gives a website
+
+| Surface                  | Purpose                                                         |
+| ------------------------ | --------------------------------------------------------------- |
+| HTML / UI                | Your existing human interface                                   |
+| Markdown alternates      | Clean `text/markdown` pages for agents (`/about.md`, etc.)      |
+| `llms.txt`               | Discovery index ([llms.txt v2](https://llmstxt.org/))           |
+| MCP                      | Streamable HTTP endpoint with resources + bounded `search_site` |
+| Bring Your Agent (React) | Provider-neutral UX so visitors connect their own agent         |
+
+```mermaid
+flowchart TB
+  subgraph site [YourWebsite]
+    human[HumanRoutes_HTML]
+    engawaLayer[EngawaIntegration]
+  end
+  subgraph agentSurface [AgentInterface]
+    md[MarkdownRoutes]
+    llms[llms.txt]
+    mcp[MCP_read_only]
+    bya[BringYourAgent_UI]
+  end
+  human --> visitors[HumanVisitors]
+  engawaLayer --> md
+  engawaLayer --> llms
+  engawaLayer --> mcp
+  engawaLayer --> bya
+  md --> agents[VisitorAgents]
+  llms --> agents
+  mcp --> agents
+  bya --> agents
 ```
-                    WEBSITE
-                       │
-          ┌────────────┴────────────┐
-          │                         │
-     Human interface          Agent interface
-          │                         │
-       HTML/UI                  Engawa
-                                    │
-                           ┌────────┼────────┐
-                           │        │        │
-                       llms.txt    MCP    content
+
+## 5-minute quick start (npm)
+
+This uses **published packages** from the public npm registry—not a clone of this monorepo.
+
+**Requirements:** Node.js 24+.
+
+```bash
+npm install \
+  @thierry-gilgen-ict/engawa-core@0.1.0 \
+  @thierry-gilgen-ict/engawa-discovery@0.1.0 \
+  @thierry-gilgen-ict/engawa-mcp@0.1.0
 ```
 
-## What it does
+```typescript
+import {
+  createEngawa,
+  StaticContentAdapter,
+  validateEngawaConfig,
+} from "@thierry-gilgen-ict/engawa-core";
+import { generateLlmsTxt } from "@thierry-gilgen-ict/engawa-discovery";
+import { createEngawaPublicMcpServer } from "@thierry-gilgen-ict/engawa-mcp";
 
-- Validates generic site configuration (`EngawaConfig`)
-- Normalizes content through pluggable adapters
-- Generates [llms.txt v2](https://llmstxt.org/) discovery files
-- Exposes MCP resources and safe read-only tools (e.g. `search_site`)
-- Documents an implementation profile for agent-native websites
+const config = validateEngawaConfig({
+  site: {
+    name: "My Site",
+    canonicalUrl: "https://www.example.com",
+    description: "A small public website with an agent interface.",
+    language: "en",
+  },
+  agentInterface: { enabled: true, public: true },
+  security: { publicDefault: "read-only" },
+  metadata: { version: "0.1.0" },
+});
 
-## Current status
+const adapter = new StaticContentAdapter(config.site.canonicalUrl, [
+  {
+    id: "about",
+    title: "About",
+    path: "/about.md",
+    content: "# About\n\nPublic about page content.",
+  },
+  {
+    id: "services",
+    title: "Services",
+    path: "/services.md",
+    content: "# Services\n\nWhat we offer.",
+  },
+]);
 
-Early **v0.1** foundation. Not production-hardened. API may change before 1.0.
+const engawa = createEngawa(config, adapter);
 
-## Quick example
+// llms.txt body
+const resources = await engawa.listResources();
+const llmsTxt = generateLlmsTxt(engawa.config, resources);
 
-See [`examples/minimal-site`](examples/minimal-site) for Example Studio—a fictional site with `llms.txt`, markdown pages, and an MCP endpoint.
+// MCP server (wire to your HTTP framework)
+const mcpServer = await createEngawaPublicMcpServer(engawa);
+```
+
+Wire `llmsTxt` to `GET /llms.txt` and the MCP server to `POST /mcp` (or use `createEngawaPublicMcpHandler` with your framework's request/response objects). See [Getting started](docs/getting-started.md) and [Next.js integration](docs/integrations/nextjs.md).
+
+**React UI (optional):**
+
+```bash
+npm install @thierry-gilgen-ict/engawa-react@0.1.0 react react-dom
+```
+
+See [@thierry-gilgen-ict/engawa-react](packages/react/README.md).
+
+## Packages
+
+| Package                                | When you need it                            | When you don't                                          |
+| -------------------------------------- | ------------------------------------------- | ------------------------------------------------------- |
+| `@thierry-gilgen-ict/engawa-core`      | Config, resources, adapters, `createEngawa` | You only want React UI without Engawa corpus (unlikely) |
+| `@thierry-gilgen-ict/engawa-discovery` | `llms.txt`, discovery link metadata         | You build discovery files entirely by hand              |
+| `@thierry-gilgen-ict/engawa-mcp`       | Public MCP server / handler, `search_site`  | You don't expose MCP                                    |
+| `@thierry-gilgen-ict/engawa-react`     | Bring Your Agent dialog and provider picker | Headless/agent-only sites with no BYA button            |
+
+**Not shipped:** `engawa-nextjs`, `engawa-cli`, `engawa-analytics`. Next.js sites integrate via documented patterns—see [docs/integrations/nextjs.md](docs/integrations/nextjs.md).
+
+## Production examples
+
+Both sites run Engawa from npm packages with site-specific adapters (no Engawa core forks).
+
+| Site                                                           | Agents page                                                                                           | What it proves                                                                         |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| [Thierry Gilgen ICT](https://www.thierry-gilgen-ict.ch/agents) | [llms.txt](https://www.thierry-gilgen-ict.ch/llms.txt) · [MCP](https://www.thierry-gilgen-ict.ch/mcp) | Editorial Field Notes content model, dynamic public pages                              |
+| [The Old Hand of Asia](https://theoldhandofasia.ch/agents)     | [llms.txt](https://theoldhandofasia.ch/llms.txt) · [MCP](https://theoldhandofasia.ch/mcp)             | Bilingual DE/EN, mixed CMS/static human-public sources, strict public/private boundary |
+
+Details: [docs/production-references.md](docs/production-references.md).
+
+## Bring Your Agent
+
+Engawa's React components implement **provider-neutral** connection UX:
+
+- ChatGPT
+- Claude
+- Grok
+- Cursor
+- Other MCP client (canonical fallback)
+
+Engawa does **not** claim one-click remote MCP setup for every provider. When a vendor has no documented deep link, the UI offers copy actions, setup instructions, and generic MCP—see [provider capability matrix](docs/providers/provider-capability-matrix.md).
+
+Provider availability and setup can vary by provider plan, workspace policy, and product version. See [capability matrix](docs/providers/provider-capability-matrix.md).
+
+## Security defaults
+
+**PUBLIC · READ-ONLY · NO MUTATIONS BY DEFAULT**
+
+- Public MCP exposes only resources your adapter registers.
+- v0.1 ships one public tool: `search_site` (bounded query and results).
+- No unauthenticated write tools, no env/secret access, no arbitrary filesystem reads.
+
+**Critical integration rule:** Engawa's public corpus must match what anonymous human visitors see—not merely what exists in a CMS or database. See [Content publication rule](docs/content-publication.md).
+
+Full model: [docs/security-model.md](docs/security-model.md).
+
+## Status
+
+- Early **v0.x** foundation on npm (`0.1.0` today; `0.1.1` metadata patch prepared in source).
+- **Two production reference integrations** (see above).
+- Public read-only surface proven; authenticated and mutating capabilities **not** shipped.
+- API may change before **1.0**.
+
+## Monorepo development
+
+Clone this repository to work on Engawa itself or run the included example:
 
 ```bash
 pnpm install
@@ -46,35 +179,27 @@ pnpm build
 pnpm --filter minimal-site start
 ```
 
-Requires Node.js 24 LTS (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+Example endpoints: `http://127.0.0.1:3847/llms.txt`, `http://127.0.0.1:3847/mcp`. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Packages
+## Documentation
 
-| Package                                | Purpose                              |
-| -------------------------------------- | ------------------------------------ |
-| `@thierry-gilgen-ict/engawa-core`      | Config, resources, adapters          |
-| `@thierry-gilgen-ict/engawa-discovery` | llms.txt generation, link metadata   |
-| `@thierry-gilgen-ict/engawa-mcp`       | MCP server adapter (spec 2026-07-28) |
-
-Planned (not in v0.1): React UI, Next.js adapters, CLI, analytics.
-
-## Security defaults
-
-Public Engawa endpoints are **read-only by default** in v0.1. No unauthenticated mutation, no secret access, bounded search input and results. See [`docs/security-model.md`](docs/security-model.md).
-
-## Licensing
-
-- **Source code**: [MIT](/LICENSE)
-- **Documentation and profiles**: [CC BY 4.0](/docs/LICENSE)
-
-## Roadmap
-
-See [`docs/roadmap.md`](docs/roadmap.md).
+| Doc                                                    | Topic                                     |
+| ------------------------------------------------------ | ----------------------------------------- |
+| [Getting started](docs/getting-started.md)             | External project, step-by-step            |
+| [Next.js integration](docs/integrations/nextjs.md)     | Route handlers, host app responsibilities |
+| [Production references](docs/production-references.md) | Live sites and portability evidence       |
+| [Content publication](docs/content-publication.md)     | Human-public corpus rule                  |
+| [Security model](docs/security-model.md)               | Threat model and launch checklist         |
+| [Roadmap](docs/roadmap.md)                             | What's done and what's deferred           |
+| [Releasing](docs/releasing.md)                         | npm publish process                       |
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## License
 
-MIT for software. CC BY 4.0 for docs. Copyright Thierry Gilgen ICT, 2026.
+- **Source code:** [MIT](LICENSE)
+- **Documentation and profiles:** [CC BY 4.0](docs/LICENSE)
+
+Copyright Thierry Gilgen ICT, 2026.
