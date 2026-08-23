@@ -21,8 +21,8 @@ SEARCH_CORPUS == ENGAWA_PUBLIC_CORPUS
 
 ## Adapter rules
 
-- Reuse the frontend's existing Strapi client and fetch helpers.
-- Respect published/draft (or preview) handling **exactly** as human routes do—typically `publicationState=live` or equivalent filters already in site loaders.
+- Reuse the frontend's existing Strapi client and fetch helpers—the Engawa adapter must call the **same human-route loader**, not a separate Engawa query.
+- Respect Draft & Publish **exactly as human-route loaders do**. On current Strapi 5 REST APIs this is represented by published/draft status; older Strapi versions used different query parameters.
 - Exclude unpublished locale variants and locales not routed publicly.
 - Exclude private/internal collections and authenticated-only content types.
 - Public-route parity: if a Strapi entry is not rendered on an anonymous human route, it is not Engawa-public.

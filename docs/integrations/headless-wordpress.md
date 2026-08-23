@@ -24,6 +24,7 @@ Do **not** create: PHP plugin, WordPress package, sidecar, or generic WordPress 
 ## Adapter rules
 
 - REST/GraphQL queries for Engawa must **not** be broader than queries used by human routes.
+- For WPGraphQL, reuse the same **unauthenticated/public-content loader** as human routes—authenticated queries can expose drafts or other data unavailable to anonymous visitors.
 - WordPress `publish` status alone is **insufficient**—a post must be anonymously routed/rendered on the frontend.
 - Exclude preview/draft queries, authentication tokens, and preview cookies from public Engawa.
 - Exclude custom post types unless they are actually anonymously routed and rendered.
@@ -33,14 +34,14 @@ Do **not** create: PHP plugin, WordPress package, sidecar, or generic WordPress 
 
 ## Pitfalls
 
-| Risk                                       | Action                                  |
-| ------------------------------------------ | --------------------------------------- |
-| `?status=draft` or preview query params    | Never in public adapter                 |
-| Application passwords / preview JWT in env | Never wire to public Engawa             |
-| `WPGraphQL` preview mode                   | Exclude from public corpus              |
-| All `post` rows with `publish`             | Exclude if frontend does not route them |
-| Internal CPTs (e.g. `acf-field`)           | Exclude                                 |
-| Media not linked on public pages           | Exclude                                 |
+| Risk                                       | Action                                                                                                         |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `?status=draft` or preview query params    | Never in public adapter                                                                                        |
+| Application passwords / preview JWT in env | Never wire to public Engawa                                                                                    |
+| Authenticated WPGraphQL queries            | Can expose drafts or data unavailable to public requests—never for Engawa; reuse unauthenticated/public loader |
+| All `post` rows with `publish`             | Exclude if frontend does not route them                                                                        |
+| Internal CPTs (e.g. `acf-field`)           | Exclude                                                                                                        |
+| Media not linked on public pages           | Exclude                                                                                                        |
 
 ## Related
 

@@ -121,4 +121,27 @@ describe("documentation sanity", () => {
     const docsIndex = readFileSync(join(root, "docs/README.md"), "utf8");
     expect(docsIndex).toContain("headless-cms.md");
   });
+
+  it("headless CMS recipes link to hub and emphasize human-route loaders", () => {
+    const recipes = [
+      "docs/integrations/headless-wordpress.md",
+      "docs/integrations/strapi.md",
+      "docs/integrations/sanity.md",
+      "docs/integrations/contentful.md",
+    ];
+    for (const path of recipes) {
+      const content = readFileSync(join(root, path), "utf8");
+      expect(content).toContain("headless-cms.md");
+      expect(content).toMatch(/HUMAN_PUBLIC_SOURCE|human.route|human-route|human routes/i);
+    }
+
+    const strapi = readFileSync(join(root, "docs/integrations/strapi.md"), "utf8");
+    const sanity = readFileSync(join(root, "docs/integrations/sanity.md"), "utf8");
+    expect(strapi).toMatch(/human.route|human-route|site loader|existing loader/i);
+    expect(sanity).toMatch(/human.route|human-route|human routes|public.loader/i);
+
+    const contentful = readFileSync(join(root, "docs/integrations/contentful.md"), "utf8");
+    expect(contentful).toMatch(/switch Engawa to Preview API credentials/i);
+    expect(contentful).toMatch(/Never use preview loader for public Engawa/i);
+  });
 });

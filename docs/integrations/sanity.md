@@ -22,8 +22,9 @@ SEARCH_CORPUS == ENGAWA_PUBLIC_CORPUS
 ## Adapter rules
 
 - GROQ queries for Engawa should wrap or reuse the **same public-loader logic** as human routes.
-- Exclude drafts (`!(_id in path("drafts.**"))` or equivalent filters already in site code).
-- Exclude preview/perspective behavior and preview tokens from public Engawa.
+- Public Engawa must reuse the same **production loader/perspective** as anonymous human routes. Current Sanity production queries commonly use the `published` perspective; draft/preview flows may use `drafts` or release perspectives and must not leak into public Engawa.
+- Do not add manual `_id` draft-path filters if the site's existing loader already uses an appropriate published perspective.
+- Exclude preview tokens from public Engawa.
 - Exclude locale/content variants not routed on the anonymous human site.
 - Exclude Sanity documents that exist in the dataset but are **not** routed by the frontend.
 - Do not broaden GROQ simply because Sanity can return more documents.
@@ -31,13 +32,14 @@ SEARCH_CORPUS == ENGAWA_PUBLIC_CORPUS
 
 ## Pitfalls
 
-| Risk                                   | Action                       |
-| -------------------------------------- | ---------------------------- |
-| `perspective: 'previewDrafts'`         | Never on public Engawa       |
-| Preview API token in env               | Never wire to public adapter |
-| Scheduled `_updatedAt` / release flags | Match human route visibility |
-| References to unpublished linked docs  | Match human route resolution |
-| Studio-only document types             | Exclude                      |
+| Risk                                   | Action                                                     |
+| -------------------------------------- | ---------------------------------------------------------- |
+| `drafts` or preview perspectives       | Never on public Engawa                                     |
+| `previewDrafts` (legacy alias)         | Legacy perspective name—not preferred; same rule as drafts |
+| Preview API token in env               | Never wire to public adapter                               |
+| Scheduled `_updatedAt` / release flags | Match human route visibility                               |
+| References to unpublished linked docs  | Match human route resolution                               |
+| Studio-only document types             | Exclude                                                    |
 
 ## Related
 
