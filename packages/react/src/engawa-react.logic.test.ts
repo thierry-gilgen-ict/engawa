@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { assertSafeContext, buildCursorMcpConfig, buildHandoffMessage } from "./context.js";
 import { DEFAULT_PROVIDERS, hasAction } from "./providers.js";
 import type { AskYourAgentLabels } from "./types.js";

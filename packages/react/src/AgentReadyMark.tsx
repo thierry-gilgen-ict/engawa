@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { AgentReadyMarkProps } from "./types.js";
 
 export function AgentReadyMark({ labels, onClick, className }: AgentReadyMarkProps) {
