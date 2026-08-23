@@ -1,0 +1,46 @@
+{
+  "name": "@thierry-gilgen-ict/engawa-map",
+  "version": "0.1.0",
+  "description": "Optional CLI client for the Engawa Distribution Map registry",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thierry-gilgen-ict/engawa.git",
+    "directory": "packages/map"
+  },
+  "bugs": {
+    "url": "https://github.com/thierry-gilgen-ict/engawa/issues"
+  },
+  "homepage": "https://github.com/thierry-gilgen-ict/engawa#readme",
+  "type": "module",
+  "bin": {
+    "engawa-map": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --root ../.. --config vitest.config.ts packages/map"
+  },
+  "dependencies": {
+    "zod": "^4.2.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
