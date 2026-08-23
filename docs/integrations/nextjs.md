@@ -144,6 +144,7 @@ Never send prompt text, copied context, MCP query strings, or contact form conte
 
 - [Integrating an existing site](../integrating-an-existing-site.md)
 - [Integration acceptance contract](../integration-acceptance.md)
+- [Headless CMS integration](headless-cms.md) — if the Next.js site gets content from a headless CMS
 
 See [production-references.md](../production-references.md) for live URLs.
 

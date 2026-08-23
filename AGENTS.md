@@ -24,7 +24,7 @@ Package versions may diverge by design. See [docs/compatibility.md](docs/compati
 - Public Engawa is **read-only** by default (v0.1: `search_site` only on public MCP).
 - **Generic MCP** is the canonical fallback for provider UX—not fake one-click connects.
 - **Content parity:** `HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE` ([content publication rule](docs/content-publication.md)).
-- No `engawa-nextjs` package in v0.1—document patterns in `docs/integrations/`.
+- No `engawa-nextjs` package in v0.1—document patterns in `docs/integrations/` (including [headless CMS](docs/integrations/headless-cms.md)).
 - Do not expose secrets, sessions, drafts, or admin-only corpus on public surfaces.
 
 ## Integrating Engawa into another website

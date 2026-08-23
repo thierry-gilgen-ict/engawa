@@ -27,6 +27,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 ## Integration guides
 
 - [Next.js integration](integrations/nextjs.md) — route handlers, host responsibilities
+- [Headless CMS integration](integrations/headless-cms.md) — Node/TS frontend + CMS API pattern
 - [Production references](production-references.md) — live sites
 - [Consuming from npm](integration-consuming-from-npm.md) — install pins
 - [Consuming from git (development)](integration-consuming-from-git.md)
