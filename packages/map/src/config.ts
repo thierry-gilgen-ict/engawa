@@ -13,19 +13,18 @@ export class ConfigError extends Error {
 
 async function atomicWriteJson(path: string, data: unknown): Promise<void> {
   const tempPath = `${path}.${randomBytes(8).toString("hex")}.tmp`;
-  let tempCreated = false;
+  let renamed = false;
 
   try {
     const serialized = `${JSON.stringify(data, null, 2)}\n`;
     await writeFile(tempPath, serialized, { encoding: "utf8", flag: "wx" });
-    tempCreated = true;
     if (process.platform !== "win32") {
       await chmod(tempPath, 0o644);
     }
     await rename(tempPath, path);
-    tempCreated = false;
+    renamed = true;
   } finally {
-    if (tempCreated) {
+    if (!renamed) {
       try {
         await unlink(tempPath);
       } catch {

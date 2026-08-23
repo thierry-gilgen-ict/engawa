@@ -120,19 +120,18 @@ export async function writeLocalState(
 
   const path = join(projectRoot, LOCAL_STATE_FILE_NAME);
   const tempPath = `${path}.${randomBytes(8).toString("hex")}.tmp`;
-  let tempCreated = false;
+  let renamed = false;
 
   try {
     const serialized = `${JSON.stringify(state, null, 2)}\n`;
     await writeFile(tempPath, serialized, { encoding: "utf8", mode: 0o600, flag: "wx" });
-    tempCreated = true;
     if (process.platform !== "win32") {
       await chmod(tempPath, 0o600);
     }
     await rename(tempPath, path);
-    tempCreated = false;
+    renamed = true;
   } finally {
-    if (tempCreated) {
+    if (!renamed) {
       try {
         await unlink(tempPath);
       } catch {

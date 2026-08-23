@@ -69,7 +69,11 @@ async function resolveInstalledVersion(
     throw new VersionDetectionError(`Missing version in installed ${packageName} package.json`);
   }
 
-  return validateExactSemver(pkg.version, `installed ${packageName} version`);
+  try {
+    return validateExactSemver(pkg.version, `installed ${packageName} version`);
+  } catch (error) {
+    throw new VersionDetectionError(error instanceof Error ? error.message : String(error));
+  }
 }
 
 export async function findProjectRoot(startDir: string): Promise<string> {

@@ -86,4 +86,30 @@ describe("cli", () => {
     expect(stderr).not.toContain("SyntaxError");
     expect(stderr).not.toMatch(/\n\s+at /);
   });
+  it("reports invalid installed semver without stack trace or SemverError", async () => {
+    const projectRoot = await createTestProject({ includeOptionalPackages: false });
+    const { REQUIRED_ENGAWA_PACKAGE } = await import("./constants.js");
+    const { join } = await import("node:path");
+    const { writeFile } = await import("node:fs/promises");
+    await writeFile(
+      join(projectRoot, "node_modules", REQUIRED_ENGAWA_PACKAGE, "package.json"),
+      JSON.stringify({ name: REQUIRED_ENGAWA_PACKAGE, version: "not-a-semver" }, null, 2),
+      "utf8",
+    );
+    process.chdir(projectRoot);
+    delete process.env.ENGAWA_MAP_ENDPOINT;
+
+    const stderrChunks: string[] = [];
+    const originalWrite = process.stderr.write.bind(process.stderr);
+    vi.spyOn(process.stderr, "write").mockImplementation((chunk, ...args) => {
+      stderrChunks.push(String(chunk));
+      return originalWrite(chunk, ...args);
+    });
+
+    const code = await runCli(["register", "--dry-run"]);
+    expect(code).toBe(1);
+    const stderr = stderrChunks.join("");
+    expect(stderr).not.toContain("SemverError");
+    expect(stderr).not.toMatch(/\n\s+at /);
+  });
 });

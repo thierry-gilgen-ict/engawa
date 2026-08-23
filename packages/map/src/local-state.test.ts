@@ -1,9 +1,19 @@
 // @vitest-environment node
 import { execFile } from "node:child_process";
-import { readFile, writeFile } from "node:fs/promises";
+import * as fsPromises from "node:fs/promises";
+import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("node:fs/promises", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs/promises")>();
+  return {
+    ...actual,
+    rename: vi.fn(actual.rename),
+  };
+});
+
 import { ensureGitignoreGuard, readLocalState, writeLocalState } from "./local-state.js";
 import { createTestProject } from "./test-helpers.js";
 
@@ -47,5 +57,27 @@ describe("local secret state", () => {
         },
       }),
     ).rejects.toMatchObject({ code: "SECRET_WRITE" });
+  });
+
+  it("cleans up temp file and preserves error when rename fails", async () => {
+    const projectRoot = await createTestProject();
+    const renameError = Object.assign(new Error("rename failed"), { code: "EACCES" });
+    const renameSpy = vi.spyOn(fsPromises, "rename").mockRejectedValue(renameError);
+
+    await expect(
+      writeLocalState(projectRoot, {
+        registration: {
+          state: "pending-request",
+          canonicalUrl: "https://example.com",
+          idempotencyKey: "550e8400-e29b-41d4-a716-446655440002",
+          siteToken: "secret-token",
+          payloadHash: "deadbeef",
+        },
+      }),
+    ).rejects.toThrow("rename failed");
+
+    const entries = await readdir(projectRoot);
+    expect(entries.some((name) => name.endsWith(".tmp"))).toBe(false);
+    renameSpy.mockRestore();
   });
 });

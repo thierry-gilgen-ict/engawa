@@ -53,4 +53,33 @@ describe("git state detection", () => {
     );
     expect(trackedState).toEqual({ kind: "ERROR", message: "git exploded" });
   });
+  it("classifies exit 128 with not-a-git-repository as NOT_REPOSITORY", async () => {
+    const execRunner = async () => {
+      throw Object.assign(new Error("fatal: not a git repository"), {
+        code: 128,
+        stderr: "fatal: not a git repository",
+      });
+    };
+    const state = await detectGitRepositoryState("/tmp/project", execRunner);
+    expect(state).toEqual({ kind: "NOT_REPOSITORY" });
+  });
+
+  it("classifies exit 128 with unrelated fatal as ERROR", async () => {
+    const execRunner = async () => {
+      throw Object.assign(new Error("fatal: dubious ownership"), {
+        code: 128,
+        stderr: "fatal: dubious ownership in repository",
+      });
+    };
+    const state = await detectGitRepositoryState("/tmp/project", execRunner);
+    expect(state).toEqual({ kind: "ERROR", message: "fatal: dubious ownership" });
+  });
+
+  it("classifies ENOENT as GIT_UNAVAILABLE", async () => {
+    const execRunner = async () => {
+      throw Object.assign(new Error("spawn git ENOENT"), { code: "ENOENT" });
+    };
+    const state = await detectGitRepositoryState("/tmp/project", execRunner);
+    expect(state).toEqual({ kind: "GIT_UNAVAILABLE" });
+  });
 });

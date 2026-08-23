@@ -53,12 +53,7 @@ export async function detectGitRepositoryState(
 
     const stderr = typeof err.stderr === "string" ? err.stderr : "";
     const message = execErrorMessage(error);
-    const exitCode = typeof err.code === "number" ? err.code : undefined;
-    if (
-      exitCode === 128 ||
-      /not a git repository/i.test(stderr) ||
-      /not a git repository/i.test(message)
-    ) {
+    if (/not a git repository/i.test(stderr) || /not a git repository/i.test(message)) {
       return { kind: "NOT_REPOSITORY" };
     }
 

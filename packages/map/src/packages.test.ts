@@ -105,4 +105,17 @@ describe("package version detection", () => {
       VersionDetectionError,
     );
   });
+  it("throws VersionDetectionError for malformed installed semver", async () => {
+    const projectRoot = await createTestProject({ includeOptionalPackages: false });
+    const coreDir = join(projectRoot, "node_modules", REQUIRED_ENGAWA_PACKAGE);
+    await writeFile(
+      join(coreDir, "package.json"),
+      JSON.stringify({ name: REQUIRED_ENGAWA_PACKAGE, version: "not-a-semver" }, null, 2),
+      "utf8",
+    );
+
+    await expect(detectEngawaPackageVersions(projectRoot)).rejects.toBeInstanceOf(
+      VersionDetectionError,
+    );
+  });
 });
