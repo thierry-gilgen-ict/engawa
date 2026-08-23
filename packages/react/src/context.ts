@@ -37,7 +37,8 @@ export function buildHandoffMessage(context: AgentContext): string {
 
   if (title && canonicalUrl && isSafeUrl(canonicalUrl)) {
     const safeUrl = canonicalUrl;
-    const mcpPart = mcpUrl && isSafeUrl(mcpUrl) ? ` Use the site's official agent interface at ${mcpUrl}` : "";
+    const mcpPart =
+      mcpUrl && isSafeUrl(mcpUrl) ? ` Use the site's official agent interface at ${mcpUrl}` : "";
     return `I'm viewing "${title}" on ${siteName}.${mcpPart} Canonical page: ${safeUrl}. Help me understand or discuss this content using only the site's official public information.`;
   }
 
@@ -49,10 +50,7 @@ export function buildHandoffMessage(context: AgentContext): string {
     return `I'm exploring ${siteName} — "${title}".${mcpPart}`;
   }
 
-  const mcpPart =
-    mcpUrl && isSafeUrl(mcpUrl)
-      ? ` The official MCP endpoint is ${mcpUrl}.`
-      : "";
+  const mcpPart = mcpUrl && isSafeUrl(mcpUrl) ? ` The official MCP endpoint is ${mcpUrl}.` : "";
   return `I'm exploring ${siteName}.${mcpPart} Help me understand this site using its official public agent interface.`;
 }
 

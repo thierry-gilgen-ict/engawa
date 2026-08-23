@@ -75,13 +75,16 @@ export function AgentConnectDialog({
     const ok = await copyToClipboard(mcpUrl);
     if (ok) {
       setCopiedMcp(true);
-      emit({
-        name: "ask_agent_mcp_copied",
-        provider: selected?.id,
-        pageType: context.type,
-        action: "COPY_MCP_URL",
-        pagePath,
-      }, onEvent);
+      emit(
+        {
+          name: "ask_agent_mcp_copied",
+          provider: selected?.id,
+          pageType: context.type,
+          action: "COPY_MCP_URL",
+          pagePath,
+        },
+        onEvent,
+      );
       window.setTimeout(() => setCopiedMcp(false), 2000);
     }
   }
@@ -91,13 +94,16 @@ export function AgentConnectDialog({
     const ok = await copyToClipboard(message);
     if (ok) {
       setCopiedContext(true);
-      emit({
-        name: "ask_agent_context_copied",
-        provider: selected?.id,
-        pageType: context.type,
-        action: "COPY_CONTEXT",
-        pagePath,
-      }, onEvent);
+      emit(
+        {
+          name: "ask_agent_context_copied",
+          provider: selected?.id,
+          pageType: context.type,
+          action: "COPY_CONTEXT",
+          pagePath,
+        },
+        onEvent,
+      );
       window.setTimeout(() => setCopiedContext(false), 2000);
     }
   }
@@ -107,13 +113,16 @@ export function AgentConnectDialog({
     const ok = await copyToClipboard(config);
     if (ok) {
       setCopiedConnection(true);
-      emit({
-        name: "ask_agent_mcp_copied",
-        provider: selected?.id,
-        pageType: context.type,
-        action: "COPY_CONNECTION_DETAILS",
-        pagePath,
-      }, onEvent);
+      emit(
+        {
+          name: "ask_agent_mcp_copied",
+          provider: selected?.id,
+          pageType: context.type,
+          action: "COPY_CONNECTION_DETAILS",
+          pagePath,
+        },
+        onEvent,
+      );
       window.setTimeout(() => setCopiedConnection(false), 2000);
     }
   }
@@ -121,36 +130,45 @@ export function AgentConnectDialog({
   function handleOpenProvider() {
     const url = selected?.openUrl ?? selected?.docsUrl;
     if (!url) return;
-    emit({
-      name: "ask_agent_external_handoff",
-      provider: selected?.id,
-      pageType: context.type,
-      action: "OPEN_PROVIDER",
-      pagePath,
-    }, onEvent);
+    emit(
+      {
+        name: "ask_agent_external_handoff",
+        provider: selected?.id,
+        pageType: context.type,
+        action: "OPEN_PROVIDER",
+        pagePath,
+      },
+      onEvent,
+    );
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
   function handleSelectProvider(provider: AgentProviderDefinition) {
     setSelected(provider);
     setShowInstructions(false);
-    emit({
-      name: "ask_agent_provider_selected",
-      provider: provider.id,
-      pageType: context.type,
-      pagePath,
-    }, onEvent);
+    emit(
+      {
+        name: "ask_agent_provider_selected",
+        provider: provider.id,
+        pageType: context.type,
+        pagePath,
+      },
+      onEvent,
+    );
   }
 
   function handleShowInstructions() {
     setShowInstructions((v) => !v);
-    emit({
-      name: "ask_agent_instructions_opened",
-      provider: selected?.id,
-      pageType: context.type,
-      action: "SHOW_CONNECTION_INSTRUCTIONS",
-      pagePath,
-    }, onEvent);
+    emit(
+      {
+        name: "ask_agent_instructions_opened",
+        provider: selected?.id,
+        pageType: context.type,
+        action: "SHOW_CONNECTION_INSTRUCTIONS",
+        pagePath,
+      },
+      onEvent,
+    );
   }
 
   return (
@@ -166,7 +184,9 @@ export function AgentConnectDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <header className="engawa-dialog__header">
-          <h2 id={titleId} className="engawa-dialog__title">{labels.dialogTitle}</h2>
+          <h2 id={titleId} className="engawa-dialog__title">
+            {labels.dialogTitle}
+          </h2>
           <button
             type="button"
             className="engawa-dialog__close"
@@ -179,7 +199,9 @@ export function AgentConnectDialog({
             ×
           </button>
         </header>
-        <p id={descId} className="engawa-dialog__description">{labels.dialogDescription}</p>
+        <p id={descId} className="engawa-dialog__description">
+          {labels.dialogDescription}
+        </p>
 
         <AgentProviderPicker
           providers={providers}

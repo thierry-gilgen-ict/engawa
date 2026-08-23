@@ -26,11 +26,7 @@ export function McpConnectionPanel({
         </button>
       </div>
       {whatCanAccessHref ? (
-        <a
-          className="engawa-mcp-panel__link"
-          href={whatCanAccessHref}
-          rel="noopener noreferrer"
-        >
+        <a className="engawa-mcp-panel__link" href={whatCanAccessHref} rel="noopener noreferrer">
           {labels.whatCanAccess}
         </a>
       ) : null}

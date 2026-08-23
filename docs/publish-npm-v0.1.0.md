@@ -2,11 +2,11 @@
 
 **Status:** Published to the public npm registry.
 
-| Package | Version |
-|---------|---------|
-| `@thierry-gilgen-ict/engawa-core` | 0.1.0 |
-| `@thierry-gilgen-ict/engawa-discovery` | 0.1.0 |
-| `@thierry-gilgen-ict/engawa-mcp` | 0.1.0 |
+| Package                                | Version |
+| -------------------------------------- | ------- |
+| `@thierry-gilgen-ict/engawa-core`      | 0.1.0   |
+| `@thierry-gilgen-ict/engawa-discovery` | 0.1.0   |
+| `@thierry-gilgen-ict/engawa-mcp`       | 0.1.0   |
 
 **Source baseline:** `thierry-gilgen-ict/engawa` @ `9e18343` (MIT LICENSE in each package tarball).
 

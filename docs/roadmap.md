@@ -33,12 +33,12 @@
 
 ## Package boundaries (planned)
 
-| Package            | Status  |
-| ------------------ | ------- |
-| `engawa-core`      | v0.1    |
-| `engawa-discovery` | v0.1    |
-| `engawa-mcp`       | v0.1    |
+| Package            | Status             |
+| ------------------ | ------------------ |
+| `engawa-core`      | v0.1               |
+| `engawa-discovery` | v0.1               |
+| `engawa-mcp`       | v0.1               |
 | `engawa-react`     | v0.1 (in progress) |
-| `engawa-nextjs`    | Planned |
-| `engawa-cli`       | Planned |
-| `engawa-analytics` | Planned |
+| `engawa-nextjs`    | Planned            |
+| `engawa-cli`       | Planned            |
+| `engawa-analytics` | Planned            |

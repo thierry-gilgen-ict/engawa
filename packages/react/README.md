@@ -27,7 +27,7 @@ import { AskYourAgent, DEFAULT_PROVIDERS } from "@thierry-gilgen-ict/engawa-reac
   providers={DEFAULT_PROVIDERS}
   labels={labels}
   onEvent={(event) => console.log(event.name)}
-/>
+/>;
 ```
 
 All user-facing strings are passed via `labels`. Analytics are emitted via `onEvent` — no vendor analytics built in.

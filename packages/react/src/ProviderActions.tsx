@@ -78,7 +78,11 @@ export function ProviderActions({
         ) : null}
       </div>
       {showInstructions ? (
-        <div className="engawa-provider-actions__instructions" role="region" aria-label={labels.instructionsTitle}>
+        <div
+          className="engawa-provider-actions__instructions"
+          role="region"
+          aria-label={labels.instructionsTitle}
+        >
           <p className="engawa-provider-actions__instructions-title">{labels.instructionsTitle}</p>
           <p className="engawa-provider-actions__instructions-body">
             {instructionText(labels, provider.id)}
