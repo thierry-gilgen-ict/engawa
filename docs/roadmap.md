@@ -59,13 +59,13 @@
 
 ## Package status
 
-| Package            | npm status                        | Notes                                                                                                                                                                                                                |
-| ------------------ | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `engawa-core`      | 0.1.1                             | engines metadata in 0.1.1                                                                                                                                                                                            |
-| `engawa-discovery` | 0.1.1                             | depends on core 0.1.1                                                                                                                                                                                                |
-| `engawa-mcp`       | 0.1.1                             | depends on core 0.1.1                                                                                                                                                                                                |
-| `engawa-react`     | 0.1.0                             | engines already present                                                                                                                                                                                              |
-| `engawa-nextjs`    | Not shipped                       | Document pattern only                                                                                                                                                                                                |
-| `engawa-cli`       | Planned                           |                                                                                                                                                                                                                      |
+| Package            | npm status                        | Notes                                                                                                                    |
+| ------------------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `engawa-core`      | 0.1.1                             | engines metadata in 0.1.1                                                                                                |
+| `engawa-discovery` | 0.1.1                             | depends on core 0.1.1                                                                                                    |
+| `engawa-mcp`       | 0.1.1                             | depends on core 0.1.1                                                                                                    |
+| `engawa-react`     | 0.1.0                             | engines already present                                                                                                  |
+| `engawa-nextjs`    | Not shipped                       | Document pattern only                                                                                                    |
+| `engawa-cli`       | Planned                           |                                                                                                                          |
 | `engawa-map`       | IMPLEMENTED_IN_REPO NOT_PUBLISHED | CLI + staging registry live (DM2B PASS); production not deployed; [DM3A contract](distribution-map-production-launch.md) |
-| `engawa-analytics` | Planned                           | Separate from Distribution Map                                                                                                                                                                                       |
+| `engawa-analytics` | Planned                           | Separate from Distribution Map                                                                                           |

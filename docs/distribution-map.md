@@ -4,14 +4,14 @@ The Engawa Distribution Map is an **optional public showcase** for sites built w
 
 This document is the canonical policy and security contract for the Distribution Map registry. It is **not** [`engawa-analytics`](roadmap.md) and not telemetry.
 
-| Field                    | Value                                                                 |
-| ------------------------ | --------------------------------------------------------------------- |
-| Package                  | `@thierry-gilgen-ict/engawa-map` — **IMPLEMENTED_IN_REPO NOT_PUBLISHED** |
-| Public name              | Engawa Distribution Map                                               |
-| CTA                      | Join the map                                                          |
-| CLI                      | Implemented in monorepo; npm publication deferred (see [DM3A](distribution-map-production-launch.md)) |
-| Registry backend         | Implemented — staging live; production not deployed                   |
-| Default state            | `NOT_REGISTERED`                                                      |
+| Field            | Value                                                                                                 |
+| ---------------- | ----------------------------------------------------------------------------------------------------- |
+| Package          | `@thierry-gilgen-ict/engawa-map` — **IMPLEMENTED_IN_REPO NOT_PUBLISHED**                              |
+| Public name      | Engawa Distribution Map                                                                               |
+| CTA              | Join the map                                                                                          |
+| CLI              | Implemented in monorepo; npm publication deferred (see [DM3A](distribution-map-production-launch.md)) |
+| Registry backend | Implemented — staging live; production not deployed                                                   |
+| Default state    | `NOT_REGISTERED`                                                                                      |
 
 There is no `distributionMap` field in `EngawaConfig` or `engawaConfigSchema`. Installing Engawa packages does not register a site.
 
@@ -53,12 +53,12 @@ Each host:
     -> isolated registry persistence
 ```
 
-| Invariant                            | Value                                              |
-| ------------------------------------ | -------------------------------------------------- |
-| `DEDICATED_REGISTRY_SERVICE`         | REQUIRED                                           |
-| `STAGING_REGISTRY_HOST`              | `staging-engawa-map.thierry-gilgen-ict.ch` (live)  |
+| Invariant                            | Value                                             |
+| ------------------------------------ | ------------------------------------------------- |
+| `DEDICATED_REGISTRY_SERVICE`         | REQUIRED                                          |
+| `STAGING_REGISTRY_HOST`              | `staging-engawa-map.thierry-gilgen-ict.ch` (live) |
 | `PRODUCTION_REGISTRY_HOST`           | `engawa-map.thierry-gilgen-ict.ch` (not deployed) |
-| Registry write API on main `www` app | FORBIDDEN                                          |
+| Registry write API on main `www` app | FORBIDDEN                                         |
 
 `REGISTRY_COMPROMISE_BLAST_RADIUS != MAIN_WEBSITE` — design for independent service boundaries. This does not claim perfect isolation, but the registry must not be a normal route inside the main website application.
 

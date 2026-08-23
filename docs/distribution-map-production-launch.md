@@ -4,21 +4,21 @@ Design and freeze contract for production launch. **No production deployment in 
 
 ## Current implementation status
 
-| Item | Status |
-| ---- | ------ |
-| `ENGAWA_MAP_CLI_IMPLEMENTED` | YES — monorepo `packages/map`; **not** on npm |
-| `REGISTRY_IMPLEMENTED` | YES — [engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry) |
-| `LIVE_STAGING` | YES — `https://staging-engawa-map.thierry-gilgen-ict.ch` |
-| `DM2B_STAGING_ACCEPTANCE` | PASS (accepted SHA `61623df1422206d86fc0b4aee39e1f843440faa9`) |
-| `PRODUCTION_REGISTRY` | NO |
-| `ENGAWA_MAP_NPM_PUBLICATION` | NO |
-| `DOMAIN_VERIFICATION` | DEFERRED |
+| Item                         | Status                                                                                 |
+| ---------------------------- | -------------------------------------------------------------------------------------- |
+| `ENGAWA_MAP_CLI_IMPLEMENTED` | YES — monorepo `packages/map`; **not** on npm                                          |
+| `REGISTRY_IMPLEMENTED`       | YES — [engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry) |
+| `LIVE_STAGING`               | YES — `https://staging-engawa-map.thierry-gilgen-ict.ch`                               |
+| `DM2B_STAGING_ACCEPTANCE`    | PASS (accepted SHA `61623df1422206d86fc0b4aee39e1f843440faa9`)                         |
+| `PRODUCTION_REGISTRY`        | NO                                                                                     |
+| `ENGAWA_MAP_NPM_PUBLICATION` | NO                                                                                     |
+| `DOMAIN_VERIFICATION`        | DEFERRED                                                                               |
 
 ## Production hostname (frozen)
 
-| Field | Value |
-| ----- | ----- |
-| `PRODUCTION_REGISTRY_HOST` | `engawa-map.thierry-gilgen-ict.ch` |
+| Field                        | Value                                      |
+| ---------------------------- | ------------------------------------------ |
+| `PRODUCTION_REGISTRY_HOST`   | `engawa-map.thierry-gilgen-ict.ch`         |
 | `PRODUCTION_REGISTRY_ORIGIN` | `https://engawa-map.thierry-gilgen-ict.ch` |
 
 Staging remains:
@@ -48,11 +48,11 @@ CLI_ENDPOINT_PRECEDENCE:
   2. production default https://engawa-map.thierry-gilgen-ict.ch
 ```
 
-| Override purpose | Example |
-| ---------------- | ------- |
-| Staging | `ENGAWA_MAP_ENDPOINT=https://staging-engawa-map.thierry-gilgen-ict.ch` |
-| Local dev / CI | `ENGAWA_MAP_ENDPOINT=http://127.0.0.1:<port>` (loopback http only) |
-| Future compatible registry | explicit HTTPS origin only if deliberately supported |
+| Override purpose           | Example                                                                |
+| -------------------------- | ---------------------------------------------------------------------- |
+| Staging                    | `ENGAWA_MAP_ENDPOINT=https://staging-engawa-map.thierry-gilgen-ict.ch` |
+| Local dev / CI             | `ENGAWA_MAP_ENDPOINT=http://127.0.0.1:<port>` (loopback http only)     |
+| Future compatible registry | explicit HTTPS origin only if deliberately supported                   |
 
 Rules:
 
@@ -171,28 +171,28 @@ Production deploy artifacts and `deploy/production/` layout are **DM3B** scope.
 
 Before public production launch, publish a privacy notice on the production hostname covering:
 
-| Topic | Accurate v1 statement |
-| ----- | --------------------- |
-| Voluntary registration | Operator-initiated CLI registration only |
-| Public listing purpose | Community showcase of Engawa-powered public sites |
-| Public fields | Exact registry fields listed above |
-| Lifecycle | `PENDING` → manual approval → `LISTED`; delist → `DELISTED` |
-| Token model | Site-scoped bearer token; hash-only server storage; shown once at register |
-| Retention | Registry DB until operator delists or maintainer removes |
-| Delisting / removal | Operator `unregister` or maintainer contact |
-| Abuse | Operational rate limits; manual moderation |
-| Visitor telemetry | **None** — no page views, MCP queries, prompts, BYA context |
-| Crawling | **No** automatic website crawling or canonical URL fetch |
+| Topic                  | Accurate v1 statement                                                      |
+| ---------------------- | -------------------------------------------------------------------------- |
+| Voluntary registration | Operator-initiated CLI registration only                                   |
+| Public listing purpose | Community showcase of Engawa-powered public sites                          |
+| Public fields          | Exact registry fields listed above                                         |
+| Lifecycle              | `PENDING` → manual approval → `LISTED`; delist → `DELISTED`                |
+| Token model            | Site-scoped bearer token; hash-only server storage; shown once at register |
+| Retention              | Registry DB until operator delists or maintainer removes                   |
+| Delisting / removal    | Operator `unregister` or maintainer contact                                |
+| Abuse                  | Operational rate limits; manual moderation                                 |
+| Visitor telemetry      | **None** — no page views, MCP queries, prompts, BYA context                |
+| Crawling               | **No** automatic website crawling or canonical URL fetch                   |
 
 Do not claim unsupported GDPR/legal conclusions in DM3A.
 
 ### Removal / contact path (recommended)
 
-| Channel | Use |
-| ------- | --- |
-| Operator self-service | `engawa-map unregister` with site token |
-| Maintainer contact | **info@thierry-gilgen-ict.ch** (existing [SECURITY.md](../SECURITY.md) channel) |
-| Public tracker | GitHub issues on [engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry) for abuse reports |
+| Channel               | Use                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Operator self-service | `engawa-map unregister` with site token                                                                             |
+| Maintainer contact    | **info@thierry-gilgen-ict.ch** (existing [SECURITY.md](../SECURITY.md) channel)                                     |
+| Public tracker        | GitHub issues on [engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry) for abuse reports |
 
 `REMOVAL_CONTACT_PATH = info@thierry-gilgen-ict.ch + GitHub issues (engawa-map-registry)`
 
