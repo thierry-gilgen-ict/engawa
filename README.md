@@ -148,6 +148,8 @@ Engawa's React components implement **provider-neutral** connection UX:
 
 Engawa does **not** claim one-click remote MCP setup for every provider. When a vendor has no documented deep link, the UI offers copy actions, setup instructions, and generic MCP—see [provider capability matrix](docs/providers/provider-capability-matrix.md).
 
+Provider availability and setup can vary by provider plan, workspace policy, and product version. See [capability matrix](docs/providers/provider-capability-matrix.md).
+
 ## Security defaults
 
 **PUBLIC · READ-ONLY · NO MUTATIONS BY DEFAULT**

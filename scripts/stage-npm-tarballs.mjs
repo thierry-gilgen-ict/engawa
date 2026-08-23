@@ -1,5 +1,7 @@
 /**
- * Stage discovery/mcp packages with 0.1.0 semver deps for npm publish tarballs.
+ * Stage discovery/mcp packages for npm publish tarballs.
+ * Rewrites workspace:* @thierry-gilgen-ict/engawa-core to the published core semver
+ * from packages/core/package.json before packing.
  * Run from engawa root after pnpm build.
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -42,4 +44,16 @@ if (existsSync(join(root, "packages/react/dist/index.js"))) {
   execSync("npm pack", { cwd: join(root, "packages/react"), stdio: "inherit" });
 }
 
+const corePkg = JSON.parse(readFileSync(join(root, "packages/core/package.json"), "utf8"));
+const discoveryStaged = JSON.parse(readFileSync(join(staging, "discovery/package.json"), "utf8"));
+const mcpStaged = JSON.parse(readFileSync(join(staging, "mcp/package.json"), "utf8"));
+
 console.log("Tarballs ready in packages/core, packages/react and .npm-staging/*/");
+console.log("Verification summary:");
+console.log(`  core version: ${corePkg.version}`);
+console.log(
+  `  discovery @thierry-gilgen-ict/engawa-core dep: ${discoveryStaged.dependencies["@thierry-gilgen-ict/engawa-core"]}`,
+);
+console.log(
+  `  mcp @thierry-gilgen-ict/engawa-core dep: ${mcpStaged.dependencies["@thierry-gilgen-ict/engawa-core"]}`,
+);

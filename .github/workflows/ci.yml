@@ -39,5 +39,8 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: v0.1.1 release-candidate smoke
+        run: node scripts/v011-release-candidate-smoke.mjs
+
       - name: External npm consumer smoke
         run: node scripts/external-consumer-smoke.mjs 0.1.0

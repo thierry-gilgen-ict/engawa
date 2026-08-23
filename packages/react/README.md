@@ -46,6 +46,8 @@ import { AskYourAgent, DEFAULT_PROVIDERS } from "@thierry-gilgen-ict/engawa-reac
 
 All user-facing strings via `labels`. Provider actions follow the [capability matrix](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/providers/provider-capability-matrix.md)—no fake one-click MCP connect.
 
+Provider availability and setup can vary by provider plan, workspace policy, and product version. See [capability matrix](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/providers/provider-capability-matrix.md).
+
 ## Key exports
 
 | Export                                                  | Purpose                                  |

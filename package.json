@@ -14,6 +14,7 @@
     "typecheck": "pnpm -r run typecheck",
     "test": "vitest run",
     "smoke:external": "node scripts/external-consumer-smoke.mjs",
+    "smoke:v011-rc": "node scripts/v011-release-candidate-smoke.mjs",
     "lint": "eslint .",
     "format": "prettier --check .",
     "format:write": "prettier --write ."
