@@ -32,7 +32,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --config ../../vitest.config.ts packages/map"
+    "test": "vitest run --root ../.. --config vitest.config.ts packages/map"
   },
   "dependencies": {
     "zod": "^4.2.0"

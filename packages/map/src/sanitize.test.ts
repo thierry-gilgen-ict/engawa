@@ -14,4 +14,9 @@ describe("terminal sanitization", () => {
       }),
     ).toBe(true);
   });
+
+  it("strips bidirectional override characters", () => {
+    const bidi = "safe\u202Ehidden\u202Ctail";
+    expect(sanitizeTerminalText(bidi)).toBe("safehiddentail");
+  });
 });

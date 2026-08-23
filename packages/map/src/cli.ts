@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 import { fileURLToPath } from "node:url";
+import { CanonicalUrlError } from "./canonical-url.js";
+import { RegistryClientError } from "./client.js";
+import { ConfigError } from "./config.js";
+import { EndpointError } from "./endpoint.js";
+import { LocalStateError } from "./local-state.js";
+import { VersionDetectionError } from "./packages.js";
 import { runRegister } from "./register.js";
+import { sanitizeTerminalText } from "./sanitize.js";
 import { runStatus } from "./status.js";
 import { runUnregister } from "./unregister.js";
 
@@ -16,6 +23,35 @@ Options:
   --dry-run   Show registration payload without network or writes (register only)
   --yes       Skip interactive confirmation (register only)
 `);
+}
+
+const EXPECTED_ERRORS = [
+  ConfigError,
+  EndpointError,
+  VersionDetectionError,
+  LocalStateError,
+  CanonicalUrlError,
+  RegistryClientError,
+] as const;
+
+function isExpectedError(error: unknown): error is Error {
+  return error instanceof Error && EXPECTED_ERRORS.some((cls) => error instanceof cls);
+}
+
+function reportExpectedError(error: Error): number {
+  process.stderr.write(`${sanitizeTerminalText(error.message)}\n`);
+  return 1;
+}
+
+async function runCommand(command: () => Promise<number>): Promise<number> {
+  try {
+    return await command();
+  } catch (error) {
+    if (isExpectedError(error)) {
+      return reportExpectedError(error);
+    }
+    throw error;
+  }
 }
 
 export async function runCli(argv: string[]): Promise<number> {
@@ -45,11 +81,11 @@ export async function runCli(argv: string[]): Promise<number> {
 
   switch (command) {
     case "register":
-      return runRegister({ dryRun, yes });
+      return runCommand(() => runRegister({ dryRun, yes }));
     case "status":
-      return runStatus();
+      return runCommand(() => runStatus());
     case "unregister":
-      return runUnregister();
+      return runCommand(() => runUnregister());
     default:
       process.stderr.write(`Unknown command: ${command}\n`);
       printUsage();

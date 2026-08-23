@@ -6,6 +6,11 @@ import {
   REQUEST_TIMEOUT_MS,
 } from "./constants.js";
 import { resolveRegistryEndpoint } from "./endpoint.js";
+import {
+  validateIdempotencyKey,
+  validateSiteId,
+  validateSiteTokenHash,
+} from "./protocol-validation.js";
 import { sanitizeTerminalText } from "./sanitize.js";
 import {
   errorResponseSchema,
@@ -81,6 +86,16 @@ function parseErrorBody(raw: string, status: number): RegistryClientError {
   }
 }
 
+function assertExpectedStatus(actual: number, expected: number, operation: string): void {
+  if (actual !== expected) {
+    throw new RegistryClientError(
+      `Unexpected ${operation} response status ${actual}; expected ${expected}`,
+      "REGISTRY_ERROR",
+      actual,
+    );
+  }
+}
+
 export class RegistryClient {
   private readonly baseUrl: string;
   private readonly fetchImpl: FetchFn;
@@ -138,6 +153,14 @@ export class RegistryClient {
         throw parseErrorBody(body, response.status);
       }
 
+      if (response.status >= 300) {
+        throw new RegistryClientError(
+          `Unexpected redirect response status ${response.status}`,
+          "REGISTRY_ERROR",
+          response.status,
+        );
+      }
+
       return { status: response.status, body };
     } catch (error) {
       if (error instanceof RegistryClientError) {
@@ -160,9 +183,12 @@ export class RegistryClient {
     idempotencyKey: string;
     siteTokenHash: string;
   }): Promise<RegisterResponse> {
+    validateIdempotencyKey(input.idempotencyKey);
+    validateSiteTokenHash(input.siteTokenHash);
+
     const payload = registrationPayloadSchema.parse(input.payload);
     const body = JSON.stringify(payload);
-    const { body: responseBody } = await this.request("POST", "/sites", {
+    const { status, body: responseBody } = await this.request("POST", "/sites", {
       body,
       headers: {
         "Idempotency-Key": input.idempotencyKey,
@@ -171,23 +197,26 @@ export class RegistryClient {
       },
     });
 
+    assertExpectedStatus(status, 201, "register");
+
     return registerResponseSchema.parse(JSON.parse(responseBody));
   }
 
   async getStatus(siteId: string, token: string): Promise<StatusResponse> {
-    const { body } = await this.request("GET", `/sites/${siteId}/status`, {
+    validateSiteId(siteId);
+    const { status, body } = await this.request("GET", `/sites/${siteId}/status`, {
       authToken: token,
     });
+    assertExpectedStatus(status, 200, "status");
     return statusResponseSchema.parse(JSON.parse(body));
   }
 
   async unregister(siteId: string, token: string): Promise<void> {
+    validateSiteId(siteId);
     const { status } = await this.request("DELETE", `/sites/${siteId}`, {
       authToken: token,
     });
-    if (status !== 204) {
-      throw new RegistryClientError("Unexpected unregister response", "REGISTRY_ERROR", status);
-    }
+    assertExpectedStatus(status, 204, "unregister");
   }
 }
 

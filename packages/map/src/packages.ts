@@ -1,8 +1,13 @@
 import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { ENGAWA_PACKAGE_NAMES, type EngawaPackageName } from "./constants.js";
+import {
+  DETECTABLE_ENGAWA_PACKAGE_NAMES,
+  REQUIRED_ENGAWA_PACKAGE,
+  type EngawaPackageName,
+} from "./constants.js";
 import type { EngawaPackages } from "./schemas.js";
+import { validateExactSemver } from "./semver.js";
 
 export class VersionDetectionError extends Error {
   constructor(message: string) {
@@ -21,10 +26,6 @@ async function readJsonFile(path: string): Promise<unknown> {
   return JSON.parse(raw) as unknown;
 }
 
-function isExactVersion(value: string): boolean {
-  return /^\d+\.\d+\.\d+/.test(value);
-}
-
 async function resolveInstalledVersion(
   projectRoot: string,
   packageName: EngawaPackageName,
@@ -33,7 +34,7 @@ async function resolveInstalledVersion(
   try {
     const pkg = (await readJsonFile(packageJsonPath)) as { version?: string };
     if (typeof pkg.version === "string" && pkg.version.length > 0) {
-      return pkg.version;
+      return validateExactSemver(pkg.version, `installed ${packageName} version`);
     }
   } catch {
     return undefined;
@@ -64,27 +65,43 @@ export async function detectEngawaPackageVersions(projectRoot: string): Promise<
     ...rootPackageJson.devDependencies,
   };
 
-  const packages = {} as EngawaPackages;
+  const packages: Partial<EngawaPackages> = {};
 
-  for (const packageName of ENGAWA_PACKAGE_NAMES) {
+  for (const packageName of DETECTABLE_ENGAWA_PACKAGE_NAMES) {
+    const declaredVersion = declared?.[packageName];
     const installed = await resolveInstalledVersion(projectRoot, packageName);
+
     if (installed) {
       packages[packageName] = installed;
       continue;
     }
 
-    const declaredVersion = declared?.[packageName];
-    if (declaredVersion && isExactVersion(declaredVersion)) {
-      packages[packageName] = declaredVersion;
-      continue;
+    if (declaredVersion) {
+      try {
+        packages[packageName] = validateExactSemver(
+          declaredVersion,
+          `declared ${packageName} version`,
+        );
+        continue;
+      } catch {
+        // fall through to error below
+      }
     }
 
+    if (packageName === REQUIRED_ENGAWA_PACKAGE) {
+      throw new VersionDetectionError(
+        `Could not resolve installed version for ${packageName}; install the package or pin an exact version`,
+      );
+    }
+  }
+
+  if (!packages[REQUIRED_ENGAWA_PACKAGE]) {
     throw new VersionDetectionError(
-      `Could not resolve installed version for ${packageName}; install the package or pin an exact version`,
+      `Could not resolve installed version for ${REQUIRED_ENGAWA_PACKAGE}; install the package or pin an exact version`,
     );
   }
 
-  return packages;
+  return packages as EngawaPackages;
 }
 
 export function getModuleDir(): string {

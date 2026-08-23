@@ -45,7 +45,7 @@ export async function runStatus(options: StatusOptions = {}): Promise<number> {
     log(`siteId=${status.siteId}`);
     log(`state=${status.state}`);
     log(`displayName=${sanitizeTerminalText(status.displayName)}`);
-    log(`canonicalUrl=${status.canonicalUrl}`);
+    log(`canonicalUrl=${sanitizeTerminalText(status.canonicalUrl)}`);
     log(`createdAt=${status.createdAt}`);
     log(`updatedAt=${status.updatedAt}`);
     return 0;

@@ -1,11 +1,11 @@
 // @vitest-environment node
-import { writeFile } from "node:fs/promises";
+import { access, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveSiteToken } from "./local-state.js";
 import { runStatus } from "./status.js";
 import { runUnregister } from "./unregister.js";
-import { createTestProject } from "./test-helpers.js";
+import { createTestProject, readLocalStateFile, readMapConfigFile } from "./test-helpers.js";
 
 const originalEndpoint = process.env.ENGAWA_MAP_ENDPOINT;
 const originalToken = process.env.ENGAWA_MAP_TOKEN;
@@ -85,15 +85,18 @@ describe("status and unregister commands", () => {
     expect(logs.join("\n")).toContain("displayName=TestSite");
   });
 
-  it("unregister sends DELETE with bearer token", async () => {
+  it("unregister cleans up local state and config siteId on 204", async () => {
     const projectRoot = await createTestProject();
+    const siteId = "550e8400-e29b-41d4-a716-446655440000";
+
     await writeFile(
       join(projectRoot, "engawa-map.config.json"),
       JSON.stringify(
         {
           displayName: "Test Site",
           canonicalUrl: "https://example.com",
-          siteId: "550e8400-e29b-41d4-a716-446655440000",
+          siteId,
+          hints: { framework: "nextjs", byaEnabled: true, localeCount: 2 },
         },
         null,
         2,
@@ -101,10 +104,79 @@ describe("status and unregister commands", () => {
       "utf8",
     );
 
+    const { writeLocalState } = await import("./local-state.js");
+    await writeLocalState(projectRoot, {
+      registration: {
+        state: "registered",
+        siteId,
+        canonicalUrl: "https://example.com",
+        siteToken: "bearer-token",
+      },
+    });
+
     process.env.ENGAWA_MAP_ENDPOINT = "http://127.0.0.1:9";
     process.env.ENGAWA_MAP_TOKEN = "bearer-token";
 
     const fetchImpl = vi.fn(async () => new Response(null, { status: 204 }));
+
+    const logs: string[] = [];
+    const code = await runUnregister({
+      cwd: projectRoot,
+      endpoint: process.env.ENGAWA_MAP_ENDPOINT,
+      envToken: process.env.ENGAWA_MAP_TOKEN,
+      fetchImpl,
+      log: (line) => logs.push(line),
+    });
+
+    expect(code).toBe(0);
+    expect(fetchImpl).toHaveBeenCalledOnce();
+    await expect(access(join(projectRoot, ".engawa-map.local.json"))).rejects.toThrow();
+
+    const config = (await readMapConfigFile(projectRoot)) as {
+      displayName: string;
+      canonicalUrl: string;
+      siteId?: string;
+      hints?: unknown;
+    };
+    expect(config.siteId).toBeUndefined();
+    expect(config.displayName).toBe("Test Site");
+    expect(config.canonicalUrl).toBe("https://example.com");
+    expect(config.hints).toEqual({ framework: "nextjs", byaEnabled: true, localeCount: 2 });
+    expect(logs.join("\n")).toMatch(/clear it manually/i);
+  });
+
+  it("unregister retains local credentials on failed DELETE", async () => {
+    const projectRoot = await createTestProject();
+    const siteId = "550e8400-e29b-41d4-a716-446655440000";
+
+    await writeFile(
+      join(projectRoot, "engawa-map.config.json"),
+      JSON.stringify(
+        {
+          displayName: "Test Site",
+          canonicalUrl: "https://example.com",
+          siteId,
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+
+    const { writeLocalState } = await import("./local-state.js");
+    await writeLocalState(projectRoot, {
+      registration: {
+        state: "registered",
+        siteId,
+        canonicalUrl: "https://example.com",
+        siteToken: "bearer-token",
+      },
+    });
+
+    process.env.ENGAWA_MAP_ENDPOINT = "http://127.0.0.1:9";
+    process.env.ENGAWA_MAP_TOKEN = "bearer-token";
+
+    const fetchImpl = vi.fn(async () => new Response("server error", { status: 500 }));
 
     const code = await runUnregister({
       cwd: projectRoot,
@@ -114,7 +186,14 @@ describe("status and unregister commands", () => {
       log: () => undefined,
     });
 
-    expect(code).toBe(0);
-    expect(fetchImpl).toHaveBeenCalledOnce();
+    expect(code).toBe(1);
+    const local = (await readLocalStateFile(projectRoot)) as {
+      registration: { siteId: string; siteToken: string };
+    };
+    expect(local.registration.siteId).toBe(siteId);
+    expect(local.registration.siteToken).toBe("bearer-token");
+
+    const config = (await readMapConfigFile(projectRoot)) as { siteId?: string };
+    expect(config.siteId).toBe(siteId);
   });
 });

@@ -37,7 +37,7 @@ export function validateRegistryEndpoint(raw: string): string {
 
 export function resolveRegistryEndpoint(envValue = process.env.ENGAWA_MAP_ENDPOINT): string {
   if (!envValue) {
-    throw new EndpointError("ENGAWA_MAP_ENDPOINT is required");
+    throw new EndpointError("MISSING_ENDPOINT");
   }
   return validateRegistryEndpoint(envValue);
 }

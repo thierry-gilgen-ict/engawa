@@ -1,6 +1,6 @@
 import { RegistryClient } from "./client.js";
-import { loadMapConfig } from "./config.js";
-import { readLocalState, resolveSiteId, resolveSiteToken } from "./local-state.js";
+import { loadMapConfig, removeMapConfigSiteId } from "./config.js";
+import { clearLocalState, readLocalState, resolveSiteId, resolveSiteToken } from "./local-state.js";
 import { findProjectRoot } from "./packages.js";
 import { sanitizeTerminalText } from "./sanitize.js";
 
@@ -23,7 +23,8 @@ export async function runUnregister(options: UnregisterOptions = {}): Promise<nu
   const config = await loadMapConfig(projectRoot);
   const localState = await readLocalState(projectRoot);
   const siteId = resolveSiteId(config.siteId, localState);
-  const token = resolveSiteToken(options.envToken ?? process.env.ENGAWA_MAP_TOKEN, localState);
+  const envToken = options.envToken ?? process.env.ENGAWA_MAP_TOKEN;
+  const token = resolveSiteToken(envToken, localState);
 
   if (!siteId) {
     log("No siteId found. Nothing to unregister.");
@@ -42,7 +43,14 @@ export async function runUnregister(options: UnregisterOptions = {}): Promise<nu
 
   try {
     await client.unregister(siteId, token);
+
+    await clearLocalState(projectRoot);
+    await removeMapConfigSiteId(projectRoot);
+
     log(`Site ${siteId} delisted.`);
+    if (envToken) {
+      log("ENGAWA_MAP_TOKEN was used for authentication; clear it manually from your environment.");
+    }
     return 0;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

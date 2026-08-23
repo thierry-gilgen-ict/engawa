@@ -26,4 +26,8 @@ describe("registry endpoint rules", () => {
       "https://registry.example.com",
     );
   });
+
+  it("throws MISSING_ENDPOINT when env is unset", () => {
+    expect(() => resolveRegistryEndpoint(undefined)).toThrow(/MISSING_ENDPOINT/);
+  });
 });

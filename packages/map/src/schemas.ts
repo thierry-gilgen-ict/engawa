@@ -1,8 +1,14 @@
 import { z } from "zod";
+import {
+  FROZEN_ERROR_CODES,
+  MAX_CANONICAL_URL_LENGTH,
+  MAX_DISPLAY_NAME_LENGTH,
+  MAX_ERROR_MESSAGE_LENGTH,
+} from "./constants.js";
 
 export const mapHintsSchema = z
   .object({
-    framework: z.string().min(1).optional(),
+    framework: z.string().min(1).max(100).optional(),
     byaEnabled: z.boolean().optional(),
     localeCount: z.number().int().min(1).max(100).optional(),
   })
@@ -10,8 +16,8 @@ export const mapHintsSchema = z
 
 export const mapConfigSchema = z
   .object({
-    displayName: z.string().min(1).max(200),
-    canonicalUrl: z.string().min(1),
+    displayName: z.string().min(1).max(MAX_DISPLAY_NAME_LENGTH),
+    canonicalUrl: z.string().min(1).max(MAX_CANONICAL_URL_LENGTH),
     siteId: z.string().uuid().optional(),
     hints: mapHintsSchema.optional(),
   })
@@ -22,9 +28,9 @@ export type MapConfig = z.infer<typeof mapConfigSchema>;
 export const engawaPackagesSchema = z
   .object({
     "@thierry-gilgen-ict/engawa-core": z.string().min(1),
-    "@thierry-gilgen-ict/engawa-discovery": z.string().min(1),
-    "@thierry-gilgen-ict/engawa-mcp": z.string().min(1),
-    "@thierry-gilgen-ict/engawa-react": z.string().min(1),
+    "@thierry-gilgen-ict/engawa-discovery": z.string().min(1).optional(),
+    "@thierry-gilgen-ict/engawa-mcp": z.string().min(1).optional(),
+    "@thierry-gilgen-ict/engawa-react": z.string().min(1).optional(),
   })
   .strict();
 
@@ -32,8 +38,8 @@ export type EngawaPackages = z.infer<typeof engawaPackagesSchema>;
 
 export const registrationPayloadSchema = z
   .object({
-    displayName: z.string().min(1),
-    canonicalUrl: z.string().min(1),
+    displayName: z.string().min(1).max(MAX_DISPLAY_NAME_LENGTH),
+    canonicalUrl: z.string().min(1).max(MAX_CANONICAL_URL_LENGTH),
     packages: engawaPackagesSchema,
     hints: mapHintsSchema.optional(),
   })
@@ -58,8 +64,8 @@ export const statusResponseSchema = z
   .object({
     siteId: z.string().uuid(),
     state: siteStateSchema,
-    displayName: z.string(),
-    canonicalUrl: z.string(),
+    displayName: z.string().min(1).max(MAX_DISPLAY_NAME_LENGTH),
+    canonicalUrl: z.string().min(1).max(MAX_CANONICAL_URL_LENGTH),
     createdAt: z.string().datetime(),
     updatedAt: z.string().datetime(),
   })
@@ -67,12 +73,14 @@ export const statusResponseSchema = z
 
 export type StatusResponse = z.infer<typeof statusResponseSchema>;
 
+export const frozenErrorCodeSchema = z.enum(FROZEN_ERROR_CODES);
+
 export const errorResponseSchema = z
   .object({
     error: z
       .object({
-        code: z.string(),
-        message: z.string(),
+        code: frozenErrorCodeSchema,
+        message: z.string().min(1).max(MAX_ERROR_MESSAGE_LENGTH),
       })
       .strict(),
   })
@@ -86,6 +94,7 @@ export const pendingRegistrationSchema = z
     canonicalUrl: z.string().min(1),
     idempotencyKey: z.string().uuid(),
     siteToken: z.string().min(1),
+    payloadHash: z.string().min(1),
   })
   .strict();
 

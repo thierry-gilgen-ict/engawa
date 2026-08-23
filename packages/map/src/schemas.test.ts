@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
+import { FROZEN_ERROR_CODES } from "./constants.js";
 import {
   errorResponseSchema,
   localStateSchema,
@@ -20,6 +21,18 @@ describe("strict schemas reject unknown fields", () => {
     ).toThrow();
   });
 
+  it("accepts core-only registration payload", () => {
+    expect(
+      registrationPayloadSchema.parse({
+        displayName: "x",
+        canonicalUrl: "https://example.com",
+        packages: {
+          "@thierry-gilgen-ict/engawa-core": "0.1.1",
+        },
+      }).packages["@thierry-gilgen-ict/engawa-core"],
+    ).toBe("0.1.1");
+  });
+
   it("rejects unknown registration payload fields", () => {
     expect(() =>
       registrationPayloadSchema.parse({
@@ -27,9 +40,6 @@ describe("strict schemas reject unknown fields", () => {
         canonicalUrl: "https://example.com",
         packages: {
           "@thierry-gilgen-ict/engawa-core": "0.1.1",
-          "@thierry-gilgen-ict/engawa-discovery": "0.1.1",
-          "@thierry-gilgen-ict/engawa-mcp": "0.1.1",
-          "@thierry-gilgen-ict/engawa-react": "0.1.0",
         },
         nodeVersion: "24",
       }),
@@ -70,6 +80,22 @@ describe("strict schemas reject unknown fields", () => {
     ).toThrow();
   });
 
+  it("accepts only frozen v1 error codes", () => {
+    for (const code of FROZEN_ERROR_CODES) {
+      expect(
+        errorResponseSchema.parse({
+          error: { code, message: "ok" },
+        }).error.code,
+      ).toBe(code);
+    }
+
+    expect(() =>
+      errorResponseSchema.parse({
+        error: { code: "NOT_A_REAL_CODE", message: "bad" },
+      }),
+    ).toThrow();
+  });
+
   it("accepts valid local pending and registered state", () => {
     expect(
       localStateSchema.parse({
@@ -78,8 +104,20 @@ describe("strict schemas reject unknown fields", () => {
           canonicalUrl: "https://example.com",
           idempotencyKey: "550e8400-e29b-41d4-a716-446655440000",
           siteToken: "token",
+          payloadHash: "deadbeef",
         },
       }).registration.state,
     ).toBe("pending-request");
+
+    expect(
+      localStateSchema.parse({
+        registration: {
+          state: "registered",
+          siteId: "550e8400-e29b-41d4-a716-446655440000",
+          canonicalUrl: "https://example.com",
+          siteToken: "token",
+        },
+      }).registration.state,
+    ).toBe("registered");
   });
 });

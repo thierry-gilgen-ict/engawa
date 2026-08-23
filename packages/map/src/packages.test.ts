@@ -13,6 +13,15 @@ describe("package version detection", () => {
     expect(versions["@thierry-gilgen-ict/engawa-react"]).toBe("0.1.1");
   });
 
+  it("returns core only when optional packages are not installed", async () => {
+    const projectRoot = await createTestProject({ includeOptionalPackages: false });
+    const versions = await detectEngawaPackageVersions(projectRoot);
+    expect(versions["@thierry-gilgen-ict/engawa-core"]).toBe("0.1.1");
+    expect(versions["@thierry-gilgen-ict/engawa-discovery"]).toBeUndefined();
+    expect(versions["@thierry-gilgen-ict/engawa-mcp"]).toBeUndefined();
+    expect(versions["@thierry-gilgen-ict/engawa-react"]).toBeUndefined();
+  });
+
   it("does not fabricate versions from semver ranges", async () => {
     const projectRoot = await createTestProject();
     await rm(join(projectRoot, "node_modules"), { recursive: true, force: true });

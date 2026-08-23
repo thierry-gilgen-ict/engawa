@@ -35,11 +35,43 @@ function normalizeIpv6Host(hostname: string): string {
   return hostname;
 }
 
+function parseFirstIpv6Hextet(host: string): number | undefined {
+  const normalized = normalizeIpv6Host(host).toLowerCase();
+  if (normalized === "::1" || normalized === "1") {
+    return 0;
+  }
+
+  const beforeDoubleColon = normalized.split("::")[0];
+  if (!beforeDoubleColon) {
+    return 0;
+  }
+
+  const firstSegment = beforeDoubleColon.split(":")[0];
+  if (!firstSegment) {
+    return 0;
+  }
+
+  const value = Number.parseInt(firstSegment, 16);
+  return Number.isNaN(value) ? undefined : value;
+}
+
 function isPrivateOrReservedIpv6(host: string): boolean {
   const normalized = normalizeIpv6Host(host).toLowerCase();
   if (normalized === "::1") return true;
-  if (normalized.startsWith("fc") || normalized.startsWith("fd")) return true;
-  if (normalized.startsWith("fe80")) return true;
+
+  const firstHextet = parseFirstIpv6Hextet(host);
+  if (firstHextet === undefined) {
+    return true;
+  }
+
+  if (firstHextet >= 0xfc00 && firstHextet <= 0xfdff) {
+    return true;
+  }
+
+  if (firstHextet >= 0xfe80 && firstHextet <= 0xfebf) {
+    return true;
+  }
+
   return false;
 }
 
@@ -75,6 +107,9 @@ export function validateAndNormalizeCanonicalUrl(url: string): string {
   }
   if (parsed.hash) {
     throw new CanonicalUrlError("fragments are not allowed");
+  }
+  if (parsed.pathname !== "/" && parsed.pathname !== "") {
+    throw new CanonicalUrlError("path components are not allowed; use the site root URL only");
   }
 
   const hostname = parsed.hostname.toLowerCase();

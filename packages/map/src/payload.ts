@@ -1,6 +1,13 @@
+import { createHash } from "node:crypto";
 import { validateAndNormalizeCanonicalUrl } from "./canonical-url.js";
-import type { MapConfig } from "./schemas.js";
+import { registrationPayloadSchema, type MapConfig } from "./schemas.js";
 import type { EngawaPackages, RegistrationPayload } from "./schemas.js";
+
+export function hashRegistrationPayload(payload: RegistrationPayload): string {
+  const normalized = registrationPayloadSchema.parse(payload);
+  const serialized = JSON.stringify(normalized);
+  return createHash("sha256").update(serialized, "utf8").digest("hex");
+}
 
 export function buildRegistrationPayload(
   config: MapConfig,

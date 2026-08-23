@@ -4,6 +4,7 @@ import { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it } from "vitest";
 import { RegistryClient, RegistryClientError } from "./client.js";
 import type { RegistrationPayload } from "./schemas.js";
+import { hashSiteToken } from "./token.js";
 
 const payload: RegistrationPayload = {
   displayName: "Test",
@@ -15,6 +16,9 @@ const payload: RegistrationPayload = {
     "@thierry-gilgen-ict/engawa-react": "0.1.0",
   },
 };
+
+const VALID_IDEMPOTENCY_KEY = "550e8400-e29b-41d4-a716-446655440001";
+const VALID_SITE_TOKEN_HASH = hashSiteToken("test-token");
 
 let server: Server | undefined;
 
@@ -45,7 +49,7 @@ describe("registry client", () => {
       expect(req.method).toBe("POST");
       expect(req.url).toBe("/api/v1/sites");
       expect(req.headers["idempotency-key"]).toBeTruthy();
-      expect(req.headers["engawa-map-site-token-hash"]).toBeTruthy();
+      expect(req.headers["engawa-map-site-token-hash"]).toBe(VALID_SITE_TOKEN_HASH);
       expect(req.headers["engawa-map-client-version"]).toBe("0.1.0");
       expect(req.headers.authorization).toBeUndefined();
       res.writeHead(201, { "Content-Type": "application/json" });
@@ -62,10 +66,35 @@ describe("registry client", () => {
     const client = new RegistryClient({ endpoint });
     const response = await client.register({
       payload,
-      idempotencyKey: "550e8400-e29b-41d4-a716-446655440001",
-      siteTokenHash: "abc",
+      idempotencyKey: VALID_IDEMPOTENCY_KEY,
+      siteTokenHash: VALID_SITE_TOKEN_HASH,
     });
     expect(response.siteId).toBe("550e8400-e29b-41d4-a716-446655440000");
+  });
+
+  it("rejects non-201 register responses", async () => {
+    for (const status of [200, 202]) {
+      const endpoint = await startServer((_req, res) => {
+        res.writeHead(status, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            siteId: "550e8400-e29b-41d4-a716-446655440000",
+            state: "PENDING",
+            createdAt: "2026-01-01T00:00:00.000Z",
+            updatedAt: "2026-01-01T00:00:00.000Z",
+          }),
+        );
+      });
+
+      const client = new RegistryClient({ endpoint });
+      await expect(
+        client.register({
+          payload,
+          idempotencyKey: VALID_IDEMPOTENCY_KEY,
+          siteTokenHash: VALID_SITE_TOKEN_HASH,
+        }),
+      ).rejects.toMatchObject({ code: "REGISTRY_ERROR", status });
+    }
   });
 
   it("rejects redirect responses", async () => {
@@ -78,8 +107,8 @@ describe("registry client", () => {
     await expect(
       client.register({
         payload,
-        idempotencyKey: "550e8400-e29b-41d4-a716-446655440001",
-        siteTokenHash: "abc",
+        idempotencyKey: VALID_IDEMPOTENCY_KEY,
+        siteTokenHash: VALID_SITE_TOKEN_HASH,
       }),
     ).rejects.toBeInstanceOf(RegistryClientError);
   });
@@ -113,8 +142,8 @@ describe("registry client", () => {
     await expect(
       client.register({
         payload,
-        idempotencyKey: "550e8400-e29b-41d4-a716-446655440001",
-        siteTokenHash: "abc",
+        idempotencyKey: VALID_IDEMPOTENCY_KEY,
+        siteTokenHash: VALID_SITE_TOKEN_HASH,
       }),
     ).rejects.toMatchObject({
       code: "CANONICAL_URL_ALREADY_REGISTERED",

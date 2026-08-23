@@ -26,7 +26,15 @@ export {
   resolveSiteToken,
   resolveSiteId,
 } from "./local-state.js";
-export { loadMapConfig } from "./config.js";
+export { loadMapConfig, writeMapConfigSiteId, removeMapConfigSiteId } from "./config.js";
+export { validateExactSemver, SemverError } from "./semver.js";
+export {
+  validateSiteId,
+  validateIdempotencyKey,
+  validateSiteTokenHash,
+} from "./protocol-validation.js";
+export { hashRegistrationPayload } from "./payload.js";
+export { clearLocalState, isSecretFileTracked } from "./local-state.js";
 export { runRegister } from "./register.js";
 export { runStatus } from "./status.js";
 export { runUnregister } from "./unregister.js";
