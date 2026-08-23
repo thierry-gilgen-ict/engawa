@@ -7,8 +7,14 @@
 | `@thierry-gilgen-ict/engawa-core`      | 0.1.0   |
 | `@thierry-gilgen-ict/engawa-discovery` | 0.1.0   |
 | `@thierry-gilgen-ict/engawa-mcp`       | 0.1.0   |
+| `@thierry-gilgen-ict/engawa-react`     | 0.1.0   |
 
-**Source baseline:** `thierry-gilgen-ict/engawa` @ `9e18343` (MIT LICENSE in each package tarball).
+**Source baselines:**
+
+| Package | Engawa commit |
+| ------- | ------------- |
+| `engawa-core`, `engawa-discovery`, `engawa-mcp` | `9e18343` (MIT LICENSE in each package tarball) |
+| `engawa-react` | `7555a0f` (squash merge of PR #9 — Bring Your Agent React UX) |
 
 **Do not republish `0.1.0`.** Future changes ship as a new semver release.
 
