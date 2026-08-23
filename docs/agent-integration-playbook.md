@@ -84,6 +84,27 @@ See [compatibility.md](compatibility.md). As of `ENGAWA_RELEASE_SET = 2026-08-v0
 - `@thierry-gilgen-ict/engawa-mcp@0.1.1`
 - `@thierry-gilgen-ict/engawa-react@0.1.0` (optional)
 
+## Production security
+
+Engawa packages do **not** enforce Host validation, Origin validation, or rate limiting. The host application or a trusted reverse proxy / edge layer must provide them.
+
+Report values:
+
+```text
+HOST_VALIDATION = PASS_APP / PASS_EDGE / FAIL / NOT_APPLICABLE_DEV_ONLY
+RATE_LIMIT = PASS_APP / PASS_EDGE / FAIL / NOT_APPLICABLE_DEV_ONLY
+ORIGIN_VALIDATION = PASS_APP / PASS_EDGE / FAIL / NOT_APPLICABLE / NOT_APPLICABLE_DEV_ONLY
+```
+
+- `PASS_APP` — enforced in application code, tested
+- `PASS_EDGE` — enforced at reverse proxy / CDN / edge, documented and tested
+- `NOT_APPLICABLE_DEV_ONLY` — valid only for local development; **forbidden for production PASS**
+- Origin validation is required only when browser-origin MCP requests are accepted
+
+```text
+PRODUCTION_SECURITY_UNKNOWN_OR_MISSING = FAIL
+```
+
 ## FINAL REPORT (required)
 
 Return this block when integration work completes:
@@ -114,8 +135,9 @@ TOOLS_LIST = PASS / FAIL
 SEARCH_SITE = PASS / FAIL
 PUBLIC_TOOLS = search_site only / FAIL
 
-HOST_VALIDATION = PASS / FAIL / NOT_CONFIGURED
-RATE_LIMIT = PASS / FAIL / NOT_CONFIGURED
+HOST_VALIDATION = PASS_APP / PASS_EDGE / FAIL / NOT_APPLICABLE_DEV_ONLY
+RATE_LIMIT = PASS_APP / PASS_EDGE / FAIL / NOT_APPLICABLE_DEV_ONLY
+ORIGIN_VALIDATION = PASS_APP / PASS_EDGE / FAIL / NOT_APPLICABLE / NOT_APPLICABLE_DEV_ONLY
 ADMIN_EXCLUDED = PASS / FAIL / UNKNOWN
 DRAFTS_EXCLUDED = PASS / FAIL / UNKNOWN
 CONTACT_DATA_EXCLUDED = PASS / FAIL / UNKNOWN
@@ -141,7 +163,7 @@ MUTATING_TOOLS_STARTED = NO
 BLOCKERS =
 ```
 
-**PASS** is not allowed if any security invariant is `UNKNOWN`.
+**PASS** is not allowed if any security invariant is `UNKNOWN`, or if production host/rate limit is `FAIL`, `NOT_APPLICABLE_DEV_ONLY`, or unconfigured without documented edge equivalent.
 
 ## Related
 

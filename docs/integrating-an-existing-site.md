@@ -95,17 +95,22 @@ Reference pattern (conceptual):
 
 ```typescript
 // lib/engawa/adapter.ts — in your application, not in Engawa packages
-import type { ContentAdapter } from "@thierry-gilgen-ict/engawa-core";
+import type { ContentAdapter, EngawaResource } from "@thierry-gilgen-ict/engawa-core";
 
 export class SiteContentAdapter implements ContentAdapter {
-  async listResources() {
+  async listResources(): Promise<EngawaResource[]> {
     // Return only resources whose human routes are public
   }
-  async getResource(uri: string) {
+  async getResource(idOrUri: string): Promise<EngawaResource | undefined> {
     // Same source as human route + markdown builder
+  }
+  async search(query: string): Promise<EngawaResource[]> {
+    // Search only the same human-public corpus; never return admin/draft/private content
   }
 }
 ```
+
+`search()` backs MCP `search_site` and must query the same bounded public corpus as `listResources()`.
 
 ## Add discovery
 

@@ -30,12 +30,32 @@ Full context: [integrating an existing site](integrating-an-existing-site.md), [
 
 ## SECURITY
 
+Content corpus (adapter-level):
+
 - [ ] Search for admin-only terms returns **no** private resources
 - [ ] Draft / unpublished sentinel content is **absent**
 - [ ] Contact submission or PII sentinel is **absent**
 - [ ] Environment, session, or secret paths are **absent**
-- [ ] Evil `Host` header rejected where host validation is configured
-- [ ] Rate limit exercised (429 or documented edge behavior under abuse)
+
+Host and rate limiting (application or edge — Engawa packages do **not** provide these):
+
+- [ ] **Host validation** — evil `Host` rejected (`PASS_APP`) or enforced at trusted reverse proxy / edge (`PASS_EDGE`, documented and tested)
+- [ ] **Rate limiting** — abuse on `/mcp` and search returns 429 or documented edge behavior (`PASS_APP` or `PASS_EDGE`)
+- [ ] **Origin validation** — if browser-origin MCP requests are accepted, `Origin` is validated (`PASS_APP` or `PASS_EDGE`); otherwise `NOT_APPLICABLE`
+
+### Production security principle
+
+```text
+PRODUCTION_SECURITY_UNKNOWN_OR_MISSING = FAIL
+```
+
+For **production** integration, overall `PASS` is **forbidden** when:
+
+- `HOST_VALIDATION` is `FAIL`, `NOT_APPLICABLE_DEV_ONLY`, or unconfigured without documented edge equivalent
+- `RATE_LIMIT` is `FAIL`, `NOT_APPLICABLE_DEV_ONLY`, or unconfigured without documented edge equivalent
+- Any security invariant is `UNKNOWN` or untested
+
+`NOT_APPLICABLE_DEV_ONLY` is valid only for local development smoke—not for production acceptance.
 
 ## UX (if Bring Your Agent is installed)
 
@@ -62,10 +82,13 @@ DISCOVERY = PASS / FAIL
 MARKDOWN = PASS / FAIL
 MCP = PASS / FAIL
 SECURITY = PASS / FAIL
+HOST_VALIDATION = PASS_APP / PASS_EDGE / FAIL / NOT_APPLICABLE_DEV_ONLY
+RATE_LIMIT = PASS_APP / PASS_EDGE / FAIL / NOT_APPLICABLE_DEV_ONLY
+ORIGIN_VALIDATION = PASS_APP / PASS_EDGE / FAIL / NOT_APPLICABLE / NOT_APPLICABLE_DEV_ONLY
 BYA = PASS / FAIL / NOT_INSTALLED
 BUILD = PASS / FAIL
 
 NOTES =
 ```
 
-**FAIL** if any security invariant is unknown or untested.
+**FAIL** if any security invariant is unknown or untested, or if production host/rate limit is `FAIL` or `NOT_APPLICABLE_DEV_ONLY`.

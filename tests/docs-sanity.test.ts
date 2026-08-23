@@ -61,4 +61,40 @@ describe("documentation sanity", () => {
     expect(block).not.toMatch(/engawa-discovery@0\.1\.0/);
     expect(block).not.toMatch(/engawa-mcp@0\.1\.0/);
   });
+
+  it("integrate prompt uses canonical Engawa GitHub URLs", () => {
+    const prompt = readFileSync(join(root, "docs/prompts/integrate-engawa.md"), "utf8");
+    expect(prompt).toContain("https://github.com/thierry-gilgen-ict/engawa");
+    expect(prompt).toContain("ENGAWA_CANONICAL_DOCS_UNAVAILABLE");
+    expect(prompt).not.toContain("vendored copy");
+  });
+
+  it("upgrade prompt uses canonical Engawa GitHub URLs", () => {
+    const prompt = readFileSync(join(root, "docs/prompts/upgrade-engawa.md"), "utf8");
+    expect(prompt).toContain("https://github.com/thierry-gilgen-ict/engawa");
+    expect(prompt).toContain("ENGAWA_CANONICAL_DOCS_UNAVAILABLE");
+  });
+
+  it("existing-site guide documents ContentAdapter search()", () => {
+    const guide = readFileSync(join(root, "docs/integrating-an-existing-site.md"), "utf8");
+    expect(guide).toContain("EngawaResource");
+    expect(guide).toMatch(/async search\(query/);
+    expect(guide).toContain("search_site");
+  });
+
+  it("acceptance and playbook forbid production PASS with missing host/rate limit", () => {
+    const acceptance = readFileSync(join(root, "docs/integration-acceptance.md"), "utf8");
+    const playbook = readFileSync(join(root, "docs/agent-integration-playbook.md"), "utf8");
+    expect(acceptance).toContain("NOT_APPLICABLE_DEV_ONLY");
+    expect(acceptance).toContain("PRODUCTION_SECURITY_UNKNOWN_OR_MISSING");
+    expect(playbook).toContain("NOT_APPLICABLE_DEV_ONLY");
+    expect(playbook).toContain("PRODUCTION_SECURITY_UNKNOWN_OR_MISSING");
+    expect(playbook).toContain("PASS_EDGE");
+  });
+
+  it("CHANGELOG compare link uses v0.1.0 baseline not engawa-core-v0.1.0", () => {
+    const changelog = readFileSync(join(root, "CHANGELOG.md"), "utf8");
+    expect(changelog).toContain("v0.1.0...engawa-core-v0.1.1");
+    expect(changelog).not.toContain("engawa-core-v0.1.0");
+  });
 });
