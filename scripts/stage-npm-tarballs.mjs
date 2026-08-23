@@ -20,7 +20,8 @@ function stagePackage(name) {
   }
   const pkg = JSON.parse(readFileSync(join(src, "package.json"), "utf8"));
   if (pkg.dependencies?.["@thierry-gilgen-ict/engawa-core"]?.startsWith("workspace:")) {
-    pkg.dependencies["@thierry-gilgen-ict/engawa-core"] = "0.1.0";
+    const corePkg = JSON.parse(readFileSync(join(root, "packages/core/package.json"), "utf8"));
+    pkg.dependencies["@thierry-gilgen-ict/engawa-core"] = corePkg.version;
   }
   delete pkg.scripts;
   writeFileSync(join(dest, "package.json"), JSON.stringify(pkg, null, 2) + "\n");

@@ -1,6 +1,6 @@
 {
   "name": "@thierry-gilgen-ict/engawa-discovery",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "llms.txt v2 generation and discovery link metadata for Engawa",
   "license": "MIT",
   "repository": {
@@ -35,5 +35,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }
