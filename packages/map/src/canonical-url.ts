@@ -1,3 +1,5 @@
+import { isIP } from "node:net";
+
 export class CanonicalUrlError extends Error {
   readonly code = "INVALID_CANONICAL_URL";
 
@@ -83,8 +85,22 @@ function rejectUnsafeHostname(hostname: string): void {
   if (lower.endsWith(".local")) {
     throw new CanonicalUrlError(".local hostnames are not allowed");
   }
-  if (isPrivateOrReservedIpv4(lower) || isPrivateOrReservedIpv6(lower)) {
-    throw new CanonicalUrlError("private or reserved IP addresses are not allowed");
+
+  const normalizedHost = normalizeIpv6Host(lower);
+  const ipVersion = isIP(normalizedHost);
+
+  if (ipVersion === 4) {
+    if (isPrivateOrReservedIpv4(normalizedHost)) {
+      throw new CanonicalUrlError("private or reserved IP addresses are not allowed");
+    }
+    return;
+  }
+
+  if (ipVersion === 6) {
+    if (isPrivateOrReservedIpv6(normalizedHost)) {
+      throw new CanonicalUrlError("private or reserved IP addresses are not allowed");
+    }
+    return;
   }
 }
 

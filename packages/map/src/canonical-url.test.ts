@@ -9,6 +9,24 @@ describe("canonical URL validation", () => {
     expect(validateAndNormalizeCanonicalUrl("https://example.com")).toBe("https://example.com");
   });
 
+  it("accepts ordinary DNS hostnames without misclassifying them as IPv6", () => {
+    for (const url of [
+      "https://example.com",
+      "https://www.example.com",
+      "https://staging.example.com",
+      "https://z.example.com",
+      "https://staging-e2e-123.example.com",
+    ]) {
+      expect(validateAndNormalizeCanonicalUrl(url)).toBe(url);
+    }
+  });
+
+  it("accepts a public IPv6 literal", () => {
+    expect(validateAndNormalizeCanonicalUrl("https://[2001:4860:4860::8888]")).toBe(
+      "https://[2001:4860:4860::8888]",
+    );
+  });
+
   it("rejects non-https schemes", () => {
     expect(() => validateAndNormalizeCanonicalUrl("http://example.com")).toThrow(CanonicalUrlError);
   });
@@ -30,13 +48,17 @@ describe("canonical URL validation", () => {
   it("rejects localhost, .local, and private addresses", () => {
     for (const url of [
       "https://localhost",
+      "https://foo.localhost",
       "https://app.local",
       "https://127.0.0.1",
       "https://10.0.0.1",
+      "https://172.16.0.1",
       "https://192.168.1.1",
+      "https://169.254.1.1",
       "https://[::1]",
       "https://[fc00::1]",
-      "https://[fdff:ffff::1]",
+      "https://[fd00::1]",
+      "https://[fe80::1]",
     ]) {
       expect(() => validateAndNormalizeCanonicalUrl(url)).toThrow(CanonicalUrlError);
     }
