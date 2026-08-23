@@ -188,5 +188,10 @@ describe("documentation sanity", () => {
     const policy = readFileSync(join(root, "docs/distribution-map.md"), "utf8");
     expect(policy).toContain("distribution-map-api.md");
     expect(policy).toContain("distribution-map-threat-model.md");
+
+    expect(api).toMatch(/SITE_TOKEN_GENERATED_BY.*CLI/i);
+    expect(api).toMatch(/IDEMPOTENCY_REPLAY_RETURNS_RAW_TOKEN.*NO/i);
+    expect(api).toMatch(/UNREGISTER_REVOKES_SITE_TOKEN.*YES/i);
+    expect(api).toMatch(/TOKEN_ROTATION_V1.*DEFERRED/i);
   });
 });

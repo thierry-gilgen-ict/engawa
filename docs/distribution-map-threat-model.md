@@ -24,44 +24,44 @@ Three distinct zones:
 
 ## Threat matrix
 
-| Threat                               | Mitigation                                                        |
-| ------------------------------------ | ----------------------------------------------------------------- |
-| Silent telemetry                     | No runtime integration; opt-in only; `PHONE_HOME = NO`            |
-| Accidental registration              | Explicit `engawa-map register` + confirmation default NO          |
-| CI accidental consent                | Dedicated registration job only; `--yes` required without TTY     |
-| Credential leak in git               | Local secret file + env only; `TOKEN_IN_COMMITTED_CONFIG = NO`    |
-| Token leak in logs                   | Redaction; never log raw bearer tokens                            |
-| Token theft                          | Site-scoped bearer; rotation and revocation                       |
-| UUID guessing                        | `SITE_ID_IS_AUTH = NO`                                            |
-| Cross-site modification              | Authorization by site-scoped token only                           |
-| Domain squatting                     | `PENDING` first; manual approval v1; future verification          |
-| Duplicate registration               | `ONE_NON_DELISTED_RECORD_PER_ORIGIN`; `409` without metadata leak |
-| Registry SSRF on register            | `REGISTER_REQUEST_REMOTE_FETCH = NO`                              |
-| Future verification SSRF             | Separate reviewed security phase                                  |
-| Malicious canonical URL              | Strict parser; no remote fetch at register                        |
-| Malicious display name               | Terminal output sanitization; no raw control sequences            |
-| Malicious registry response          | Strict response schema; bounded body; no code execution           |
-| API redirect token theft             | `API_REDIRECT_FOLLOWING = NO`                                     |
-| MITM                                 | HTTPS only for production; loopback HTTP only in dev mode         |
-| Registry outage                      | No runtime dependency; fail-open for sites                        |
-| Request replay                       | Bearer auth; idempotency semantics for register                   |
-| Brute force token guessing           | >= 256-bit cryptographic random tokens                            |
-| Database leak                        | `TOKEN_SERVER_STORAGE = HASH_ONLY`                                |
-| Abuse / spam                         | Rate limits + moderation; short-lived abuse logs not product data |
-| Data overcollection                  | Exact minimal schema; `UNKNOWN_REQUEST_FIELDS = REJECT`           |
-| Arbitrary application code execution | `ENGAWA_MAP_EXECUTES_APPLICATION_CODE = NO`                       |
-| Secret discovery via `.env`          | `DOTENV_SCAN = NO`                                                |
-| Supply-chain surprise                | Optional standalone `@thierry-gilgen-ict/engawa-map` package only |
-| Visitor tracking                     | `VISITOR_TRACKING = NO`                                           |
-| MCP tracking                         | `MCP_TRACKING = NO`                                               |
-| BYA forwarding                       | `BYA_FORWARDING = NO`                                             |
-| Token in shell history               | `TOKEN_IN_CLI_ARGUMENT = FORBIDDEN`                               |
-| Config file implies consent          | `CONFIG_FILE_PRESENCE_REGISTERS = NO`                             |
-| Version range fabrication            | `VERSION_RANGE_FABRICATION = NO`                                  |
-| Dry-run trust gap                    | `DRY_RUN_EXACT_PAYLOAD = YES` shared serializer                   |
-| CI hitting live registry             | `ENGAWA_CI_REGISTRY_NETWORK = NO`                                 |
-| Hints as telemetry                   | `OPTIONAL_HINTS_ARE_NOT_TELEMETRY = YES`                          |
-| engawa-map in public listing         | `ENGAWA_MAP_VERSION_PUBLIC = NO`                                  |
+| Threat                               | Mitigation                                                                                       |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| Silent telemetry                     | No runtime integration; opt-in only; `PHONE_HOME = NO`                                           |
+| Accidental registration              | Explicit `engawa-map register` + confirmation default NO                                         |
+| CI accidental consent                | Dedicated registration job only; `--yes` required without TTY                                    |
+| Credential leak in git               | Local secret file + env only; `TOKEN_IN_COMMITTED_CONFIG = NO`                                   |
+| Token leak in logs                   | Redaction; never log raw bearer tokens                                                           |
+| Token theft                          | Site-scoped bearer; v1 revocation via unregister/maintainer; `TOKEN_ROTATION_V1 = DEFERRED`      |
+| UUID guessing                        | `SITE_ID_IS_AUTH = NO`                                                                           |
+| Cross-site modification              | Authorization by site-scoped token only                                                          |
+| Domain squatting                     | `PENDING` first; manual approval v1; future verification                                         |
+| Duplicate registration               | `ONE_NON_DELISTED_RECORD_PER_ORIGIN`; `409` without metadata leak                                |
+| Registry SSRF on register            | `REGISTER_REQUEST_REMOTE_FETCH = NO`                                                             |
+| Future verification SSRF             | Separate reviewed security phase                                                                 |
+| Malicious canonical URL              | Strict parser; no remote fetch at register                                                       |
+| Malicious display name               | Terminal output sanitization; no raw control sequences                                           |
+| Malicious registry response          | Strict response schema; bounded body; no code execution                                          |
+| API redirect token theft             | `API_REDIRECT_FOLLOWING = NO`                                                                    |
+| MITM                                 | HTTPS only for production; loopback HTTP only in dev mode                                        |
+| Registry outage                      | No runtime dependency; fail-open for sites                                                       |
+| Request replay                       | Bearer auth; client-generated token; idempotency with client-side persistence                    |
+| Brute force token guessing           | >= 256-bit cryptographic random tokens                                                           |
+| Database leak                        | `TOKEN_SERVER_STORAGE = HASH_ONLY`                                                               |
+| Abuse / spam                         | Rate limits + moderation; short-lived abuse logs not product data                                |
+| Data overcollection                  | Exact minimal schema; `UNKNOWN_REQUEST_FIELDS = REJECT`                                          |
+| Arbitrary application code execution | `ENGAWA_MAP_EXECUTES_APPLICATION_CODE = NO`                                                      |
+| Secret discovery via `.env`          | `DOTENV_SCAN = NO`                                                                               |
+| Supply-chain surprise                | Optional standalone `@thierry-gilgen-ict/engawa-map` package only                                |
+| Visitor tracking                     | `VISITOR_TRACKING = NO`                                                                          |
+| MCP tracking                         | `MCP_TRACKING = NO`                                                                              |
+| BYA forwarding                       | `BYA_FORWARDING = NO`                                                                            |
+| Token in shell history               | `TOKEN_IN_CLI_ARGUMENT = FORBIDDEN`                                                              |
+| Config file implies consent          | `CONFIG_FILE_PRESENCE_REGISTERS = NO`                                                            |
+| Version range fabrication            | `VERSION_RANGE_FABRICATION = NO`                                                                 |
+| Lost registration response           | Client persists token + idempotency key before POST; `IDEMPOTENCY_REPLAY_RETURNS_RAW_TOKEN = NO` |
+| CI hitting live registry             | `ENGAWA_CI_REGISTRY_NETWORK = NO`                                                                |
+| Hints as telemetry                   | `OPTIONAL_HINTS_ARE_NOT_TELEMETRY = YES`                                                         |
+| engawa-map in public listing         | `ENGAWA_MAP_VERSION_PUBLIC = NO`                                                                 |
 
 ## Malicious registry response
 
@@ -139,7 +139,9 @@ Honest limitations:
 - **Dedicated CI job misconfiguration** — `--yes` in wrong pipeline could register unintentionally
 - **Maintainer admin compromise** — separate admin auth reduces blast radius but does not eliminate it
 - **Rate limits** — edge limits reduce abuse but do not prevent all spam
+- **No self-service token rotation in v1** — `TOKEN_ROTATION_V1 = DEFERRED`; stolen token remains valid until unregister or maintainer revocation
 - **Windows secret file permissions** — ACL model differs from POSIX `0600`
+- **Dry-run trust gap** — mitigated by `DRY_RUN_EXACT_PAYLOAD = YES` shared serializer
 
 ## Related
 
