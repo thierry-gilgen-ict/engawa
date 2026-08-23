@@ -59,7 +59,7 @@ Before enabling public MCP and machine markdown on a production domain:
 
 ## Distribution Map (opt-in only)
 
-The [Distribution Map](distribution-map.md) is a **planned optional showcase** — not telemetry, not `engawa-analytics`, and not part of Engawa runtime.
+The [Distribution Map](distribution-map.md) is an **optional showcase** — not telemetry, not `engawa-analytics`, and not part of Engawa runtime. CLI and staging registry are implemented; production not deployed.
 
 Current published Engawa packages:
 

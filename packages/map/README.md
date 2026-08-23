@@ -2,14 +2,14 @@
 
 Optional CLI client for the [Engawa Distribution Map](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/distribution-map.md). This package is **registry-client tooling only** — it does not run in website runtime, MCP, or React.
 
-**Status:** Implemented in this monorepo (DM1 CLI client). Not published to npm yet. No registry backend ships with this package.
+**Status:** Implemented in this monorepo. Not published to npm. Registry is a separate service ([engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry)); staging is live.
 
 ## Requirements
 
 - Node.js 24+
-- A future registry endpoint via `ENGAWA_MAP_ENDPOINT` (host to be announced)
+- `ENGAWA_MAP_ENDPOINT` — required today. Staging: `https://staging-engawa-map.thierry-gilgen-ict.ch`. Production default after DM3B/DM3D: `https://engawa-map.thierry-gilgen-ict.ch`
 
-## Install (monorepo / future npm)
+## Install (monorepo; npm after DM3D)
 
 ```bash
 pnpm add -D @thierry-gilgen-ict/engawa-map
@@ -59,3 +59,4 @@ engawa-map unregister
 
 - [Distribution Map policy](../../docs/distribution-map.md)
 - [API contract](../../docs/distribution-map-api.md)
+- [DM3A production launch contract](../../docs/distribution-map-production-launch.md)

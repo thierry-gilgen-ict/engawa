@@ -28,6 +28,21 @@
 - Package metadata `engines.node >=24` published as `@thierry-gilgen-ict/engawa-core@0.1.1`, `@thierry-gilgen-ict/engawa-discovery@0.1.1`, `@thierry-gilgen-ict/engawa-mcp@0.1.1`
 - `@thierry-gilgen-ict/engawa-react` remains at **0.1.0**
 
+## Completed — Distribution Map staging (DM2B)
+
+- `@thierry-gilgen-ict/engawa-map` CLI in monorepo (register / status / unregister)
+- Dedicated registry service ([engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry))
+- Live staging at `https://staging-engawa-map.thierry-gilgen-ict.ch` — DM2B acceptance PASS
+- Canonical URL hostname validation hotfix (PR #18)
+- **Not** published to npm; production registry not deployed
+
+## Future — Distribution Map production (DM3)
+
+- [DM3A](distribution-map-production-launch.md) — production launch contract (design)
+- DM3B — public showcase, production deploy artifacts, CLI default endpoint
+- DM3C — production deploy and live acceptance
+- DM3D — npm publish `@thierry-gilgen-ict/engawa-map@0.1.0`
+
 ## Future — Authenticated capabilities (not started)
 
 - OAuth and authenticated MCP tools
@@ -52,5 +67,5 @@
 | `engawa-react`     | 0.1.0                             | engines already present                                                                                                                                                                                              |
 | `engawa-nextjs`    | Not shipped                       | Document pattern only                                                                                                                                                                                                |
 | `engawa-cli`       | Planned                           |                                                                                                                                                                                                                      |
-| `engawa-map`       | IMPLEMENTED_IN_REPO NOT_PUBLISHED | Optional explicit-registration CLI for the public Distribution Map; no runtime telemetry; registry backend separate future work; [API/threat contract](distribution-map-api.md) implemented in DM1 (CLI client only) |
+| `engawa-map`       | IMPLEMENTED_IN_REPO NOT_PUBLISHED | CLI + staging registry live (DM2B PASS); production not deployed; [DM3A contract](distribution-map-production-launch.md) |
 | `engawa-analytics` | Planned                           | Separate from Distribution Map                                                                                                                                                                                       |
