@@ -19,6 +19,16 @@ All notable changes to Engawa are documented here. Versions follow [Semantic Ver
 
 No runtime API changes in this patch.
 
+### UPGRADE_IMPACT
+
+```text
+BREAKING_CHANGE = NO
+MIGRATION_REQUIRED = NO
+MIN_NODE = 24
+PACKAGE_SET = core@0.1.1, discovery@0.1.1, mcp@0.1.1, react@0.1.0
+MIGRATION_GUIDE = NONE
+```
+
 ### Source baseline (package-specific tags)
 
 Release source SHA: `cec86afd56e446b6d84fb124edaf08fa1185a0c8`
@@ -66,4 +76,4 @@ Release source SHA: `cec86afd56e446b6d84fb124edaf08fa1185a0c8`
 
 Do **not** move tag `v0.1.0`. Future releases use new semver tags (see [docs/releasing.md](docs/releasing.md)).
 
-[0.1.1]: https://github.com/thierry-gilgen-ict/engawa/compare/engawa-core-v0.1.0...engawa-core-v0.1.1
+[0.1.1]: https://github.com/thierry-gilgen-ict/engawa/compare/v0.1.0...engawa-core-v0.1.1

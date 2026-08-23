@@ -2,23 +2,43 @@
 
 Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 
-## Start here
+## Choose your path
 
-- [Getting started](getting-started.md) — external project, step-by-step
+### For humans — add Engawa to an existing site
+
+- [Integrating an existing site](integrating-an-existing-site.md) — primary workflow for live websites
+- [Integration acceptance contract](integration-acceptance.md) — done-when checklist
+- [Content publication rule](content-publication.md) — `HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE`
+- [Getting started](getting-started.md) — empty external project quick start
+
+### For coding agents
+
+- [Agent integration playbook](agent-integration-playbook.md) — deterministic integration sequence
+- [Ready-to-copy integrate prompt](prompts/integrate-engawa.md)
+- [AGENTS.md](../AGENTS.md) — repository orientation
+
+### For existing Engawa installations — upgrade
+
+- [Upgrading](upgrading.md) — safe consumer upgrade path
+- [Compatibility matrix](compatibility.md) — tested package sets
+- [Migration guides](migrations/README.md) — when `MIGRATION_REQUIRED = YES`
+- [Ready-to-copy upgrade prompt](prompts/upgrade-engawa.md)
+
+## Integration guides
+
 - [Next.js integration](integrations/nextjs.md) — route handlers, host responsibilities
 - [Production references](production-references.md) — live sites
-- [Content publication rule](content-publication.md) — human-public corpus parity
-- [Security model](security-model.md)
-- [Releasing](releasing.md)
+- [Consuming from npm](integration-consuming-from-npm.md) — install pins
+- [Consuming from git (development)](integration-consuming-from-git.md)
 
 ## Reference
 
 - [Vision](vision.md)
 - [Architecture](architecture.md)
 - [Implementation profile v0.1](implementation-profile-v0.1.md)
+- [Security model](security-model.md)
 - [Roadmap](roadmap.md)
-- [Consuming from npm](integration-consuming-from-npm.md)
-- [Consuming from git (development)](integration-consuming-from-git.md)
+- [Releasing](releasing.md) — maintainer npm publish
 - [Provider capability matrix](providers/provider-capability-matrix.md)
 - [Launch kit (internal)](launch/launch-kit.md)
 - [Architecture decision records](adr/)

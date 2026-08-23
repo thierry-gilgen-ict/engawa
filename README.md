@@ -182,17 +182,32 @@ pnpm --filter minimal-site start
 
 Example endpoints: `http://127.0.0.1:3847/llms.txt`, `http://127.0.0.1:3847/mcp`. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Choose your path
+
+| You are…                                             | Start here                                                                                                               |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| A developer adding Engawa to an **existing website** | [Integrating an existing site](docs/integrating-an-existing-site.md)                                                     |
+| Using a **coding agent** to integrate Engawa         | [Agent integration playbook](docs/agent-integration-playbook.md) · [copy-paste prompt](docs/prompts/integrate-engawa.md) |
+| **Upgrading** an existing Engawa integration         | [Upgrading](docs/upgrading.md) · [Compatibility](docs/compatibility.md)                                                  |
+| Starting from an **empty project**                   | [Getting started](docs/getting-started.md)                                                                               |
+| Working **in this monorepo**                         | [AGENTS.md](AGENTS.md) · [CONTRIBUTING.md](CONTRIBUTING.md)                                                              |
+
 ## Documentation
 
-| Doc                                                    | Topic                                     |
-| ------------------------------------------------------ | ----------------------------------------- |
-| [Getting started](docs/getting-started.md)             | External project, step-by-step            |
-| [Next.js integration](docs/integrations/nextjs.md)     | Route handlers, host app responsibilities |
-| [Production references](docs/production-references.md) | Live sites and portability evidence       |
-| [Content publication](docs/content-publication.md)     | Human-public corpus rule                  |
-| [Security model](docs/security-model.md)               | Threat model and launch checklist         |
-| [Roadmap](docs/roadmap.md)                             | What's done and what's deferred           |
-| [Releasing](docs/releasing.md)                         | npm publish process                       |
+| Doc                                                                  | Topic                                     |
+| -------------------------------------------------------------------- | ----------------------------------------- |
+| [Integrating an existing site](docs/integrating-an-existing-site.md) | Add Engawa to a live website              |
+| [Agent integration playbook](docs/agent-integration-playbook.md)     | Coding-agent integration sequence         |
+| [Integration acceptance](docs/integration-acceptance.md)             | Done-when checklist                       |
+| [Upgrading](docs/upgrading.md)                                       | Safe consumer upgrades                    |
+| [Compatibility](docs/compatibility.md)                               | Tested package sets                       |
+| [Getting started](docs/getting-started.md)                           | Empty external project quick start        |
+| [Next.js integration](docs/integrations/nextjs.md)                   | Route handlers, host app responsibilities |
+| [Production references](docs/production-references.md)               | Live sites and portability evidence       |
+| [Content publication](docs/content-publication.md)                   | Human-public corpus rule                  |
+| [Security model](docs/security-model.md)                             | Threat model and launch checklist         |
+| [Roadmap](docs/roadmap.md)                                           | What's done and what's deferred           |
+| [Releasing](docs/releasing.md)                                       | Maintainer npm publish process            |
 
 ## Contributing
 

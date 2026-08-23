@@ -59,6 +59,20 @@ Reference sites (Next.js) keep host-specific route handlers, guards, and rate li
 - Do not republish existing npm versions.
 - See [docs/releasing.md](docs/releasing.md) for maintainer publish flow.
 
+### CHANGELOG UPGRADE_IMPACT
+
+User-facing releases should include an `UPGRADE_IMPACT` block (see [docs/upgrading.md](docs/upgrading.md)):
+
+```text
+BREAKING_CHANGE = YES / NO
+MIGRATION_REQUIRED = YES / NO
+MIN_NODE = <version>
+PACKAGE_SET = <tested together>
+MIGRATION_GUIDE = <path or NONE>
+```
+
+When `MIGRATION_REQUIRED = YES`, add `docs/migrations/<from>-to-<to>.md` per [docs/migrations/README.md](docs/migrations/README.md).
+
 ## Pull requests
 
 - Open PRs against `main`.

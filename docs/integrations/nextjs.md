@@ -136,8 +136,14 @@ Never send prompt text, copied context, MCP query strings, or contact form conte
 
 - Pin Engawa package versions in `package.json`; `npm ci` in CI.
 - Node **24+** in Docker and CI.
-- Run site test suite after Engawa upgrades.
+- Run site test suite after Engawa upgrades (see [upgrading.md](../upgrading.md)).
+- Run [integration acceptance](../integration-acceptance.md) on staging before production.
 - MCP and llms.txt are public—treat them as part of your attack surface (guards + rate limits).
+
+## Related
+
+- [Integrating an existing site](../integrating-an-existing-site.md)
+- [Integration acceptance contract](../integration-acceptance.md)
 
 See [production-references.md](../production-references.md) for live URLs.
 

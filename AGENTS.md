@@ -1,0 +1,51 @@
+# AGENTS.md
+
+Orientation for coding agents working in or with the Engawa repository.
+
+## What Engawa is
+
+Open toolkit for **agent-native websites**: human HTML plus structured agent surfaces (`llms.txt`, markdown alternates, read-only MCP, optional Bring Your Agent UI).
+
+## Current published packages (npm)
+
+| Package                                | Version |
+| -------------------------------------- | ------- |
+| `@thierry-gilgen-ict/engawa-core`      | 0.1.1   |
+| `@thierry-gilgen-ict/engawa-discovery` | 0.1.1   |
+| `@thierry-gilgen-ict/engawa-mcp`       | 0.1.1   |
+| `@thierry-gilgen-ict/engawa-react`     | 0.1.0   |
+
+**Node.js 24+** required (`engines` in package manifests).
+
+Package versions may diverge by design. See [docs/compatibility.md](docs/compatibility.md).
+
+## Defaults and invariants
+
+- Public Engawa is **read-only** by default (v0.1: `search_site` only on public MCP).
+- **Generic MCP** is the canonical fallback for provider UX—not fake one-click connects.
+- **Content parity:** `HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE` ([content publication rule](docs/content-publication.md)).
+- No `engawa-nextjs` package in v0.1—document patterns in `docs/integrations/`.
+- Do not expose secrets, sessions, drafts, or admin-only corpus on public surfaces.
+
+## Integrating Engawa into another website
+
+Start here (external consumer repos):
+
+1. [Agent integration playbook](docs/agent-integration-playbook.md)
+2. [Integrating an existing site](docs/integrating-an-existing-site.md)
+3. [Ready-to-copy integrate prompt](docs/prompts/integrate-engawa.md)
+4. [Integration acceptance contract](docs/integration-acceptance.md)
+
+## Upgrading an existing Engawa integration
+
+- [Upgrading guide](docs/upgrading.md)
+- [Compatibility matrix](docs/compatibility.md)
+- [Upgrade prompt](docs/prompts/upgrade-engawa.md)
+
+## Working in this monorepo
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — setup, tests, PR expectations
+- [docs/security-model.md](docs/security-model.md)
+- [docs/releasing.md](docs/releasing.md) — maintainer npm publish (not consumer upgrades)
+
+Do not duplicate full guides in this file—follow the links above.

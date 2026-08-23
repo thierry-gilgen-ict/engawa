@@ -27,9 +27,9 @@ Packages ship prebuilt `dist/` output. No git submodule or local Engawa checkout
 
 ## Upgrading
 
-1. Bump the pinned versions in `package.json` (or lockfile) to a newer Engawa release.
-2. Run `npm ci` and your site's test suite.
-3. Record the Engawa version in your integration documentation.
+See [upgrading.md](upgrading.md) for the full consumer upgrade path, acceptance checks, and rollback.
+
+Do not use floating version ranges for production reference-style deployments—pin exact versions and use `npm ci`.
 
 ## Alternative: git submodule (development only)
 
