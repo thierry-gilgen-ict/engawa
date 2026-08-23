@@ -38,6 +38,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 - [Architecture](architecture.md)
 - [Implementation profile v0.1](implementation-profile-v0.1.md)
 - [Security model](security-model.md)
+- [Distribution Map](distribution-map.md) — optional showcase; opt-in policy
 - [Distribution Map production launch (DM3A)](distribution-map-production-launch.md)
 - [Distribution Map API contract](distribution-map-api.md) — frozen v1 registry/CLI contract (DM1A)
 - [Distribution Map threat model](distribution-map-threat-model.md) — CLI and registry threats (DM1A)
