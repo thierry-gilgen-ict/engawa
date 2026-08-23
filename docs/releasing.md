@@ -174,15 +174,16 @@ After maintainer publishes interactively, **Phase 2B is not CLOSED** until a sep
 4. Update README status line to reflect published `0.1.1`.
 5. Update CI external consumer smoke to `node scripts/external-consumer-smoke.mjs 0.1.1`.
 
-Until that closeout merge, public documentation correctly targets the **currently published** registry versions (`0.1.0` until `0.1.1` is live and docs are updated).
+Until that closeout merge, public documentation correctly targets the **currently published** registry versions.
 
 ## CI policy
 
 - PR CI does **not** publish to npm.
-- PR CI runs external consumer smoke against **currently published** registry versions (`0.1.0` until post-publish closeout).
+- PR CI runs external consumer smoke against **currently published** registry versions (`0.1.1` for core/discovery/mcp; react pinned to `0.1.0` in smoke script).
 - PR CI runs v0.1.1 release-candidate smoke against local staged tarballs (`scripts/v011-release-candidate-smoke.mjs`).
 
 ## Related
 
 - [integration-consuming-from-npm.md](integration-consuming-from-npm.md)
 - [publish-npm-v0.1.0.md](publish-npm-v0.1.0.md) — v0.1.0 publication record
+- [publish-npm-v0.1.1.md](publish-npm-v0.1.1.md) — v0.1.1 publication record

@@ -11,7 +11,7 @@ Always, for any Engawa integration. Other Engawa packages depend on it.
 ## Install
 
 ```bash
-npm install @thierry-gilgen-ict/engawa-core@0.1.0
+npm install @thierry-gilgen-ict/engawa-core@0.1.1
 ```
 
 Requires **Node.js 24+** (package `engines` enforced in 0.1.1+).
@@ -34,7 +34,7 @@ const config = validateEngawaConfig({
   },
   agentInterface: { enabled: true, public: true },
   security: { publicDefault: "read-only" },
-  metadata: { version: "0.1.0" },
+  metadata: { version: "0.1.1" },
 });
 
 const adapter = new StaticContentAdapter(config.site.canonicalUrl, [

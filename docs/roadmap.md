@@ -19,13 +19,14 @@
 - Content publication parity rule documented (`HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE`)
 - No Engawa core changes; no `engawa-nextjs` extraction
 
-## In progress — Open-source launch & DX (Phase 2B)
+## Completed — Open-source launch & DX (Phase 2B)
 
 - README and getting-started for external developers
 - Next.js integration guide (documentation only)
 - Production references doc, CHANGELOG, releasing guide
 - External npm consumer smoke in CI
-- Package metadata `engines.node >=24` (v0.1.1 patch for core/discovery/mcp)
+- Package metadata `engines.node >=24` published as `@thierry-gilgen-ict/engawa-core@0.1.1`, `@thierry-gilgen-ict/engawa-discovery@0.1.1`, `@thierry-gilgen-ict/engawa-mcp@0.1.1`
+- `@thierry-gilgen-ict/engawa-react` remains at **0.1.0**
 
 ## Future — Authenticated capabilities (not started)
 
@@ -43,12 +44,12 @@
 
 ## Package status
 
-| Package            | npm status         | Notes                     |
-| ------------------ | ------------------ | ------------------------- |
-| `engawa-core`      | 0.1.0 → 0.1.1 prep | engines metadata in 0.1.1 |
-| `engawa-discovery` | 0.1.0 → 0.1.1 prep | depends on core           |
-| `engawa-mcp`       | 0.1.0 → 0.1.1 prep | depends on core           |
-| `engawa-react`     | 0.1.0              | engines already present   |
-| `engawa-nextjs`    | Not shipped        | Document pattern only     |
-| `engawa-cli`       | Planned            |                           |
-| `engawa-analytics` | Planned            |                           |
+| Package            | npm status  | Notes                     |
+| ------------------ | ----------- | ------------------------- |
+| `engawa-core`      | 0.1.1       | engines metadata in 0.1.1 |
+| `engawa-discovery` | 0.1.1       | depends on core 0.1.1     |
+| `engawa-mcp`       | 0.1.1       | depends on core 0.1.1     |
+| `engawa-react`     | 0.1.0       | engines already present   |
+| `engawa-nextjs`    | Not shipped | Document pattern only     |
+| `engawa-cli`       | Planned     |                           |
+| `engawa-analytics` | Planned     |                           |

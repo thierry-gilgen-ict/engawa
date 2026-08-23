@@ -15,7 +15,7 @@ You hand-author discovery files with no Engawa resource model (unusual).
 ## Install
 
 ```bash
-npm install @thierry-gilgen-ict/engawa-discovery@0.1.0
+npm install @thierry-gilgen-ict/engawa-discovery@0.1.1
 ```
 
 Requires **Node.js 24+** (with engawa-core 0.1.1+). Depends on `@thierry-gilgen-ict/engawa-core`.
