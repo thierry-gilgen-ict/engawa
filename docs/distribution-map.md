@@ -167,12 +167,15 @@ Committed `engawa-map.config.json` may contain non-secret `siteId` only. **Never
 
 ### Server storage (future)
 
-- Store `site_id` + `token_hash`
+- Store `site_id` + `token_hash` only (`SITE_TOKEN_RAW_SERVER_STORAGE = NO`)
 - `PLAINTEXT_EDIT_TOKEN_STORED_SERVER_SIDE = NO`
+- `SITE_TOKEN_GENERATED_BY` = CLI — raw token never returned by server (`SITE_TOKEN_RAW_RETURNED_BY_SERVER = NO`)
+- Bootstrap verifier via `Engawa-Map-Site-Token-Hash` header (`TOKEN_HASH_IS_AUTHENTICATION = NO`)
 - `SITE_SCOPED_TOKEN = YES`
 - `GLOBAL_SITE_EDIT_TOKEN = NO`
-- `TOKEN_ROTATABLE = YES`
-- `TOKEN_REVOCABLE = YES`
+- `TOKEN_REVOCABLE_V1 = YES` — unregister or maintainer-assisted revocation
+- `TOKEN_ROTATION_V1 = DEFERRED` — `TOKEN_ROTATABLE_FUTURE = YES`
+- `UNREGISTER_REVOKES_SITE_TOKEN = YES` — `DELISTED_TOKEN_REMAINS_ACTIVE = NO`
 - `SITE_ID_IS_AUTHENTICATION = NO` — the registry must not rely on UUID secrecy
 
 ### CLI authentication (future)
@@ -206,13 +209,13 @@ If a browser-based dashboard is added later, its authentication model requires a
 
 The initial registration endpoint must require:
 
-| Control              | Required                            |
-| -------------------- | ----------------------------------- |
-| `HTTPS_ONLY`         | YES                                 |
-| `STRICT_JSON_SCHEMA` | YES                                 |
-| `SMALL_BODY_LIMIT`   | YES (recommended ~8–16 KB eventual) |
-| `RATE_LIMIT`         | YES                                 |
-| Unknown fields       | Rejected or ignored safely          |
+| Control              | Required                                   |
+| -------------------- | ------------------------------------------ |
+| `HTTPS_ONLY`         | YES                                        |
+| `STRICT_JSON_SCHEMA` | YES                                        |
+| `SMALL_BODY_LIMIT`   | YES (recommended ~8–16 KB eventual)        |
+| `RATE_LIMIT`         | YES                                        |
+| Unknown fields       | REJECT (`UNKNOWN_REQUEST_FIELDS = REJECT`) |
 
 Eventual `canonicalUrl` rules:
 
@@ -283,8 +286,31 @@ The future registry backend must publish its own privacy notice before productio
 
 Topics to cover in that notice: deliberate operator opt-in, exact public payload, public listing purpose, delisting mechanism, retention, and contact/removal path.
 
+## DM1A contract (frozen for implementation)
+
+DM0 policy remains authoritative. DM1A tightens the future CLI and registry API without implementing them:
+
+| Rule                                           | Value    |
+| ---------------------------------------------- | -------- |
+| `UNKNOWN_REQUEST_FIELDS`                       | REJECT   |
+| `UNKNOWN_RESPONSE_FIELDS`                      | REJECT   |
+| `ENGAWA_MAP_EXECUTES_APPLICATION_CODE`         | NO       |
+| `API_REDIRECT_FOLLOWING`                       | NO       |
+| `IDEMPOTENCY_REQUIRED_FOR_REGISTER`            | YES      |
+| `SITE_TOKEN_GENERATED_BY`                      | CLI      |
+| `IDEMPOTENCY_REPLAY_RETURNS_RAW_TOKEN`         | NO       |
+| `TOKEN_ROTATION_V1`                            | DEFERRED |
+| `UNREGISTER_REVOKES_SITE_TOKEN`                | YES      |
+| `CANONICAL_URL_CHANGE_REQUIRES_REAPPROVAL`     | YES      |
+| `ONE_NON_DELISTED_RECORD_PER_CANONICAL_ORIGIN` | YES      |
+| `ENGAWA_CI_REGISTRY_NETWORK`                   | NO       |
+
+Full contract: [distribution-map-api.md](distribution-map-api.md). Threat model: [distribution-map-threat-model.md](distribution-map-threat-model.md).
+
 ## Related
 
+- [API and CLI contract (v1)](distribution-map-api.md) — frozen endpoints, schema, CLI behavior
+- [Threat model](distribution-map-threat-model.md) — registry and CLI threats
 - [Security model](security-model.md) — runtime boundaries and Distribution Map subsection
 - [Roadmap](roadmap.md) — `@thierry-gilgen-ict/engawa-map` PLANNED; registry backend separate future work
 - [Agent integration playbook](agent-integration-playbook.md) — agents must not register without explicit user request

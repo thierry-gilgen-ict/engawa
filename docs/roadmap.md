@@ -44,13 +44,13 @@
 
 ## Package status
 
-| Package            | npm status  | Notes                                                                                                                           |
-| ------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `engawa-core`      | 0.1.1       | engines metadata in 0.1.1                                                                                                       |
-| `engawa-discovery` | 0.1.1       | depends on core 0.1.1                                                                                                           |
-| `engawa-mcp`       | 0.1.1       | depends on core 0.1.1                                                                                                           |
-| `engawa-react`     | 0.1.0       | engines already present                                                                                                         |
-| `engawa-nextjs`    | Not shipped | Document pattern only                                                                                                           |
-| `engawa-cli`       | Planned     |                                                                                                                                 |
-| `engawa-map`       | Planned     | Optional explicit-registration CLI for the public Distribution Map; no runtime telemetry; registry backend separate future work |
-| `engawa-analytics` | Planned     | Separate from Distribution Map                                                                                                  |
+| Package            | npm status  | Notes                                                                                                                                                                                                          |
+| ------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `engawa-core`      | 0.1.1       | engines metadata in 0.1.1                                                                                                                                                                                      |
+| `engawa-discovery` | 0.1.1       | depends on core 0.1.1                                                                                                                                                                                          |
+| `engawa-mcp`       | 0.1.1       | depends on core 0.1.1                                                                                                                                                                                          |
+| `engawa-react`     | 0.1.0       | engines already present                                                                                                                                                                                        |
+| `engawa-nextjs`    | Not shipped | Document pattern only                                                                                                                                                                                          |
+| `engawa-cli`       | Planned     |                                                                                                                                                                                                                |
+| `engawa-map`       | Planned     | Optional explicit-registration CLI for the public Distribution Map; no runtime telemetry; registry backend separate future work; [API/threat contract](distribution-map-api.md) frozen in DM1A (pending merge) |
+| `engawa-analytics` | Planned     | Separate from Distribution Map                                                                                                                                                                                 |
