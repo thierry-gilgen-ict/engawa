@@ -9,7 +9,7 @@
 ## Phase 1 — Integration and UX
 
 - Production site integration (first consumer)
-- Ask Your Agent React UI
+- Ask Your Agent React UI — **in progress (engawa-react v0.1.0)**
 - Framework adapters (e.g. Next.js)
 - Markdown alternate helpers for HTML pages
 - Optional filesystem adapter with strict sandboxing
@@ -38,7 +38,7 @@
 | `engawa-core`      | v0.1    |
 | `engawa-discovery` | v0.1    |
 | `engawa-mcp`       | v0.1    |
-| `engawa-react`     | Planned |
+| `engawa-react`     | v0.1 (in progress) |
 | `engawa-nextjs`    | Planned |
 | `engawa-cli`       | Planned |
 | `engawa-analytics` | Planned |

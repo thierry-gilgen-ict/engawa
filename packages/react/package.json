@@ -1,0 +1,44 @@
+{
+  "name": "@thierry-gilgen-ict/engawa-react",
+  "version": "0.1.0",
+  "description": "Reusable Bring Your Agent React UX for Engawa agent-native websites",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thierry-gilgen-ict/engawa.git",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/thierry-gilgen-ict/engawa/issues"
+  },
+  "homepage": "https://github.com/thierry-gilgen-ict/engawa#readme",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config ../../vitest.config.ts packages/react"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

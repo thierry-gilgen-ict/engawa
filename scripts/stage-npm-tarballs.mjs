@@ -37,4 +37,8 @@ execSync("npm pack", { cwd: join(root, "packages/core"), stdio: "inherit" });
 stagePackage("discovery");
 stagePackage("mcp");
 
-console.log("Tarballs ready in packages/core and .npm-staging/*/");
+if (existsSync(join(root, "packages/react/dist/index.js"))) {
+  execSync("npm pack", { cwd: join(root, "packages/react"), stdio: "inherit" });
+}
+
+console.log("Tarballs ready in packages/core, packages/react and .npm-staging/*/");
