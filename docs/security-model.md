@@ -56,3 +56,23 @@ Before enabling public MCP and machine markdown on a production domain:
 - [ ] **No unauthenticated mutation** — writes belong in authenticated future surface
 - [ ] **Markdown `noindex`** — if alternates should not compete with HTML in search indexes
 - [ ] **Analytics metadata only** — BYA `onEvent`: no prompt, context, or MCP query body logging
+
+## Distribution Map (opt-in only)
+
+The [Distribution Map](distribution-map.md) is a **planned optional showcase** — not telemetry, not `engawa-analytics`, and not part of Engawa runtime.
+
+Current published Engawa packages:
+
+- Make **no** Distribution Map requests
+- Do **not** register sites from MCP tools, discovery generation, React/BYA mount, or `onEvent`
+- Do **not** require a map token at runtime (`NO_RUNTIME_MAP_TOKEN`)
+
+Registration design rules (future registry):
+
+- `REGISTRATION_IS_OUT_OF_BAND = YES` — only explicit CLI or dedicated CI registration job
+- `NO_RUNTIME_NETWORK_CALL` from normal website processes to the registry
+- `REGISTER_REQUEST_REMOTE_FETCH = NO` — registry must not fetch submitted URLs on registration
+- Dedicated registry service; external to public MCP authority
+- Registry outage must not affect site build, deploy, startup, `/mcp`, `/llms.txt`, markdown, BYA, or public HTML
+
+This does not weaken **No arbitrary outbound network from tools** — public MCP tools remain read-only and adapter-bound.

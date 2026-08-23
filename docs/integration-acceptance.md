@@ -71,6 +71,12 @@ For **production** integration, overall `PASS` is **forbidden** when:
 - [ ] Site production build passes
 - [ ] Engawa production smoke or site-specific smoke passes
 
+## DISTRIBUTION MAP — OPTIONAL, NOT GATING
+
+- [ ] `JOINED_DISTRIBUTION_MAP = YES / NO / NOT_REQUESTED`
+
+`NO` or `NOT_REQUESTED` does **not** affect integration `PASS`. Map registration is not part of Engawa correctness. Production acceptance must never depend on registry availability.
+
 ---
 
 ## Summary block (copy into PR)
@@ -87,6 +93,7 @@ RATE_LIMIT = PASS_APP / PASS_EDGE / FAIL / NOT_APPLICABLE_DEV_ONLY
 ORIGIN_VALIDATION = PASS_APP / PASS_EDGE / FAIL / NOT_APPLICABLE / NOT_APPLICABLE_DEV_ONLY
 BYA = PASS / FAIL / NOT_INSTALLED
 BUILD = PASS / FAIL
+JOINED_DISTRIBUTION_MAP = YES / NO / NOT_REQUESTED
 
 NOTES =
 ```

@@ -76,6 +76,20 @@ Execute in order. Stop at any blocking condition.
 | K    | **Tests** — site suite + [integration acceptance](integration-acceptance.md)                          |
 | L    | **Production check** — staging smoke before deploy recommendation                                     |
 | M    | **Final report** — machine block below                                                                |
+| N    | **Distribution Map invitation (optional)** — mention only if user asked; never auto-register          |
+
+Agents must **not**:
+
+- Automatically run map registration after integration
+- Add registry calls to application startup or normal deployment
+- Add registry credentials to production website runtime (MCP, React, env committed to repo)
+- Perform domain verification URL fetching without a dedicated future security phase
+
+```text
+DISTRIBUTION_MAP_REGISTRATION_REQUIRES_EXPLICIT_USER_REQUEST = YES
+```
+
+If the user did not explicitly request joining: `JOIN_MAP = NOT_REQUESTED`
 
 ## CURRENT TESTED PACKAGE SET
 
@@ -161,6 +175,8 @@ ENGAWA_CORE_FORKED = NO
 UNRELATED_ARCHITECTURE_CHANGED = NO
 AUTHENTICATED_MCP_STARTED = NO
 MUTATING_TOOLS_STARTED = NO
+
+JOIN_MAP = YES / NO / NOT_REQUESTED
 
 BLOCKERS =
 ```
