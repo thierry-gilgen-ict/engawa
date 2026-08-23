@@ -14,9 +14,9 @@ Engawa packages ship prebuilt `dist/` output. You do not need to compile Engawa 
 
 ```bash
 npm install \
-  @thierry-gilgen-ict/engawa-core@0.1.0 \
-  @thierry-gilgen-ict/engawa-discovery@0.1.0 \
-  @thierry-gilgen-ict/engawa-mcp@0.1.0
+  @thierry-gilgen-ict/engawa-core@0.1.1 \
+  @thierry-gilgen-ict/engawa-discovery@0.1.1 \
+  @thierry-gilgen-ict/engawa-mcp@0.1.1
 ```
 
 Optional React UI:
@@ -47,7 +47,7 @@ export const siteConfig = validateEngawaConfig({
     publicDefault: "read-only",
   },
   metadata: {
-    version: "0.1.0",
+    version: "0.1.1",
   },
 });
 ```

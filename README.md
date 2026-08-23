@@ -53,9 +53,9 @@ This uses **published packages** from the public npm registry—not a clone of t
 
 ```bash
 npm install \
-  @thierry-gilgen-ict/engawa-core@0.1.0 \
-  @thierry-gilgen-ict/engawa-discovery@0.1.0 \
-  @thierry-gilgen-ict/engawa-mcp@0.1.0
+  @thierry-gilgen-ict/engawa-core@0.1.1 \
+  @thierry-gilgen-ict/engawa-discovery@0.1.1 \
+  @thierry-gilgen-ict/engawa-mcp@0.1.1
 ```
 
 ```typescript
@@ -76,7 +76,7 @@ const config = validateEngawaConfig({
   },
   agentInterface: { enabled: true, public: true },
   security: { publicDefault: "read-only" },
-  metadata: { version: "0.1.0" },
+  metadata: { version: "0.1.1" },
 });
 
 const adapter = new StaticContentAdapter(config.site.canonicalUrl, [
@@ -164,7 +164,8 @@ Full model: [docs/security-model.md](docs/security-model.md).
 
 ## Status
 
-- Early **v0.x** foundation on npm (`0.1.0` today; `0.1.1` metadata patch prepared in source).
+- Current npm registry: `@thierry-gilgen-ict/engawa-core@0.1.1`, `@thierry-gilgen-ict/engawa-discovery@0.1.1`, `@thierry-gilgen-ict/engawa-mcp@0.1.1`, `@thierry-gilgen-ict/engawa-react@0.1.0`.
+- Early **v0.x** foundation on npm; packages may diverge by semver.
 - **Two production reference integrations** (see above).
 - Public read-only surface proven; authenticated and mutating capabilities **not** shipped.
 - API may change before **1.0**.

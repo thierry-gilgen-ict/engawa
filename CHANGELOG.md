@@ -2,13 +2,32 @@
 
 All notable changes to Engawa are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
-## [0.1.1] — unreleased (source prepared)
+## [0.1.1] — 2026-08-23
+
+### Packages published to npm
+
+- `@thierry-gilgen-ict/engawa-core@0.1.1`
+- `@thierry-gilgen-ict/engawa-discovery@0.1.1`
+- `@thierry-gilgen-ict/engawa-mcp@0.1.1`
+
+`@thierry-gilgen-ict/engawa-react` remains at **0.1.0** (not republished).
 
 ### engawa-core, engawa-discovery, engawa-mcp
 
 - Add `"engines": { "node": ">=24" }` to package manifests (v0.1.0 npm tarballs omitted package-level engines metadata).
+- Release packaging housekeeping (staged tarball publish path for discovery/mcp).
 
-No runtime API changes intended for this patch.
+No runtime API changes in this patch.
+
+### Source baseline (package-specific tags)
+
+Release source SHA: `cec86afd56e446b6d84fb124edaf08fa1185a0c8`
+
+| Tag                       | Points to |
+| ------------------------- | --------- |
+| `engawa-core-v0.1.1`      | `cec86af` |
+| `engawa-discovery-v0.1.1` | `cec86af` |
+| `engawa-mcp-v0.1.1`       | `cec86af` |
 
 ## [0.1.0] — 2026-08
 
@@ -47,4 +66,4 @@ No runtime API changes intended for this patch.
 
 Do **not** move tag `v0.1.0`. Future releases use new semver tags (see [docs/releasing.md](docs/releasing.md)).
 
-[0.1.1]: https://github.com/thierry-gilgen-ict/engawa/compare/v0.1.0...main
+[0.1.1]: https://github.com/thierry-gilgen-ict/engawa/compare/engawa-core-v0.1.0...engawa-core-v0.1.1
