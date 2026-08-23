@@ -46,6 +46,30 @@ describe("strict schemas reject unknown fields", () => {
     ).toThrow();
   });
 
+  it("rejects semver ranges in registration packages", () => {
+    expect(() =>
+      registrationPayloadSchema.parse({
+        displayName: "x",
+        canonicalUrl: "https://example.com",
+        packages: {
+          "@thierry-gilgen-ict/engawa-core": "^0.1.1",
+        },
+      }),
+    ).toThrow();
+  });
+
+  it("normalizes canonicalUrl in registration payload", () => {
+    expect(
+      registrationPayloadSchema.parse({
+        displayName: "x",
+        canonicalUrl: "https://Example.COM/",
+        packages: {
+          "@thierry-gilgen-ict/engawa-core": "0.1.1",
+        },
+      }).canonicalUrl,
+    ).toBe("https://example.com");
+  });
+
   it("rejects unknown response fields", () => {
     expect(() =>
       registerResponseSchema.parse({

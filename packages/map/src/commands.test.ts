@@ -11,6 +11,7 @@ const originalEndpoint = process.env.ENGAWA_MAP_ENDPOINT;
 const originalToken = process.env.ENGAWA_MAP_TOKEN;
 
 afterEach(() => {
+  vi.restoreAllMocks();
   if (originalEndpoint === undefined) {
     delete process.env.ENGAWA_MAP_ENDPOINT;
   } else {
@@ -195,5 +196,109 @@ describe("status and unregister commands", () => {
 
     const config = (await readMapConfigFile(projectRoot)) as { siteId?: string };
     expect(config.siteId).toBe(siteId);
+  });
+
+  it("unregister reports partial success when secret cleanup fails after 204", async () => {
+    const projectRoot = await createTestProject();
+    const siteId = "550e8400-e29b-41d4-a716-446655440000";
+
+    await writeFile(
+      join(projectRoot, "engawa-map.config.json"),
+      JSON.stringify(
+        {
+          displayName: "Test Site",
+          canonicalUrl: "https://example.com",
+          siteId,
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+
+    const { writeLocalState } = await import("./local-state.js");
+    await writeLocalState(projectRoot, {
+      registration: {
+        state: "registered",
+        siteId,
+        canonicalUrl: "https://example.com",
+        siteToken: "bearer-token",
+      },
+    });
+
+    process.env.ENGAWA_MAP_ENDPOINT = "http://127.0.0.1:9";
+    process.env.ENGAWA_MAP_TOKEN = "bearer-token";
+
+    const fetchImpl = vi.fn(async () => new Response(null, { status: 204 }));
+    const localState = await import("./local-state.js");
+    vi.spyOn(localState, "clearLocalState").mockRejectedValueOnce(new Error("permission denied"));
+
+    const logs: string[] = [];
+    const code = await runUnregister({
+      cwd: projectRoot,
+      endpoint: process.env.ENGAWA_MAP_ENDPOINT,
+      envToken: process.env.ENGAWA_MAP_TOKEN,
+      fetchImpl,
+      log: (line) => logs.push(line),
+    });
+
+    expect(code).toBe(1);
+    const output = logs.join("\n");
+    expect(output).toContain("delisted successfully");
+    expect(output).toContain("permission denied");
+    expect(output).not.toContain("Unregister failed");
+    expect(output).not.toMatch(/retry/i);
+  });
+
+  it("unregister reports partial success when config cleanup fails after 204", async () => {
+    const projectRoot = await createTestProject();
+    const siteId = "550e8400-e29b-41d4-a716-446655440000";
+
+    await writeFile(
+      join(projectRoot, "engawa-map.config.json"),
+      JSON.stringify(
+        {
+          displayName: "Test Site",
+          canonicalUrl: "https://example.com",
+          siteId,
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+
+    const { writeLocalState } = await import("./local-state.js");
+    await writeLocalState(projectRoot, {
+      registration: {
+        state: "registered",
+        siteId,
+        canonicalUrl: "https://example.com",
+        siteToken: "bearer-token",
+      },
+    });
+
+    process.env.ENGAWA_MAP_ENDPOINT = "http://127.0.0.1:9";
+    process.env.ENGAWA_MAP_TOKEN = "bearer-token";
+
+    const fetchImpl = vi.fn(async () => new Response(null, { status: 204 }));
+    const config = await import("./config.js");
+    vi.spyOn(config, "removeMapConfigSiteId").mockRejectedValueOnce(new Error("disk full"));
+
+    const logs: string[] = [];
+    const code = await runUnregister({
+      cwd: projectRoot,
+      endpoint: process.env.ENGAWA_MAP_ENDPOINT,
+      envToken: process.env.ENGAWA_MAP_TOKEN,
+      fetchImpl,
+      log: (line) => logs.push(line),
+    });
+
+    expect(code).toBe(1);
+    const output = logs.join("\n");
+    expect(output).toContain("delisted successfully");
+    expect(output).toContain("disk full");
+    expect(output).not.toContain("Unregister failed");
+    await expect(access(join(projectRoot, ".engawa-map.local.json"))).rejects.toThrow();
   });
 });

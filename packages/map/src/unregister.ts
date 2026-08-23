@@ -1,4 +1,5 @@
 import { RegistryClient } from "./client.js";
+import { CONFIG_FILE_NAME } from "./constants.js";
 import { loadMapConfig, removeMapConfigSiteId } from "./config.js";
 import { clearLocalState, readLocalState, resolveSiteId, resolveSiteToken } from "./local-state.js";
 import { findProjectRoot } from "./packages.js";
@@ -43,18 +44,42 @@ export async function runUnregister(options: UnregisterOptions = {}): Promise<nu
 
   try {
     await client.unregister(siteId, token);
-
-    await clearLocalState(projectRoot);
-    await removeMapConfigSiteId(projectRoot);
-
-    log(`Site ${siteId} delisted.`);
-    if (envToken) {
-      log("ENGAWA_MAP_TOKEN was used for authentication; clear it manually from your environment.");
-    }
-    return 0;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     log(`Unregister failed: ${sanitizeTerminalText(message)}`);
     return 1;
   }
+
+  const cleanupFailures: string[] = [];
+
+  try {
+    await clearLocalState(projectRoot);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    cleanupFailures.push(sanitizeTerminalText(message));
+  }
+
+  try {
+    await removeMapConfigSiteId(projectRoot);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    cleanupFailures.push(`Failed to update ${CONFIG_FILE_NAME}: ${sanitizeTerminalText(message)}`);
+  }
+
+  if (cleanupFailures.length > 0) {
+    log("Site was delisted successfully, but local cleanup is incomplete");
+    for (const failure of cleanupFailures) {
+      log(`  - ${failure}`);
+    }
+    if (envToken) {
+      log("ENGAWA_MAP_TOKEN was used for authentication; clear it manually from your environment.");
+    }
+    return 1;
+  }
+
+  log(`Site ${siteId} delisted.`);
+  if (envToken) {
+    log("ENGAWA_MAP_TOKEN was used for authentication; clear it manually from your environment.");
+  }
+  return 0;
 }

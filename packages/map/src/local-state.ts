@@ -1,12 +1,13 @@
 import { chmod, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
-import { execFile } from "node:child_process";
 import { join } from "node:path";
-import { promisify } from "node:util";
 import { GITIGNORE_ENTRY, LOCAL_STATE_FILE_NAME } from "./constants.js";
+import {
+  detectGitRepositoryState,
+  detectSecretFileTrackedState,
+  type ExecRunner,
+} from "./git-state.js";
 import { localStateSchema, type LocalState } from "./schemas.js";
-
-const execFileAsync = promisify(execFile);
 
 export class LocalStateError extends Error {
   readonly code?: string;
@@ -22,26 +23,6 @@ export interface LocalStateIO {
   readLocalState(projectRoot: string): Promise<LocalState | undefined>;
   writeLocalState(projectRoot: string, state: LocalState): Promise<void>;
   ensureGitignoreGuard(projectRoot: string): Promise<void>;
-}
-
-async function isGitRepository(projectRoot: string): Promise<boolean> {
-  try {
-    await execFileAsync("git", ["rev-parse", "--git-dir"], { cwd: projectRoot });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function isGitTracked(projectRoot: string, fileName: string): Promise<boolean> {
-  try {
-    await execFileAsync("git", ["ls-files", "--error-unmatch", fileName], {
-      cwd: projectRoot,
-    });
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 async function appendGitignoreEntry(projectRoot: string): Promise<void> {
@@ -65,17 +46,49 @@ export async function ensureGitignoreGuard(projectRoot: string): Promise<void> {
   await appendGitignoreEntry(projectRoot);
 }
 
-async function assertSecretFileNotTracked(projectRoot: string): Promise<void> {
-  if (!(await isGitRepository(projectRoot))) {
+async function assertSecretWriteAllowed(
+  projectRoot: string,
+  execRunner?: ExecRunner,
+): Promise<void> {
+  const repoState = await detectGitRepositoryState(projectRoot, execRunner);
+
+  if (repoState.kind === "GIT_UNAVAILABLE") {
+    process.stderr.write(
+      `Warning: git is unavailable; ensure ${LOCAL_STATE_FILE_NAME} stays secret.\n`,
+    );
+    return;
+  }
+
+  if (repoState.kind === "NOT_REPOSITORY") {
     process.stderr.write(
       `Warning: ${LOCAL_STATE_FILE_NAME} is being written outside a git repository; ensure it stays secret.\n`,
     );
     return;
   }
 
-  if (await isGitTracked(projectRoot, LOCAL_STATE_FILE_NAME)) {
+  if (repoState.kind === "ERROR") {
+    throw new LocalStateError(
+      `Failed to detect git repository: ${repoState.message}`,
+      "SECRET_WRITE",
+    );
+  }
+
+  const trackedState = await detectSecretFileTrackedState(
+    projectRoot,
+    LOCAL_STATE_FILE_NAME,
+    execRunner,
+  );
+
+  if (trackedState.kind === "TRACKED") {
     throw new LocalStateError(
       `${LOCAL_STATE_FILE_NAME} is tracked by git; remove it from version control before continuing`,
+      "SECRET_WRITE",
+    );
+  }
+
+  if (trackedState.kind === "ERROR") {
+    throw new LocalStateError(
+      `Failed to check whether ${LOCAL_STATE_FILE_NAME} is tracked: ${trackedState.message}`,
       "SECRET_WRITE",
     );
   }
@@ -97,27 +110,36 @@ export async function readLocalState(projectRoot: string): Promise<LocalState | 
   }
 }
 
-export async function writeLocalState(projectRoot: string, state: LocalState): Promise<void> {
-  await assertSecretFileNotTracked(projectRoot);
+export async function writeLocalState(
+  projectRoot: string,
+  state: LocalState,
+  options: { execRunner?: ExecRunner } = {},
+): Promise<void> {
+  await assertSecretWriteAllowed(projectRoot, options.execRunner);
   await ensureGitignoreGuard(projectRoot);
-
-  if (await isGitRepository(projectRoot)) {
-    if (await isGitTracked(projectRoot, LOCAL_STATE_FILE_NAME)) {
-      throw new LocalStateError(
-        `${LOCAL_STATE_FILE_NAME} is tracked by git; remove it from version control before continuing`,
-        "SECRET_WRITE",
-      );
-    }
-  }
 
   const path = join(projectRoot, LOCAL_STATE_FILE_NAME);
   const tempPath = `${path}.${randomBytes(8).toString("hex")}.tmp`;
-  const serialized = `${JSON.stringify(state, null, 2)}\n`;
-  await writeFile(tempPath, serialized, { encoding: "utf8", mode: 0o600, flag: "wx" });
-  if (process.platform !== "win32") {
-    await chmod(tempPath, 0o600);
+  let tempCreated = false;
+
+  try {
+    const serialized = `${JSON.stringify(state, null, 2)}\n`;
+    await writeFile(tempPath, serialized, { encoding: "utf8", mode: 0o600, flag: "wx" });
+    tempCreated = true;
+    if (process.platform !== "win32") {
+      await chmod(tempPath, 0o600);
+    }
+    await rename(tempPath, path);
+    tempCreated = false;
+  } finally {
+    if (tempCreated) {
+      try {
+        await unlink(tempPath);
+      } catch {
+        // best effort
+      }
+    }
   }
-  await rename(tempPath, path);
 }
 
 export async function clearLocalState(projectRoot: string): Promise<void> {
@@ -154,8 +176,11 @@ export function resolveSiteId(
 }
 
 export async function isSecretFileTracked(projectRoot: string): Promise<boolean> {
-  if (!(await isGitRepository(projectRoot))) {
+  const repoState = await detectGitRepositoryState(projectRoot);
+  if (repoState.kind !== "REPOSITORY") {
     return false;
   }
-  return isGitTracked(projectRoot, LOCAL_STATE_FILE_NAME);
+
+  const trackedState = await detectSecretFileTrackedState(projectRoot, LOCAL_STATE_FILE_NAME);
+  return trackedState.kind === "TRACKED";
 }

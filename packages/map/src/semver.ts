@@ -1,9 +1,22 @@
+import { z } from "zod";
+
 export class SemverError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "SemverError";
   }
 }
+
+export const exactSemverSchema = z.string().superRefine((version, ctx) => {
+  try {
+    validateExactSemver(version);
+  } catch (error) {
+    ctx.addIssue({
+      code: "custom",
+      message: error instanceof Error ? error.message : "invalid exact semver",
+    });
+  }
+});
 
 const DISALLOWED_PREFIXES = /^(?:\^|~|>=|<=|>|<|workspace:|file:|git\+|latest$)/;
 

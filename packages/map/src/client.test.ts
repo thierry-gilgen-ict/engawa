@@ -164,4 +164,31 @@ describe("registry client", () => {
       client.unregister("550e8400-e29b-41d4-a716-446655440000", "site-token"),
     ).resolves.toBeUndefined();
   });
+
+  it("rejects invalid canonicalUrl before network", async () => {
+    const client = new RegistryClient({ endpoint: "http://127.0.0.1:9" });
+    await expect(
+      client.register({
+        payload: { ...payload, canonicalUrl: "http://example.com" },
+        idempotencyKey: VALID_IDEMPOTENCY_KEY,
+        siteTokenHash: VALID_SITE_TOKEN_HASH,
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("rejects semver range in packages before network", async () => {
+    const client = new RegistryClient({ endpoint: "http://127.0.0.1:9" });
+    await expect(
+      client.register({
+        payload: {
+          ...payload,
+          packages: {
+            "@thierry-gilgen-ict/engawa-core": "^0.1.1",
+          },
+        },
+        idempotencyKey: VALID_IDEMPOTENCY_KEY,
+        siteTokenHash: VALID_SITE_TOKEN_HASH,
+      }),
+    ).rejects.toThrow();
+  });
 });

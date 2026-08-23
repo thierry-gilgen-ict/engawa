@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { runCli } from "./cli.js";
 import { createTestProject } from "./test-helpers.js";
 
@@ -9,6 +9,7 @@ const originalCwd = process.cwd();
 const originalEndpoint = process.env.ENGAWA_MAP_ENDPOINT;
 
 afterEach(async () => {
+  vi.restoreAllMocks();
   process.chdir(originalCwd);
   if (originalEndpoint === undefined) {
     delete process.env.ENGAWA_MAP_ENDPOINT;
@@ -64,5 +65,25 @@ describe("cli", () => {
 
     const code = await runCli(["register", "--yes"]);
     expect(code).toBe(1);
+  });
+
+  it("reports malformed package.json without stack trace", async () => {
+    const projectRoot = await createTestProject();
+    await writeFile(join(projectRoot, "package.json"), "{not-json", "utf8");
+    process.chdir(projectRoot);
+    delete process.env.ENGAWA_MAP_ENDPOINT;
+
+    const stderrChunks: string[] = [];
+    const originalWrite = process.stderr.write.bind(process.stderr);
+    vi.spyOn(process.stderr, "write").mockImplementation((chunk, ...args) => {
+      stderrChunks.push(String(chunk));
+      return originalWrite(chunk, ...args);
+    });
+
+    const code = await runCli(["register", "--dry-run"]);
+    expect(code).toBe(1);
+    const stderr = stderrChunks.join("");
+    expect(stderr).not.toContain("SyntaxError");
+    expect(stderr).not.toMatch(/\n\s+at /);
   });
 });

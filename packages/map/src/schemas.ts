@@ -1,10 +1,28 @@
 import { z } from "zod";
+import { validateAndNormalizeCanonicalUrl } from "./canonical-url.js";
 import {
   FROZEN_ERROR_CODES,
   MAX_CANONICAL_URL_LENGTH,
   MAX_DISPLAY_NAME_LENGTH,
   MAX_ERROR_MESSAGE_LENGTH,
 } from "./constants.js";
+import { exactSemverSchema } from "./semver.js";
+
+const canonicalUrlFieldSchema = z
+  .string()
+  .min(1)
+  .max(MAX_CANONICAL_URL_LENGTH)
+  .transform((url, ctx) => {
+    try {
+      return validateAndNormalizeCanonicalUrl(url);
+    } catch (error) {
+      ctx.addIssue({
+        code: "custom",
+        message: error instanceof Error ? error.message : "invalid canonical URL",
+      });
+      return z.NEVER;
+    }
+  });
 
 export const mapHintsSchema = z
   .object({
@@ -27,10 +45,10 @@ export type MapConfig = z.infer<typeof mapConfigSchema>;
 
 export const engawaPackagesSchema = z
   .object({
-    "@thierry-gilgen-ict/engawa-core": z.string().min(1),
-    "@thierry-gilgen-ict/engawa-discovery": z.string().min(1).optional(),
-    "@thierry-gilgen-ict/engawa-mcp": z.string().min(1).optional(),
-    "@thierry-gilgen-ict/engawa-react": z.string().min(1).optional(),
+    "@thierry-gilgen-ict/engawa-core": exactSemverSchema,
+    "@thierry-gilgen-ict/engawa-discovery": exactSemverSchema.optional(),
+    "@thierry-gilgen-ict/engawa-mcp": exactSemverSchema.optional(),
+    "@thierry-gilgen-ict/engawa-react": exactSemverSchema.optional(),
   })
   .strict();
 
@@ -39,7 +57,7 @@ export type EngawaPackages = z.infer<typeof engawaPackagesSchema>;
 export const registrationPayloadSchema = z
   .object({
     displayName: z.string().min(1).max(MAX_DISPLAY_NAME_LENGTH),
-    canonicalUrl: z.string().min(1).max(MAX_CANONICAL_URL_LENGTH),
+    canonicalUrl: canonicalUrlFieldSchema,
     packages: engawaPackagesSchema,
     hints: mapHintsSchema.optional(),
   })
