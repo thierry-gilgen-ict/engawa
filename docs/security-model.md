@@ -76,3 +76,11 @@ Registration design rules (future registry):
 - Registry outage must not affect site build, deploy, startup, `/mcp`, `/llms.txt`, markdown, BYA, or public HTML
 
 This does not weaken **No arbitrary outbound network from tools** — public MCP tools remain read-only and adapter-bound.
+
+DM1A freezes the future `engawa-map` CLI contract and registry API ([distribution-map-api.md](distribution-map-api.md), [distribution-map-threat-model.md](distribution-map-threat-model.md)) without implementing network code. Additional hard invariants for future implementation:
+
+- `ENGAWA_MAP_EXECUTES_APPLICATION_CODE = NO` — CLI reads static config only
+- `UNKNOWN_REQUEST_FIELDS = REJECT` / `UNKNOWN_RESPONSE_FIELDS = REJECT`
+- `API_REDIRECT_FOLLOWING = NO` on registry client requests
+- `ENGAWA_CI_REGISTRY_NETWORK = NO` — no live registry in normal CI
+- `DO_NOT_IMPLEMENT_MAP_NETWORK_CODE_BEFORE_DM1A_APPROVAL` — agents must not add outbound HTTP until contract is approved

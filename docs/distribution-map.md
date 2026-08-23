@@ -206,13 +206,13 @@ If a browser-based dashboard is added later, its authentication model requires a
 
 The initial registration endpoint must require:
 
-| Control              | Required                            |
-| -------------------- | ----------------------------------- |
-| `HTTPS_ONLY`         | YES                                 |
-| `STRICT_JSON_SCHEMA` | YES                                 |
-| `SMALL_BODY_LIMIT`   | YES (recommended ~8–16 KB eventual) |
-| `RATE_LIMIT`         | YES                                 |
-| Unknown fields       | Rejected or ignored safely          |
+| Control              | Required                                   |
+| -------------------- | ------------------------------------------ |
+| `HTTPS_ONLY`         | YES                                        |
+| `STRICT_JSON_SCHEMA` | YES                                        |
+| `SMALL_BODY_LIMIT`   | YES (recommended ~8–16 KB eventual)        |
+| `RATE_LIMIT`         | YES                                        |
+| Unknown fields       | REJECT (`UNKNOWN_REQUEST_FIELDS = REJECT`) |
 
 Eventual `canonicalUrl` rules:
 
@@ -283,8 +283,27 @@ The future registry backend must publish its own privacy notice before productio
 
 Topics to cover in that notice: deliberate operator opt-in, exact public payload, public listing purpose, delisting mechanism, retention, and contact/removal path.
 
+## DM1A contract (frozen for implementation)
+
+DM0 policy remains authoritative. DM1A tightens the future CLI and registry API without implementing them:
+
+| Rule                                           | Value  |
+| ---------------------------------------------- | ------ |
+| `UNKNOWN_REQUEST_FIELDS`                       | REJECT |
+| `UNKNOWN_RESPONSE_FIELDS`                      | REJECT |
+| `ENGAWA_MAP_EXECUTES_APPLICATION_CODE`         | NO     |
+| `API_REDIRECT_FOLLOWING`                       | NO     |
+| `IDEMPOTENCY_REQUIRED_FOR_REGISTER`            | YES    |
+| `CANONICAL_URL_CHANGE_REQUIRES_REAPPROVAL`     | YES    |
+| `ONE_NON_DELISTED_RECORD_PER_CANONICAL_ORIGIN` | YES    |
+| `ENGAWA_CI_REGISTRY_NETWORK`                   | NO     |
+
+Full contract: [distribution-map-api.md](distribution-map-api.md). Threat model: [distribution-map-threat-model.md](distribution-map-threat-model.md).
+
 ## Related
 
+- [API and CLI contract (v1)](distribution-map-api.md) — frozen endpoints, schema, CLI behavior
+- [Threat model](distribution-map-threat-model.md) — registry and CLI threats
 - [Security model](security-model.md) — runtime boundaries and Distribution Map subsection
 - [Roadmap](roadmap.md) — `@thierry-gilgen-ict/engawa-map` PLANNED; registry backend separate future work
 - [Agent integration playbook](agent-integration-playbook.md) — agents must not register without explicit user request

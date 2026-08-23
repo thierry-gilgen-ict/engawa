@@ -166,4 +166,27 @@ describe("documentation sanity", () => {
     const acceptance = readFileSync(join(root, "docs/integration-acceptance.md"), "utf8");
     expect(acceptance).toMatch(/NOT GATING|NOT_REQUESTED/i);
   });
+
+  it("distribution map DM1A API contract and threat model exist with security rules", () => {
+    expect(existsSync(join(root, "docs/distribution-map-api.md"))).toBe(true);
+    expect(existsSync(join(root, "docs/distribution-map-threat-model.md"))).toBe(true);
+
+    const api = readFileSync(join(root, "docs/distribution-map-api.md"), "utf8");
+    expect(api).toMatch(/UNKNOWN_REQUEST_FIELDS.*REJECT|UNKNOWN_FIELDS.*REJECT/i);
+    expect(api).toMatch(/PENDING/);
+    expect(api).toMatch(/Bearer.*site-token|site-scoped|SITE_TOKEN_SCOPED/i);
+    expect(api).toMatch(/IDEMPOTENCY_REQUIRED_FOR_REGISTER|Idempotency-Key/i);
+    expect(api).toMatch(/API_REDIRECT_FOLLOWING.*NO|redirect.*error|FOLLOW_REDIRECTS.*NO/i);
+    expect(api).toMatch(/ENGAWA_CI_REGISTRY_NETWORK.*NO|no live network/i);
+
+    const threat = readFileSync(join(root, "docs/distribution-map-threat-model.md"), "utf8");
+    expect(threat).toMatch(/ENGAWA_MAP_EXECUTES_APPLICATION_CODE.*NO|executes application code/i);
+    expect(threat).toMatch(/malicious registry|Malicious registry/i);
+    expect(threat).toMatch(/WWW_WRITE_API_FOR_MAP.*NO|WWW_RUNTIME_REGISTRY_CALL.*NO/i);
+    expect(threat).toMatch(/WEBSITE_DEPENDENCY_ON_REGISTRY.*NONE|no runtime dependency/i);
+
+    const policy = readFileSync(join(root, "docs/distribution-map.md"), "utf8");
+    expect(policy).toContain("distribution-map-api.md");
+    expect(policy).toContain("distribution-map-threat-model.md");
+  });
 });
