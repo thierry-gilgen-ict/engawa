@@ -75,13 +75,13 @@ From repo root after `pnpm build`:
 node scripts/stage-npm-tarballs.mjs
 ```
 
-This produces:
+This produces exact tarball filenames (staging cleans prior `*.tgz` and `.npm-staging` artifacts first):
 
-| Artifact                          | Location                       |
-| --------------------------------- | ------------------------------ |
-| `engawa-core` tarball             | `packages/core/*.tgz`          |
-| `engawa-discovery` staged tarball | `.npm-staging/discovery/*.tgz` |
-| `engawa-mcp` staged tarball       | `.npm-staging/mcp/*.tgz`       |
+| Artifact                          | Exact path                                                             |
+| --------------------------------- | ---------------------------------------------------------------------- |
+| `engawa-core` tarball             | `packages/core/thierry-gilgen-ict-engawa-core-0.1.1.tgz`               |
+| `engawa-discovery` staged tarball | `.npm-staging/discovery/thierry-gilgen-ict-engawa-discovery-0.1.1.tgz` |
+| `engawa-mcp` staged tarball       | `.npm-staging/mcp/thierry-gilgen-ict-engawa-mcp-0.1.1.tgz`             |
 
 **Inspect staged metadata** before publishing:
 
@@ -120,30 +120,15 @@ Expect `ENGAWA_V011_RELEASE_CANDIDATE_SMOKE = PASS`.
 
 **STOP:** Publication requires interactive npm login / WebAuthn. Agents must not publish without explicit user authorization.
 
-Publish the **inspected tarballs** in order. Prefer publishing the exact tarball you inspected rather than regenerating a different artifact at publish time.
+Publish the **exact inspected tarballs** in order. Do not publish from package directories after inspection—the tarball is the release artifact.
 
-1. **core** — from `packages/core`:
+```bash
+npm publish packages/core/thierry-gilgen-ict-engawa-core-0.1.1.tgz --access public
+npm publish .npm-staging/discovery/thierry-gilgen-ict-engawa-discovery-0.1.1.tgz --access public
+npm publish .npm-staging/mcp/thierry-gilgen-ict-engawa-mcp-0.1.1.tgz --access public
+```
 
-   ```bash
-   cd packages/core
-   npm publish --access public
-   ```
-
-   Or publish the packed tarball: `npm publish engawa-core-0.1.1.tgz --access public`
-
-2. **discovery** — publish staged tarball:
-
-   ```bash
-   npm publish .npm-staging/discovery/thierry-gilgen-ict-engawa-discovery-0.1.1.tgz --access public
-   ```
-
-3. **mcp** — publish staged tarball:
-
-   ```bash
-   npm publish .npm-staging/mcp/thierry-gilgen-ict-engawa-mcp-0.1.1.tgz --access public
-   ```
-
-4. **react** — **do not republish `0.1.0`** unless a new react version is explicitly released.
+**react** — **do not republish `0.1.0`** unless a new react version is explicitly released.
 
 Tag after publish (tags must point to the reviewed release source SHA):
 

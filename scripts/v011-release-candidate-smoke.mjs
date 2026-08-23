@@ -7,20 +7,43 @@
  *
  * Usage: node scripts/v011-release-candidate-smoke.mjs
  */
-import { mkdtemp, rm, readdir, readFile, writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { mkdtemp, rm, readFile, writeFile } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
 
 const root = process.cwd();
 const scope = "@thierry-gilgen-ict";
+const scopeCore = `${scope}/engawa-core`;
+const expectedCoreVersion = JSON.parse(
+  readFileSync(join(root, "packages/core/package.json"), "utf8"),
+).version;
+const expectedReactVersion = "0.1.0";
 
-async function findTarball(dir) {
-  const files = await readdir(dir);
-  const tgz = files.find((f) => f.endsWith(".tgz"));
-  if (!tgz) throw new Error(`No .tgz found in ${dir}`);
-  return join(dir, tgz);
+function expectedTarballName(name, version) {
+  return `${name.replace("@", "").replace("/", "-")}-${version}.tgz`;
+}
+
+function resolveTarball(dir, name, version) {
+  const filename = expectedTarballName(name, version);
+  const path = join(dir, filename);
+  if (!existsSync(path)) {
+    throw new Error(`Expected tarball missing: ${path}`);
+  }
+  return path;
+}
+
+function assertVersion(actual, expected, label) {
+  if (actual !== expected) {
+    throw new Error(`${label} version mismatch: expected ${expected}, got ${actual}`);
+  }
+}
+
+function assertCoreDep(actual, expected, label) {
+  if (actual !== expected) {
+    throw new Error(`${label} ${scopeCore} dep mismatch: expected ${expected}, got ${actual}`);
+  }
 }
 
 async function main() {
@@ -31,9 +54,25 @@ async function main() {
 
   execSync("node scripts/stage-npm-tarballs.mjs", { cwd: root, stdio: "inherit" });
 
-  const coreTarball = await findTarball(join(root, "packages/core"));
-  const discoveryTarball = await findTarball(join(root, ".npm-staging/discovery"));
-  const mcpTarball = await findTarball(join(root, ".npm-staging/mcp"));
+  const discoveryPkg = JSON.parse(
+    readFileSync(join(root, "packages/discovery/package.json"), "utf8"),
+  );
+  const mcpPkg = JSON.parse(readFileSync(join(root, "packages/mcp/package.json"), "utf8"));
+
+  assertVersion(discoveryPkg.version, expectedCoreVersion, "discovery source");
+  assertVersion(mcpPkg.version, expectedCoreVersion, "mcp source");
+
+  const coreTarball = resolveTarball(join(root, "packages/core"), scopeCore, expectedCoreVersion);
+  const discoveryTarball = resolveTarball(
+    join(root, ".npm-staging/discovery"),
+    `${scope}/engawa-discovery`,
+    expectedCoreVersion,
+  );
+  const mcpTarball = resolveTarball(
+    join(root, ".npm-staging/mcp"),
+    `${scope}/engawa-mcp`,
+    expectedCoreVersion,
+  );
 
   const smokeDir = await mkdtemp(join(tmpdir(), "engawa-v011-rc-smoke-"));
   try {
@@ -42,10 +81,10 @@ async function main() {
       private: true,
       type: "module",
       dependencies: {
-        [`${scope}/engawa-core`]: `file:${coreTarball}`,
+        [scopeCore]: `file:${coreTarball}`,
         [`${scope}/engawa-discovery`]: `file:${discoveryTarball}`,
         [`${scope}/engawa-mcp`]: `file:${mcpTarball}`,
-        [`${scope}/engawa-react`]: "0.1.0",
+        [`${scope}/engawa-react`]: expectedReactVersion,
         react: "^19.0.0",
         "react-dom": "^19.0.0",
       },
@@ -59,37 +98,45 @@ async function main() {
       env: { ...process.env, npm_config_registry: "https://registry.npmjs.org" },
     });
 
-    const discoveryPkg = JSON.parse(
+    const installedCore = JSON.parse(
+      await readFile(join(smokeDir, "node_modules", scopeCore, "package.json"), "utf8"),
+    );
+    const installedDiscovery = JSON.parse(
       await readFile(
         join(smokeDir, "node_modules/@thierry-gilgen-ict/engawa-discovery/package.json"),
         "utf8",
       ),
     );
-    const mcpPkg = JSON.parse(
+    const installedMcp = JSON.parse(
       await readFile(
         join(smokeDir, "node_modules/@thierry-gilgen-ict/engawa-mcp/package.json"),
         "utf8",
       ),
     );
+    const installedReact = JSON.parse(
+      await readFile(
+        join(smokeDir, "node_modules/@thierry-gilgen-ict/engawa-react/package.json"),
+        "utf8",
+      ),
+    );
 
-    const discoveryCoreDep = discoveryPkg.dependencies?.[`${scope}/engawa-core`];
-    const mcpCoreDep = mcpPkg.dependencies?.[`${scope}/engawa-core`];
-
-    if (!discoveryCoreDep || discoveryCoreDep.startsWith("workspace:")) {
-      throw new Error(
-        `engawa-discovery still has workspace: dependency: ${discoveryCoreDep ?? "missing"}`,
-      );
-    }
-    if (!mcpCoreDep || mcpCoreDep.startsWith("workspace:")) {
-      throw new Error(`engawa-mcp still has workspace: dependency: ${mcpCoreDep ?? "missing"}`);
-    }
+    assertVersion(installedCore.version, expectedCoreVersion, "installed core");
+    assertVersion(installedDiscovery.version, expectedCoreVersion, "installed discovery");
+    assertVersion(installedMcp.version, expectedCoreVersion, "installed mcp");
+    assertVersion(installedReact.version, expectedReactVersion, "installed react");
+    assertCoreDep(
+      installedDiscovery.dependencies?.[scopeCore],
+      expectedCoreVersion,
+      "installed discovery",
+    );
+    assertCoreDep(installedMcp.dependencies?.[scopeCore], expectedCoreVersion, "installed mcp");
 
     const smokeCode = `
 import {
   createEngawa,
   StaticContentAdapter,
   validateEngawaConfig,
-} from "${scope}/engawa-core";
+} from "${scopeCore}";
 import { generateLlmsTxt } from "${scope}/engawa-discovery";
 import { createEngawaPublicMcpServer } from "${scope}/engawa-mcp";
 import { AskYourAgent } from "${scope}/engawa-react";
@@ -103,7 +150,7 @@ const config = validateEngawaConfig({
   },
   agentInterface: { enabled: true, public: true },
   security: { publicDefault: "read-only" },
-  metadata: { version: "0.1.1" },
+  metadata: { version: "${expectedCoreVersion}" },
 });
 
 const adapter = new StaticContentAdapter(config.site.canonicalUrl, [
