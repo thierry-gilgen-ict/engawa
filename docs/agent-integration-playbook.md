@@ -59,21 +59,21 @@ Read [content publication rule](content-publication.md) before implementing adap
 
 Execute in order. Stop at any blocking condition.
 
-| Step | Action |
-| ---- | ------ |
-| A | **Discovery report** — document framework, routes, sources, risks |
-| B | **Integration architecture proposal** — packages, routes, adapter shape (no code yet if A incomplete) |
-| C | **Package install** — exact registry pins from [compatibility](compatibility.md) |
-| D | **Adapter** — custom `ContentAdapter`; no `StaticContentAdapter` in production dynamic sites |
-| E | **llms.txt** — route + `generateLlmsTxt` |
-| F | **Markdown** — alternates sharing human-public markdown builders |
-| G | **MCP** — public handler, resources, `search_site` only |
-| H | **Security guards** — host, origin (if needed), rate limits, bounds |
-| I | **BYA optional** — `engawa-react@0.1.0`, capability-matrix-honest actions |
-| J | **Analytics optional** — metadata only; never log prompt/context bodies |
-| K | **Tests** — site suite + [integration acceptance](integration-acceptance.md) |
-| L | **Production check** — staging smoke before deploy recommendation |
-| M | **Final report** — machine block below |
+| Step | Action                                                                                                |
+| ---- | ----------------------------------------------------------------------------------------------------- |
+| A    | **Discovery report** — document framework, routes, sources, risks                                     |
+| B    | **Integration architecture proposal** — packages, routes, adapter shape (no code yet if A incomplete) |
+| C    | **Package install** — exact registry pins from [compatibility](compatibility.md)                      |
+| D    | **Adapter** — custom `ContentAdapter`; no `StaticContentAdapter` in production dynamic sites          |
+| E    | **llms.txt** — route + `generateLlmsTxt`                                                              |
+| F    | **Markdown** — alternates sharing human-public markdown builders                                      |
+| G    | **MCP** — public handler, resources, `search_site` only                                               |
+| H    | **Security guards** — host, origin (if needed), rate limits, bounds                                   |
+| I    | **BYA optional** — `engawa-react@0.1.0`, capability-matrix-honest actions                             |
+| J    | **Analytics optional** — metadata only; never log prompt/context bodies                               |
+| K    | **Tests** — site suite + [integration acceptance](integration-acceptance.md)                          |
+| L    | **Production check** — staging smoke before deploy recommendation                                     |
+| M    | **Final report** — machine block below                                                                |
 
 ## CURRENT TESTED PACKAGE SET
 

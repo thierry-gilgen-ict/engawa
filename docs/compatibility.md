@@ -10,13 +10,13 @@ Engawa is a monorepo with **independently versioned packages**. Production sites
 ENGAWA_RELEASE_SET = 2026-08-v0.1.1
 ```
 
-| Package | Version | Notes |
-| ------- | ------- | ----- |
-| `@thierry-gilgen-ict/engawa-core` | 0.1.1 | `engines.node >= 24` |
-| `@thierry-gilgen-ict/engawa-discovery` | 0.1.1 | depends on core `0.1.1` |
-| `@thierry-gilgen-ict/engawa-mcp` | 0.1.1 | depends on core `0.1.1` |
-| `@thierry-gilgen-ict/engawa-react` | 0.1.0 | optional BYA UI; not republished in 0.1.1 |
-| Node.js | >= 24 | LTS |
+| Package                                | Version | Notes                                     |
+| -------------------------------------- | ------- | ----------------------------------------- |
+| `@thierry-gilgen-ict/engawa-core`      | 0.1.1   | `engines.node >= 24`                      |
+| `@thierry-gilgen-ict/engawa-discovery` | 0.1.1   | depends on core `0.1.1`                   |
+| `@thierry-gilgen-ict/engawa-mcp`       | 0.1.1   | depends on core `0.1.1`                   |
+| `@thierry-gilgen-ict/engawa-react`     | 0.1.0   | optional BYA UI; not republished in 0.1.1 |
+| Node.js                                | >= 24   | LTS                                       |
 
 ```text
 TESTED_TOGETHER = YES
@@ -29,10 +29,10 @@ Verified by:
 
 ## Runtime API migration notes
 
-| Transition | Migration |
-| ---------- | --------- |
+| Transition                           | Migration                                         |
+| ------------------------------------ | ------------------------------------------------- |
 | core/discovery/mcp `0.1.0` → `0.1.1` | **None** — engines metadata and release packaging |
-| react `0.1.0` | Unchanged in this release set |
+| react `0.1.0`                        | Unchanged in this release set                     |
 
 See [CHANGELOG.md](../CHANGELOG.md) and [upgrading.md](upgrading.md).
 

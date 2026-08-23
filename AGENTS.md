@@ -8,12 +8,12 @@ Open toolkit for **agent-native websites**: human HTML plus structured agent sur
 
 ## Current published packages (npm)
 
-| Package | Version |
-| ------- | ------- |
-| `@thierry-gilgen-ict/engawa-core` | 0.1.1 |
-| `@thierry-gilgen-ict/engawa-discovery` | 0.1.1 |
-| `@thierry-gilgen-ict/engawa-mcp` | 0.1.1 |
-| `@thierry-gilgen-ict/engawa-react` | 0.1.0 |
+| Package                                | Version |
+| -------------------------------------- | ------- |
+| `@thierry-gilgen-ict/engawa-core`      | 0.1.1   |
+| `@thierry-gilgen-ict/engawa-discovery` | 0.1.1   |
+| `@thierry-gilgen-ict/engawa-mcp`       | 0.1.1   |
+| `@thierry-gilgen-ict/engawa-react`     | 0.1.0   |
 
 **Node.js 24+** required (`engines` in package manifests).
 

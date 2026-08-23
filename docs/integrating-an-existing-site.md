@@ -8,20 +8,20 @@ For an empty TypeScript project, see [getting started](getting-started.md). For 
 
 Inspect and record:
 
-| Area | What to document |
-| ---- | ---------------- |
-| Framework | Next.js, Astro, custom Node, etc. |
-| Runtime | Node version (Engawa requires **24+**) |
-| Package manager | npm, pnpm, yarn |
-| Public routes | Human HTML routes agents should mirror |
-| Locales | Single or multi-locale routing |
-| Content architecture | CMS, DB, static files, hybrid |
+| Area                       | What to document                              |
+| -------------------------- | --------------------------------------------- |
+| Framework                  | Next.js, Astro, custom Node, etc.             |
+| Runtime                    | Node version (Engawa requires **24+**)        |
+| Package manager            | npm, pnpm, yarn                               |
+| Public routes              | Human HTML routes agents should mirror        |
+| Locales                    | Single or multi-locale routing                |
+| Content architecture       | CMS, DB, static files, hybrid                 |
 | Canonical source per route | **Which function/file feeds each human page** |
-| Auth / session | Middleware, cookies, admin areas |
-| Host topology | Reverse proxy, CDN, canonical domain |
-| Rate limiting | Existing limits on public routes |
-| Analytics | Metadata-only vs content logging |
-| Deployment | How production is built and released |
+| Auth / session             | Middleware, cookies, admin areas              |
+| Host topology              | Reverse proxy, CDN, canonical domain          |
+| Rate limiting              | Existing limits on public routes              |
+| Analytics                  | Metadata-only vs content logging              |
+| Deployment                 | How production is built and released          |
 
 **Stop** if you cannot identify the canonical human-public source for each route class. See [content publication rule](content-publication.md).
 
@@ -33,19 +33,19 @@ HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE
 
 Engawa surfaces are composable:
 
-| Package | Required? | Purpose |
-| ------- | --------- | ------- |
-| `@thierry-gilgen-ict/engawa-core` | **Yes** | Config, adapter, `createEngawa` |
-| `@thierry-gilgen-ict/engawa-discovery` | Usually | `llms.txt`, discovery metadata |
-| `@thierry-gilgen-ict/engawa-mcp` | Usually | Public MCP server |
-| `@thierry-gilgen-ict/engawa-react` | Optional | Bring Your Agent UI |
+| Package                                | Required? | Purpose                         |
+| -------------------------------------- | --------- | ------------------------------- |
+| `@thierry-gilgen-ict/engawa-core`      | **Yes**   | Config, adapter, `createEngawa` |
+| `@thierry-gilgen-ict/engawa-discovery` | Usually   | `llms.txt`, discovery metadata  |
+| `@thierry-gilgen-ict/engawa-mcp`       | Usually   | Public MCP server               |
+| `@thierry-gilgen-ict/engawa-react`     | Optional  | Bring Your Agent UI             |
 
-| Surface | What visitors get |
-| ------- | ----------------- |
-| Markdown alternates | Clean `text/markdown` at paths like `/about.md` |
-| `llms.txt` | Discovery index for agents |
-| MCP | Streamable HTTP endpoint with resources + bounded `search_site` |
-| Bring Your Agent | Provider-neutral connection UX on your site |
+| Surface             | What visitors get                                               |
+| ------------------- | --------------------------------------------------------------- |
+| Markdown alternates | Clean `text/markdown` at paths like `/about.md`                 |
+| `llms.txt`          | Discovery index for agents                                      |
+| MCP                 | Streamable HTTP endpoint with resources + bounded `search_site` |
+| Bring Your Agent    | Provider-neutral connection UX on your site                     |
 
 Add only what your product needs. MCP without BYA is valid.
 
@@ -53,10 +53,10 @@ Add only what your product needs. MCP without BYA is valid.
 
 Create a table before coding:
 
-| Human route | Public? | Canonical source | Engawa resource ID | Markdown path | Locale |
-| ----------- | ------- | ------------------ | ------------------ | ------------- | ------ |
-| `/about` | YES | `getPageContent().about` | `about` | `/about.md` | `en` |
-| `/admin` | NO | — | — | — | — |
+| Human route | Public? | Canonical source         | Engawa resource ID | Markdown path | Locale |
+| ----------- | ------- | ------------------------ | ------------------ | ------------- | ------ |
+| `/about`    | YES     | `getPageContent().about` | `about`            | `/about.md`   | `en`   |
+| `/admin`    | NO      | —                        | —                  | —             | —      |
 
 Rules:
 

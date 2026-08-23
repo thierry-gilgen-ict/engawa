@@ -2,6 +2,8 @@
 
 This guide starts from an **empty external TypeScript project**, not the Engawa monorepo. A competent TypeScript developer should reach a working basic Engawa integration in about 10–15 minutes.
 
+**Already have a website?** Use [integrating an existing site](integrating-an-existing-site.md) instead.
+
 ## Prerequisites
 
 - **Node.js 24+** (LTS)
@@ -179,7 +181,9 @@ See [security-model.md](security-model.md) for the full threat model.
 
 ## Next steps
 
+- [Integrating an existing site](integrating-an-existing-site.md) — if you already have a website
 - [Next.js integration](integrations/nextjs.md) — route handlers and host responsibilities
 - [Production references](production-references.md) — live sites
-- [Consuming from npm](integration-consuming-from-npm.md) — version pinning and upgrades
+- [Upgrading](upgrading.md) — when new Engawa versions ship
+- [Consuming from npm](integration-consuming-from-npm.md) — version pinning
 - [minimal-site example](../examples/minimal-site) — runnable monorepo demo (workspace packages)

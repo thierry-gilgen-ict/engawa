@@ -9,6 +9,7 @@ Upgrade Engawa packages in this **existing** repository safely.
 ## Rules
 
 1. **Inspect currently installed versions:**
+
    ```bash
    npm ls @thierry-gilgen-ict/engawa-core
    npm ls @thierry-gilgen-ict/engawa-discovery
