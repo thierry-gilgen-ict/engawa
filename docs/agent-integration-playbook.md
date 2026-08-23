@@ -55,6 +55,8 @@ Do not resolve ambiguity by exposing more content.
 
 Read [content publication rule](content-publication.md) before implementing adapters.
 
+If architecture is **Node/TypeScript frontend + headless CMS**, read [headless CMS integration](integrations/headless-cms.md) and the matching CMS recipe (WordPress, Strapi, Sanity, Contentful) before implementing the adapter. CMS documentation is not mandatory for non-CMS sites.
+
 ## IMPLEMENTATION SEQUENCE
 
 Execute in order. Stop at any blocking condition.

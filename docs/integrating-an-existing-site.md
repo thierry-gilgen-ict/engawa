@@ -2,7 +2,7 @@
 
 This guide is for developers who **already have a website** and want to add Engawa agent surfaces without rebuilding the site from scratch.
 
-For an empty TypeScript project, see [getting started](getting-started.md). For Next.js route patterns, see [Next.js integration](integrations/nextjs.md).
+For an empty TypeScript project, see [getting started](getting-started.md). For Next.js route patterns, see [Next.js integration](integrations/nextjs.md). If the site uses a **Node/TypeScript frontend with a headless CMS**, see [headless CMS integration](integrations/headless-cms.md).
 
 ## Before touching code
 

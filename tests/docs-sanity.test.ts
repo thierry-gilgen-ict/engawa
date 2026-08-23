@@ -97,4 +97,28 @@ describe("documentation sanity", () => {
     expect(changelog).toContain("v0.1.0...engawa-core-v0.1.1");
     expect(changelog).not.toContain("engawa-core-v0.1.0");
   });
+
+  it("headless CMS integration docs exist and hub states key rules", () => {
+    const headlessDocs = [
+      "docs/integrations/headless-cms.md",
+      "docs/integrations/headless-wordpress.md",
+      "docs/integrations/strapi.md",
+      "docs/integrations/sanity.md",
+      "docs/integrations/contentful.md",
+    ];
+    for (const path of headlessDocs) {
+      expect(existsSync(join(root, path)), `missing ${path}`).toBe(true);
+    }
+
+    const hub = readFileSync(join(root, "docs/integrations/headless-cms.md"), "utf8");
+    expect(hub).toContain("HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE");
+    expect(hub).toMatch(/CMS_PUBLISHED.*AUTOMATICALLY_ENGAWA_PUBLIC/i);
+    expect(hub).toMatch(/SEARCH_CORPUS|search\(query\)|public corpus/i);
+    expect(hub).toContain("content-publication.md");
+    expect(hub).toContain("security-model.md");
+    expect(hub).toContain("integrating-an-existing-site.md");
+
+    const docsIndex = readFileSync(join(root, "docs/README.md"), "utf8");
+    expect(docsIndex).toContain("headless-cms.md");
+  });
 });

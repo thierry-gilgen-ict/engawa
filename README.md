@@ -203,6 +203,7 @@ Example endpoints: `http://127.0.0.1:3847/llms.txt`, `http://127.0.0.1:3847/mcp`
 | [Compatibility](docs/compatibility.md)                               | Tested package sets                       |
 | [Getting started](docs/getting-started.md)                           | Empty external project quick start        |
 | [Next.js integration](docs/integrations/nextjs.md)                   | Route handlers, host app responsibilities |
+| [Headless CMS integration](docs/integrations/headless-cms.md)        | Node/TS frontend + CMS API pattern        |
 | [Production references](docs/production-references.md)               | Live sites and portability evidence       |
 | [Content publication](docs/content-publication.md)                   | Human-public corpus rule                  |
 | [Security model](docs/security-model.md)                             | Threat model and launch checklist         |
