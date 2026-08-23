@@ -26,6 +26,7 @@ Package versions may diverge by design. See [docs/compatibility.md](docs/compati
 - **Content parity:** `HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE` ([content publication rule](docs/content-publication.md)).
 - No `engawa-nextjs` package in v0.1—document patterns in `docs/integrations/` (including [headless CMS](docs/integrations/headless-cms.md)).
 - Do not expose secrets, sessions, drafts, or admin-only corpus on public surfaces.
+- Do not register a site on the [Distribution Map](docs/distribution-map.md) without explicit user request (`DO_NOT_REGISTER_MAP_WITHOUT_EXPLICIT_USER_REQUEST`).
 
 ## Integrating Engawa into another website
 

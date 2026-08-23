@@ -144,4 +144,26 @@ describe("documentation sanity", () => {
     expect(contentful).toMatch(/switch Engawa to Preview API credentials/i);
     expect(contentful).toMatch(/Never use preview loader for public Engawa/i);
   });
+
+  it("distribution map policy exists with opt-in and security boundaries", () => {
+    expect(existsSync(join(root, "docs/distribution-map.md"))).toBe(true);
+
+    const readme = readFileSync(join(root, "README.md"), "utf8");
+    const docsIndex = readFileSync(join(root, "docs/README.md"), "utf8");
+    expect(readme).toContain("distribution-map.md");
+    expect(docsIndex).toContain("distribution-map.md");
+
+    const policy = readFileSync(join(root, "docs/distribution-map.md"), "utf8");
+    expect(policy).toMatch(/voluntary|opt.in|NOT_REGISTERED/i);
+    expect(policy).toMatch(/phone home|telemetry|not telemetry/i);
+    expect(policy).toMatch(/OUT_OF_BAND|out-of-band|MAP_REGISTRATION_FROM_RUNTIME/i);
+    expect(policy).toMatch(/REGISTER_REQUEST_REMOTE_FETCH|must not.*fetch/i);
+
+    const playbook = readFileSync(join(root, "docs/agent-integration-playbook.md"), "utf8");
+    expect(playbook).toContain("DISTRIBUTION_MAP_REGISTRATION_REQUIRES_EXPLICIT_USER_REQUEST");
+    expect(playbook).toMatch(/not.*auto.?register|never auto-register/i);
+
+    const acceptance = readFileSync(join(root, "docs/integration-acceptance.md"), "utf8");
+    expect(acceptance).toMatch(/NOT GATING|NOT_REQUESTED/i);
+  });
 });

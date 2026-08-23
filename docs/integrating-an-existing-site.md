@@ -183,6 +183,10 @@ Engawa integration is additive. To roll back without disturbing human-facing con
 
 Human HTML routes and CMS content are unaffected when adapters only read existing public loaders.
 
+## Join the map (optional)
+
+Successful Engawa integration does **not** require joining the [Distribution Map](distribution-map.md). Registration is a separate, voluntary operator action after production acceptance passes.
+
 ## Related
 
 - [Agent integration playbook](agent-integration-playbook.md) — for coding agents

@@ -187,3 +187,11 @@ See [security-model.md](security-model.md) for the full threat model.
 - [Upgrading](upgrading.md) — when new Engawa versions ship
 - [Consuming from npm](integration-consuming-from-npm.md) — version pinning
 - [minimal-site example](../examples/minimal-site) — runnable monorepo demo (workspace packages)
+
+## Join the map (optional)
+
+Engawa does **not** phone home or track your visitors. If you choose to appear on the public Engawa Distribution Map, you can voluntarily register the site **after** integration. This feature is separate from Engawa runtime and is off unless you explicitly join.
+
+The `@thierry-gilgen-ict/engawa-map` CLI is **PLANNED** — there is no working register command in current releases.
+
+See [Distribution Map](distribution-map.md) for policy, security boundaries, and planned lifecycle.

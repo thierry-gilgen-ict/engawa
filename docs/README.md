@@ -38,6 +38,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 - [Architecture](architecture.md)
 - [Implementation profile v0.1](implementation-profile-v0.1.md)
 - [Security model](security-model.md)
+- [Distribution Map](distribution-map.md) — optional showcase; opt-in only; PLANNED CLI
 - [Roadmap](roadmap.md)
 - [Releasing](releasing.md) — maintainer npm publish
 - [Provider capability matrix](providers/provider-capability-matrix.md)
