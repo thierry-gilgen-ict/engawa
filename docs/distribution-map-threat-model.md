@@ -1,6 +1,6 @@
 # Distribution Map threat model
 
-Threat analysis for the planned `@thierry-gilgen-ict/engawa-map` CLI and dedicated registry service. Policy: [distribution-map.md](distribution-map.md). API contract: [distribution-map-api.md](distribution-map-api.md).
+Threat analysis for the `@thierry-gilgen-ict/engawa-map` CLI and dedicated registry service (implemented; staging live). Policy: [distribution-map.md](distribution-map.md). API contract: [distribution-map-api.md](distribution-map-api.md).
 
 DM1A is the first Engawa component **intentionally capable of outbound network requests**. This boundary requires review before implementation.
 

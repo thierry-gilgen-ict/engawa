@@ -1,13 +1,14 @@
 # Distribution Map API and CLI contract (v1)
 
-This document freezes the **future registry API** and **engawa-map CLI** behavior for implementation review. It is a contract, not implementation.
+This document freezes the **registry API** and **engawa-map CLI** behavior. Contract and implementation exist; staging is live (DM2B PASS). Production registry not deployed. See [DM3A production launch contract](distribution-map-production-launch.md).
 
-| Field             | Value                                            |
-| ----------------- | ------------------------------------------------ |
-| Package (planned) | `@thierry-gilgen-ict/engawa-map`                 |
-| CLI status        | **PLANNED** — not functional in current releases |
-| Registry host     | `REGISTRY_HOST = TO_BE_ANNOUNCED`                |
-| API version       | `/api/v1`                                        |
+| Field                    | Value                                                                |
+| ------------------------ | -------------------------------------------------------------------- |
+| Package                  | `@thierry-gilgen-ict/engawa-map` — IMPLEMENTED_IN_REPO NOT_PUBLISHED |
+| CLI                      | Functional in monorepo; npm publication deferred                     |
+| Staging registry         | `https://staging-engawa-map.thierry-gilgen-ict.ch` (live)            |
+| Production registry host | `https://engawa-map.thierry-gilgen-ict.ch` (frozen, not deployed)    |
+| API version              | `/api/v1`                                                            |
 
 Canonical policy remains in [distribution-map.md](distribution-map.md). Threat analysis is in [distribution-map-threat-model.md](distribution-map-threat-model.md).
 
@@ -15,7 +16,7 @@ DM0 invariants are authoritative. This contract **tightens** where noted and doe
 
 ## Base endpoint
 
-Production registry host is not decided. Do not invent or publish a dead endpoint (e.g. `map.engawa.dev`).
+Production registry host is frozen at `engawa-map.thierry-gilgen-ict.ch` (DM3A) but **not deployed**. Staging: `staging-engawa-map.thierry-gilgen-ict.ch`. Do not invent other endpoints (e.g. `map.engawa.dev`).
 
 Paths are frozen independently of host:
 
@@ -789,9 +790,11 @@ Future package tests must use injected/mock fetch, local test server, fixtures, 
 
 A later separately authorized end-to-end staging smoke may exist outside required normal CI.
 
-## Registry deployment requirements (DM2 — not implemented)
+## Registry deployment (DM2B — staging live; production DM3)
 
-Future registry must have: dedicated service/process, dedicated DB credentials, least privilege, HTTPS, edge rate limits, request-body limits, security headers for public dashboard, separate admin auth, no main website session reuse, secrets via deployment secret management, no secrets in repository, appropriate backups, privacy/removal contact, operational logging without product telemetry.
+Staging registry implements: dedicated service/process, dedicated DB credentials, least privilege, HTTPS, edge rate limits, request-body limits, security headers, separate admin auth (CLI only), no main website session reuse, secrets via deployment secret management, no secrets in repository, backups, privacy/removal contact path, operational logging without product telemetry.
+
+Production deployment design: [distribution-map-production-launch.md](distribution-map-production-launch.md) and registry `docs/production-deployment.md`.
 
 Dedicated registry service may share physical server with other services if **service/network/credential isolation** exists. Do not falsely claim separate physical infrastructure is required.
 

@@ -2,15 +2,16 @@
 
 The Engawa Distribution Map is an **optional public showcase** for sites built with Engawa. Joining is a deliberate one-time action by the site operator. Engawa does **not** phone home, track visitors, or send adoption data from normal application runtime.
 
-This document is the canonical policy and security contract for the future registry. It is **not** [`engawa-analytics`](roadmap.md) and not telemetry.
+This document is the canonical policy and security contract for the Distribution Map registry. It is **not** [`engawa-analytics`](roadmap.md) and not telemetry.
 
-| Field             | Value                                            |
-| ----------------- | ------------------------------------------------ |
-| Package (planned) | `@thierry-gilgen-ict/engawa-map`                 |
-| Public name       | Engawa Distribution Map                          |
-| CTA               | Join the map                                     |
-| CLI status        | **PLANNED** — not functional in current releases |
-| Default state     | `NOT_REGISTERED`                                 |
+| Field            | Value                                                                                                 |
+| ---------------- | ----------------------------------------------------------------------------------------------------- |
+| Package          | `@thierry-gilgen-ict/engawa-map` — **IMPLEMENTED_IN_REPO NOT_PUBLISHED**                              |
+| Public name      | Engawa Distribution Map                                                                               |
+| CTA              | Join the map                                                                                          |
+| CLI              | Implemented in monorepo; npm publication deferred (see [DM3A](distribution-map-production-launch.md)) |
+| Registry backend | Implemented — staging live; production not deployed                                                   |
+| Default state    | `NOT_REGISTERED`                                                                                      |
 
 There is no `distributionMap` field in `EngawaConfig` or `engawaConfigSchema`. Installing Engawa packages does not register a site.
 
@@ -40,19 +41,24 @@ The registry must be a **separate service and security boundary** from consumer 
 www.example.com
     -> normal website / public Engawa surfaces (/mcp, /llms.txt, BYA, HTML)
 
-dedicated Engawa registry host (REGISTRY_HOST = TO_BE_ANNOUNCED)
+staging Engawa registry host (STAGING_REGISTRY_HOST)
+    -> https://staging-engawa-map.thierry-gilgen-ict.ch (live, DM2B PASS)
+
+production Engawa registry host (PRODUCTION_REGISTRY_HOST — not deployed)
+    -> https://engawa-map.thierry-gilgen-ict.ch (frozen in DM3A)
+
+Each host:
     -> Distribution Map API
-    -> public map / dashboard
+    -> public showcase (production v1)
     -> isolated registry persistence
 ```
 
-| Invariant                            | Value           |
-| ------------------------------------ | --------------- |
-| `DEDICATED_REGISTRY_SERVICE`         | REQUIRED        |
-| `REGISTRY_HOST`                      | TO_BE_ANNOUNCED |
-| Registry write API on main `www` app | FORBIDDEN       |
-
-Preferred eventual hostname pattern (not fixed): e.g. `engawa-map.thierry-gilgen-ict.ch` or another dedicated Engawa registry hostname.
+| Invariant                            | Value                                             |
+| ------------------------------------ | ------------------------------------------------- |
+| `DEDICATED_REGISTRY_SERVICE`         | REQUIRED                                          |
+| `STAGING_REGISTRY_HOST`              | `staging-engawa-map.thierry-gilgen-ict.ch` (live) |
+| `PRODUCTION_REGISTRY_HOST`           | `engawa-map.thierry-gilgen-ict.ch` (not deployed) |
+| Registry write API on main `www` app | FORBIDDEN                                         |
 
 `REGISTRY_COMPROMISE_BLAST_RADIUS != MAIN_WEBSITE` — design for independent service boundaries. This does not claim perfect isolation, but the registry must not be a normal route inside the main website application.
 
@@ -64,16 +70,16 @@ MAP_REGISTRATION_FROM_RUNTIME = FORBIDDEN
 NORMAL_BUILD_DEPLOY_DOES_NOT_IMPLY_REGISTRATION
 ```
 
-**Allowed future path:**
+**Allowed path (implemented):**
 
 ```text
 developer machine
 or explicitly configured dedicated CI registration job
-    -> engawa-map CLI (PLANNED)
-    -> registry API
+    -> engawa-map CLI (monorepo / future npm)
+    -> registry API (ENGAWA_MAP_ENDPOINT)
 ```
 
-**Forbidden future paths** — these must never call the registry API:
+**Forbidden paths** — these must never call the registry API:
 
 - Visitor HTTP requests
 - MCP tools or `/mcp` handler
@@ -84,11 +90,13 @@ or explicitly configured dedicated CI registration job
 
 If CI is used, wording must be: **manual or explicitly configured dedicated CI registration job** — not generic deploy-time registration.
 
-Future register command ( **STATUS = PLANNED** — not available yet):
+Register command (monorepo today; npm after DM3D):
 
 ```bash
-# PLANNED — do not run until @thierry-gilgen-ict/engawa-map ships
-npx @thierry-gilgen-ict/engawa-map register
+# Monorepo: pnpm --filter @thierry-gilgen-ict/engawa-map ...
+# Future npm: npx @thierry-gilgen-ict/engawa-map register
+# Requires ENGAWA_MAP_ENDPOINT (staging) or production default after DM3B/DM3D
+engawa-map register --yes
 ```
 
 ## Registration lifecycle
@@ -114,7 +122,7 @@ An unauthenticated first registration cannot prove ownership of an arbitrary dom
 
 Future domain verification (deferred) may use `/.well-known/engawa-map.txt` or equivalent ownership proof in a **separate security phase**.
 
-## Planned public payload
+## Public payload
 
 Example minimal registration body (illustrative):
 
@@ -270,7 +278,7 @@ The only failed operation during a registry outage is the **explicitly invoked r
 
 ## Revocation
 
-Planned future CLI commands ( **PLANNED** ):
+CLI commands (implemented):
 
 - `register`
 - `status`
@@ -282,13 +290,13 @@ Maintainers must provide a contact or removal path for operators who lose their 
 
 Document operational facts only. Do not claim unsupported legal bases (e.g. GDPR lawful basis) without a reviewed privacy policy.
 
-The future registry backend must publish its own privacy notice before production launch.
+The production registry must publish its privacy notice before public production launch (see [DM3A contract](distribution-map-production-launch.md)).
 
 Topics to cover in that notice: deliberate operator opt-in, exact public payload, public listing purpose, delisting mechanism, retention, and contact/removal path.
 
 ## DM1A contract (frozen for implementation)
 
-DM0 policy remains authoritative. DM1A tightens the future CLI and registry API without implementing them:
+DM0 policy remains authoritative. DM1A/DM2B implemented the CLI and staging registry; production launch is [DM3A](distribution-map-production-launch.md):
 
 | Rule                                           | Value    |
 | ---------------------------------------------- | -------- |
@@ -312,5 +320,5 @@ Full contract: [distribution-map-api.md](distribution-map-api.md). Threat model:
 - [API and CLI contract (v1)](distribution-map-api.md) — frozen endpoints, schema, CLI behavior
 - [Threat model](distribution-map-threat-model.md) — registry and CLI threats
 - [Security model](security-model.md) — runtime boundaries and Distribution Map subsection
-- [Roadmap](roadmap.md) — `@thierry-gilgen-ict/engawa-map` PLANNED; registry backend separate future work
+- [Roadmap](roadmap.md) — `@thierry-gilgen-ict/engawa-map` implemented in repo; [DM3A production launch contract](distribution-map-production-launch.md)
 - [Agent integration playbook](agent-integration-playbook.md) — agents must not register without explicit user request

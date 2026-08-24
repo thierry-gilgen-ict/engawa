@@ -192,6 +192,6 @@ See [security-model.md](security-model.md) for the full threat model.
 
 Engawa does **not** phone home or track your visitors. If you choose to appear on the public Engawa Distribution Map, you can voluntarily register the site **after** integration. This feature is separate from Engawa runtime and is off unless you explicitly join.
 
-The `@thierry-gilgen-ict/engawa-map` CLI is **PLANNED** — there is no working register command in current releases.
+The `@thierry-gilgen-ict/engawa-map` CLI is implemented in this monorepo (`packages/map`). Use `ENGAWA_MAP_ENDPOINT` for staging or wait for production default after DM3D npm publish.
 
-See [Distribution Map](distribution-map.md) for policy, security boundaries, and planned lifecycle.
+See [Distribution Map](distribution-map.md) and [DM3A production launch contract](distribution-map-production-launch.md).

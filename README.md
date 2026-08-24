@@ -194,26 +194,26 @@ Example endpoints: `http://127.0.0.1:3847/llms.txt`, `http://127.0.0.1:3847/mcp`
 
 ## Documentation
 
-| Doc                                                                  | Topic                                     |
-| -------------------------------------------------------------------- | ----------------------------------------- |
-| [Integrating an existing site](docs/integrating-an-existing-site.md) | Add Engawa to a live website              |
-| [Agent integration playbook](docs/agent-integration-playbook.md)     | Coding-agent integration sequence         |
-| [Integration acceptance](docs/integration-acceptance.md)             | Done-when checklist                       |
-| [Upgrading](docs/upgrading.md)                                       | Safe consumer upgrades                    |
-| [Compatibility](docs/compatibility.md)                               | Tested package sets                       |
-| [Getting started](docs/getting-started.md)                           | Empty external project quick start        |
-| [Next.js integration](docs/integrations/nextjs.md)                   | Route handlers, host app responsibilities |
-| [Headless CMS integration](docs/integrations/headless-cms.md)        | Node/TS frontend + CMS API pattern        |
-| [Production references](docs/production-references.md)               | Live sites and portability evidence       |
-| [Content publication](docs/content-publication.md)                   | Human-public corpus rule                  |
-| [Security model](docs/security-model.md)                             | Threat model and launch checklist         |
-| [Roadmap](docs/roadmap.md)                                           | What's done and what's deferred           |
-| [Distribution Map](docs/distribution-map.md)                         | Optional community showcase (planned)     |
-| [Releasing](docs/releasing.md)                                       | Maintainer npm publish process            |
+| Doc                                                                  | Topic                                        |
+| -------------------------------------------------------------------- | -------------------------------------------- |
+| [Integrating an existing site](docs/integrating-an-existing-site.md) | Add Engawa to a live website                 |
+| [Agent integration playbook](docs/agent-integration-playbook.md)     | Coding-agent integration sequence            |
+| [Integration acceptance](docs/integration-acceptance.md)             | Done-when checklist                          |
+| [Upgrading](docs/upgrading.md)                                       | Safe consumer upgrades                       |
+| [Compatibility](docs/compatibility.md)                               | Tested package sets                          |
+| [Getting started](docs/getting-started.md)                           | Empty external project quick start           |
+| [Next.js integration](docs/integrations/nextjs.md)                   | Route handlers, host app responsibilities    |
+| [Headless CMS integration](docs/integrations/headless-cms.md)        | Node/TS frontend + CMS API pattern           |
+| [Production references](docs/production-references.md)               | Live sites and portability evidence          |
+| [Content publication](docs/content-publication.md)                   | Human-public corpus rule                     |
+| [Security model](docs/security-model.md)                             | Threat model and launch checklist            |
+| [Roadmap](docs/roadmap.md)                                           | What's done and what's deferred              |
+| [Distribution Map](docs/distribution-map.md)                         | Optional community showcase; CLI in monorepo |
+| [Releasing](docs/releasing.md)                                       | Maintainer npm publish process               |
 
 ## Distribution Map (optional)
 
-Engawa never phones home. A voluntary **Join the map** flow is **planned** for site operators who want their public Engawa integration listed in the community showcase. See [Distribution Map](docs/distribution-map.md). The CLI is not available in current releases.
+Engawa never phones home. A voluntary **Join the map** flow lets site operators list their public Engawa integration in the community showcase. The CLI is implemented in this monorepo (`packages/map`); npm publication is deferred until after production acceptance ([DM3A contract](docs/distribution-map-production-launch.md)). Staging registry is live; production is not deployed. See [Distribution Map](docs/distribution-map.md).
 
 ## Contributing
 
