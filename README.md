@@ -65,7 +65,7 @@ import {
   validateEngawaConfig,
 } from "@thierry-gilgen-ict/engawa-core";
 import { generateLlmsTxt } from "@thierry-gilgen-ict/engawa-discovery";
-import { createEngawaPublicMcpServer } from "@thierry-gilgen-ict/engawa-mcp";
+import { createEngawaPublicMcpHandler } from "@thierry-gilgen-ict/engawa-mcp";
 
 const config = validateEngawaConfig({
   site: {
@@ -100,11 +100,12 @@ const engawa = createEngawa(config, adapter);
 const resources = await engawa.listResources();
 const llmsTxt = generateLlmsTxt(engawa.config, resources);
 
-// MCP server (wire to your HTTP framework)
-const mcpServer = await createEngawaPublicMcpServer(engawa);
+// MCP handler — wire to your HTTP route (see complete example below)
+const mcpHandler = createEngawaPublicMcpHandler(engawa);
+// return mcpHandler.fetch(request);
 ```
 
-Wire `llmsTxt` to `GET /llms.txt` and the MCP server to `POST /mcp` (or use `createEngawaPublicMcpHandler` with your framework's request/response objects). See [Getting started](docs/getting-started.md) and [Next.js integration](docs/integrations/nextjs.md).
+Wire `llmsTxt` to `GET /llms.txt` and MCP to `/mcp` with host guards and rate limits. **Complete Next.js App Router example:** [docs/examples/nextjs-mcp-app-router.md](docs/examples/nextjs-mcp-app-router.md). See also [Getting started](docs/getting-started.md) and [Next.js integration](docs/integrations/nextjs.md).
 
 **React UI (optional):**
 
@@ -164,11 +165,15 @@ Full model: [docs/security-model.md](docs/security-model.md).
 
 ## Status
 
-- Current npm registry: `@thierry-gilgen-ict/engawa-core@0.1.1`, `@thierry-gilgen-ict/engawa-discovery@0.1.1`, `@thierry-gilgen-ict/engawa-mcp@0.1.1`, `@thierry-gilgen-ict/engawa-react@0.1.0`.
-- Early **v0.x** foundation on npm; packages may diverge by semver.
-- **Two production reference integrations** (see above).
-- Public read-only surface proven; authenticated and mutating capabilities **not** shipped.
-- API may change before **1.0**.
+- Current npm registry: `@thierry-gilgen-ict/engawa-core@0.1.1`, `@thierry-gilgen-ict/engawa-discovery@0.1.1`, `@thierry-gilgen-ict/engawa-mcp@0.1.1`, `@thierry-gilgen-ict/engawa-react@0.1.0`, `@thierry-gilgen-ict/engawa-map@0.1.0`.
+- Early **v0.x** foundation on npm; packages may diverge by semver; **API may change before 1.0**.
+- **Node.js 24+** required for published packages.
+- **Two production reference integrations** on Next.js (see above).
+- **Public read-only MCP only** in v0.1 — no authenticated or mutating MCP shipped.
+- **Engawa runtime does not phone home** — Distribution Map registration is voluntary and operator-initiated.
+- **Distribution Map CLI is live** on npm (`@thierry-gilgen-ict/engawa-map@0.1.0`); production registry at [engawa-map.thierry-gilgen-ict.ch](https://engawa-map.thierry-gilgen-ict.ch).
+
+Public announcement blurb: [ANNOUNCE.md](ANNOUNCE.md). Security: [SECURITY.md](SECURITY.md).
 
 ## Monorepo development
 
@@ -194,22 +199,24 @@ Example endpoints: `http://127.0.0.1:3847/llms.txt`, `http://127.0.0.1:3847/mcp`
 
 ## Documentation
 
-| Doc                                                                  | Topic                                        |
-| -------------------------------------------------------------------- | -------------------------------------------- |
-| [Integrating an existing site](docs/integrating-an-existing-site.md) | Add Engawa to a live website                 |
-| [Agent integration playbook](docs/agent-integration-playbook.md)     | Coding-agent integration sequence            |
-| [Integration acceptance](docs/integration-acceptance.md)             | Done-when checklist                          |
-| [Upgrading](docs/upgrading.md)                                       | Safe consumer upgrades                       |
-| [Compatibility](docs/compatibility.md)                               | Tested package sets                          |
-| [Getting started](docs/getting-started.md)                           | Empty external project quick start           |
-| [Next.js integration](docs/integrations/nextjs.md)                   | Route handlers, host app responsibilities    |
-| [Headless CMS integration](docs/integrations/headless-cms.md)        | Node/TS frontend + CMS API pattern           |
-| [Production references](docs/production-references.md)               | Live sites and portability evidence          |
-| [Content publication](docs/content-publication.md)                   | Human-public corpus rule                     |
-| [Security model](docs/security-model.md)                             | Threat model and launch checklist            |
-| [Roadmap](docs/roadmap.md)                                           | What's done and what's deferred              |
-| [Distribution Map](docs/distribution-map.md)                         | Optional community showcase; CLI in monorepo |
-| [Releasing](docs/releasing.md)                                       | Maintainer npm publish process               |
+| Doc                                                                      | Topic                                                                      |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| [Integrating an existing site](docs/integrating-an-existing-site.md)     | Add Engawa to a live website                                               |
+| [Agent integration playbook](docs/agent-integration-playbook.md)         | Coding-agent integration sequence                                          |
+| [Integration acceptance](docs/integration-acceptance.md)                 | Done-when checklist                                                        |
+| [Upgrading](docs/upgrading.md)                                           | Safe consumer upgrades                                                     |
+| [Compatibility](docs/compatibility.md)                                   | Tested package sets                                                        |
+| [Getting started](docs/getting-started.md)                               | Empty external project quick start                                         |
+| [Complete MCP route example](docs/examples/nextjs-mcp-app-router.md)     | Copy-paste Next.js App Router wiring                                       |
+| [Custom ContentAdapter example](docs/examples/custom-content-adapter.md) | Production-shaped adapter pattern                                          |
+| [Next.js integration](docs/integrations/nextjs.md)                       | Route handlers, host app responsibilities                                  |
+| [Headless CMS integration](docs/integrations/headless-cms.md)            | Node/TS frontend + CMS API pattern                                         |
+| [Production references](docs/production-references.md)                   | Live sites and portability evidence                                        |
+| [Content publication](docs/content-publication.md)                       | Human-public corpus rule                                                   |
+| [Security model](docs/security-model.md)                                 | Threat model and launch checklist                                          |
+| [Roadmap](docs/roadmap.md)                                               | What's done and what's deferred                                            |
+| [Distribution Map](docs/distribution-map.md)                             | Optional community showcase; `@thierry-gilgen-ict/engawa-map@0.1.0` on npm |
+| [Releasing](docs/releasing.md)                                           | Maintainer npm publish process                                             |
 
 ## Distribution Map (optional)
 

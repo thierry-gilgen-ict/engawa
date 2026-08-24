@@ -4,14 +4,14 @@
  * Does NOT use the Engawa pnpm workspace.
  *
  * Usage: node scripts/external-consumer-smoke.mjs [version]
- * Default version: 0.1.0 (registry packages until 0.1.1 is published)
+ * Default version: 0.1.1 (registry packages)
  */
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
 
-const version = process.argv[2] ?? "0.1.0";
+const version = process.argv[2] ?? "0.1.1";
 const scope = "@thierry-gilgen-ict";
 
 async function main() {

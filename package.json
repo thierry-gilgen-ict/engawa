@@ -14,6 +14,8 @@
     "typecheck": "pnpm -r run typecheck",
     "test": "vitest run",
     "smoke:external": "node scripts/external-consumer-smoke.mjs",
+    "smoke:stranger-path": "node scripts/stranger-path-smoke.mjs",
+    "smoke:live-references": "node scripts/live-reference-acceptance.mjs",
     "smoke:v011-rc": "node scripts/v011-release-candidate-smoke.mjs",
     "smoke:map-rc": "node scripts/map-release-candidate-smoke.mjs",
     "lint": "eslint .",

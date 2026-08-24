@@ -123,8 +123,12 @@ Machine routes should skip locale middleware that rewrites based on cookies when
 ## Add MCP
 
 1. Route handler for `/mcp` (or your chosen path).
-2. Use `createEngawaPublicMcpServer` with your `createEngawa` instance.
-3. Verify `resources/list`, `resources/read`, and `search_site` in development.
+2. Use `createEngawaPublicMcpHandler(engawa)` and call **`handler.fetch(request)`** in your route.
+3. Add host validation, origin validation, and rate limiting in the route layer.
+4. Export GET, POST, DELETE, and OPTIONS on the MCP path (Streamable HTTP).
+5. Verify `resources/list`, `resources/read`, and `search_site` in development.
+
+**Complete Next.js example:** [Next.js App Router MCP route](examples/nextjs-mcp-app-router.md).
 
 Public v0.x ships one tool: `search_site` (read-only, bounded).
 

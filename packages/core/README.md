@@ -69,6 +69,7 @@ Adapters define the public corpus. Engawa validates resource shape and size at t
 ## Documentation
 
 - [Getting started](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/getting-started.md)
+- [Custom ContentAdapter example](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/examples/custom-content-adapter.md)
 - [Security model](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/security-model.md)
 
 ## License

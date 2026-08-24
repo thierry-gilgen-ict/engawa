@@ -75,7 +75,7 @@ NORMAL_BUILD_DEPLOY_DOES_NOT_IMPLY_REGISTRATION
 ```text
 developer machine
 or explicitly configured dedicated CI registration job
-    -> engawa-map CLI (monorepo / future npm)
+    -> engawa-map CLI (@thierry-gilgen-ict/engawa-map@0.1.0 on npm)
     -> registry API (ENGAWA_MAP_ENDPOINT)
 ```
 

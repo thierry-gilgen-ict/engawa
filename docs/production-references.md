@@ -12,6 +12,8 @@ Engawa v0.1 packages are consumed from the public npm registry by two live produ
 | MCP              | https://www.thierry-gilgen-ict.ch/mcp                                           |
 | Markdown example | https://www.thierry-gilgen-ict.ch/field-notes/example.md (pattern; slug varies) |
 
+**Engawa package pins (production):** `@thierry-gilgen-ict/engawa-core@0.1.0`, `engawa-discovery@0.1.0`, `engawa-mcp@0.1.0`, `engawa-react@0.1.0`. Valid per [compatibility matrix](compatibility.md) (0.1.0 → 0.1.1: no API migration). New integrations should install **0.1.1** for core/discovery/mcp.
+
 **Integration characteristics**
 
 - Editorial Field Notes content model (Prisma-backed public content)
@@ -37,6 +39,8 @@ Engawa v0.1 packages are consumed from the public npm registry by two live produ
 | MCP                   | https://theoldhandofasia.ch/mcp          |
 | Markdown (DE)         | https://theoldhandofasia.ch/ankauf.md    |
 | Markdown (EN)         | https://theoldhandofasia.ch/en/ankauf.md |
+
+**Engawa package pins (production):** same as Reference 1 (`engawa-*@0.1.0`). See [compatibility matrix](compatibility.md) for the current tested release set (`0.1.1` for new strangers).
 
 **Integration characteristics**
 
