@@ -132,11 +132,7 @@ async function checkHttp(url) {
 
 async function checkHostValidation(mcpUrl) {
   try {
-    const status = await httpsPost(
-      mcpUrl,
-      { Host: "evil.example" },
-      buildMcpInitializeProbeBody(),
-    );
+    const status = await httpsPost(mcpUrl, { Host: "evil.example" }, buildMcpInitializeProbeBody());
     return classifySecurityResponse(status);
   } catch (err) {
     return classifySecurityResponse(undefined, err);
