@@ -1,3 +1,4 @@
+import { isMcpPath, lineReferencesMcp } from "./mcp.js";
 import { resolveSameOriginLink } from "./url.js";
 
 export function parseLlmsTxt(
@@ -11,15 +12,15 @@ export function parseLlmsTxt(
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;
+    if (lineReferencesMcp(trimmed)) mcpReferenced = true;
+    if (/\.md/i.test(trimmed) || /markdown/i.test(trimmed)) markdownReferenced = true;
     const urlMatch = trimmed.match(/https?:\/\/[^\s)]+/i) ?? trimmed.match(/\(([^)]+)\)/);
     const candidate = urlMatch ? (urlMatch[1] ?? urlMatch[0]) : trimmed;
-    if (/mcp/i.test(trimmed)) mcpReferenced = true;
-    if (/\.md/i.test(trimmed) || /markdown/i.test(trimmed)) markdownReferenced = true;
     try {
       const resolved = resolveSameOriginLink(base, candidate);
       if (resolved) {
         urls.push(resolved.href);
-        if (resolved.pathname.toLowerCase().includes("mcp")) mcpReferenced = true;
+        if (isMcpPath(resolved.pathname)) mcpReferenced = true;
         if (resolved.pathname.toLowerCase().endsWith(".md")) markdownReferenced = true;
       }
     } catch {

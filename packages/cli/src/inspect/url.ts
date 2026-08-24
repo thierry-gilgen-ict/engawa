@@ -1,3 +1,5 @@
+import { lookup } from "node:dns/promises";
+import { isIP } from "node:net";
 import { InspectError } from "../errors.js";
 
 const ALLOWED_SCHEMES = new Set(["http:", "https:"]);
@@ -40,32 +42,60 @@ export function isSameOrigin(a: URL, b: URL): boolean {
   return a.origin === b.origin;
 }
 
-function parseIpv4(host: string): number[] | null {
-  if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) {
-    return null;
+function normalizeIpv6Host(hostname: string): string {
+  if (hostname.startsWith("[") && hostname.endsWith("]")) {
+    return hostname.slice(1, -1);
   }
-  const parts = host.split(".").map((p) => Number(p));
-  if (parts.some((p) => p > 255)) {
-    return null;
-  }
-  return parts;
+  return hostname;
 }
 
-function isPrivateIpv4(parts: number[]): boolean {
-  if (parts[0] === 10) return true;
-  if (parts[0] === 127) return true;
-  if (parts[0] === 169 && parts[1] === 254) return true;
-  if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
-  if (parts[0] === 192 && parts[1] === 168) return true;
-  if (parts[0] === 0) return true;
-  return false;
+function parseFirstIpv6Hextet(host: string): number | undefined {
+  const normalized = normalizeIpv6Host(host).toLowerCase();
+  if (normalized === "::1" || normalized === "1") {
+    return 0;
+  }
+  const beforeDoubleColon = normalized.split("::")[0];
+  if (!beforeDoubleColon) {
+    return 0;
+  }
+  const firstSegment = beforeDoubleColon.split(":")[0];
+  if (!firstSegment) {
+    return 0;
+  }
+  const value = Number.parseInt(firstSegment, 16);
+  return Number.isNaN(value) ? undefined : value;
 }
 
-function isPrivateIpv6(host: string): boolean {
-  const lower = host.toLowerCase();
-  if (lower === "::1") return true;
-  if (lower.startsWith("fc") || lower.startsWith("fd")) return true;
-  if (lower.startsWith("fe80")) return true;
+export function isPrivateOrReservedAddress(address: string): boolean {
+  const normalized = normalizeIpv6Host(address).toLowerCase();
+  const ipVersion = isIP(normalized);
+
+  if (ipVersion === 4) {
+    const match = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(normalized);
+    if (!match) return true;
+    const octets = match.slice(1).map((part) => Number(part));
+    if (octets.some((octet) => Number.isNaN(octet) || octet < 0 || octet > 255)) {
+      return true;
+    }
+    const [a, b] = octets;
+    if (a === 127) return true;
+    if (a === 10) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 169 && b === 254) return true;
+    if (a === 0) return true;
+    return false;
+  }
+
+  if (ipVersion === 6) {
+    if (normalized === "::1") return true;
+    const firstHextet = parseFirstIpv6Hextet(normalized);
+    if (firstHextet === undefined) return true;
+    if (firstHextet >= 0xfc00 && firstHextet <= 0xfdff) return true;
+    if (firstHextet >= 0xfe80 && firstHextet <= 0xfebf) return true;
+    return false;
+  }
+
   return false;
 }
 
@@ -73,9 +103,12 @@ export function isPrivateOrLocalHost(hostname: string): boolean {
   const host = hostname.toLowerCase();
   if (host === "localhost" || host.endsWith(".localhost")) return true;
   if (host.endsWith(".local")) return true;
-  const ipv4 = parseIpv4(host);
-  if (ipv4) return isPrivateIpv4(ipv4);
-  if (host.includes(":")) return isPrivateIpv6(host);
+
+  const normalizedHost = normalizeIpv6Host(host);
+  const ipVersion = isIP(normalizedHost);
+  if (ipVersion === 4 || ipVersion === 6) {
+    return isPrivateOrReservedAddress(normalizedHost);
+  }
   return false;
 }
 
@@ -86,6 +119,51 @@ export function assertPublicTarget(url: URL, allowLocal: boolean): void {
       `Refusing to inspect private or local target ${url.hostname}. Use --allow-local to override.`,
     );
   }
+}
+
+export async function assertResolvablePublicTarget(url: URL, allowLocal: boolean): Promise<void> {
+  if (allowLocal) return;
+
+  assertPublicTarget(url, false);
+
+  const hostname = url.hostname;
+  const ipVersion = isIP(normalizeIpv6Host(hostname));
+  if (ipVersion === 4 || ipVersion === 6) {
+    return;
+  }
+
+  try {
+    const records = await lookup(hostname, { all: true });
+    for (const record of records) {
+      if (isPrivateOrReservedAddress(record.address)) {
+        throw new InspectError(
+          `Refusing to inspect target ${hostname} (resolves to private address). Use --allow-local to override.`,
+        );
+      }
+    }
+  } catch (error) {
+    if (error instanceof InspectError) {
+      throw error;
+    }
+    throw new InspectError(`DNS resolution failed for ${hostname}`);
+  }
+}
+
+export interface FetchTargetPolicy {
+  allowLocal: boolean;
+  lockOrigin?: string;
+}
+
+export async function assertFetchTargetAllowed(url: URL, policy: FetchTargetPolicy): Promise<void> {
+  if (!ALLOWED_SCHEMES.has(url.protocol)) {
+    throw new InspectError(
+      `Unsupported URL scheme: ${url.protocol} (only http and https are allowed)`,
+    );
+  }
+  if (policy.lockOrigin && url.origin !== policy.lockOrigin) {
+    throw new InspectError(`Cross-origin redirect blocked: ${url.origin}`);
+  }
+  await assertResolvablePublicTarget(url, policy.allowLocal);
 }
 
 const BINARY_EXTENSIONS = new Set([

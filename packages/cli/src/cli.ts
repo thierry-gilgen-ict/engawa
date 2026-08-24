@@ -37,7 +37,7 @@ Inspect a public website and produce an Engawa Agent Readiness Report.
 Options:
   --json              Output machine-readable JSON to stdout
   --output <path>     Write report to .json or .md file
-  --max-pages <n>     Maximum pages to fetch (default ${DEFAULT_MAX_PAGES}, max ${HARD_MAX_PAGES})
+  --max-pages <n>     Primary page crawl budget (default ${DEFAULT_MAX_PAGES}, max ${HARD_MAX_PAGES}; well-known discovery probes may run separately)
   --timeout-ms <n>    Per-request timeout in ms (default ${DEFAULT_TIMEOUT_MS})
   --allow-local       Allow localhost and private-network targets
   --help, -h          Show this help

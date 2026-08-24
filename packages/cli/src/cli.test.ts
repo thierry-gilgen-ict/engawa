@@ -9,7 +9,7 @@ import { runCli } from "./cli.js";
 import { runInspect } from "./inspect/run-inspect.js";
 import { inspectReportSchema } from "./inspect/schema.js";
 import { sanitizeTerminalText } from "./sanitize.js";
-import { startFixtureServer } from "./test-helpers/fixture-server.js";
+import { startFixtureServer, startSecondaryFixtureServer } from "./test-helpers/fixture-server.js";
 
 describe("engawa cli", () => {
   it("shows help", async () => {
@@ -220,6 +220,176 @@ describe("inspect discovery and scoring", () => {
     });
     const sanitized = sanitizeTerminalText(report.site.title ?? "");
     expect(sanitized).not.toContain("\u001b");
+    await fixture.close();
+  });
+});
+
+describe("inspect redirect and DNS policy", () => {
+  it("enforces redirect limit", async () => {
+    const fixture = await startFixtureServer({
+      redirectChain: ["/r1", "/r2", "/r3", "/r4", "/r5", "/r6", "/r7"],
+    });
+    await expect(
+      runInspect({
+        inputUrl: fixture.baseUrl,
+        maxPages: 3,
+        timeoutMs: 5000,
+        allowLocal: true,
+      }),
+    ).rejects.toThrow(/Redirect limit exceeded/i);
+    await fixture.close();
+  });
+
+  it("does not follow post-seed cross-origin redirect", async () => {
+    const secondary = await startSecondaryFixtureServer();
+    const fixture = await startFixtureServer({
+      sitemapXml: `<?xml version="1.0"?><urlset><url><loc>/cross</loc></url></urlset>`,
+      pathRedirects: { "/cross": `${secondary.baseUrl}/offsite` },
+    });
+    const report = await runInspect({
+      inputUrl: fixture.baseUrl,
+      maxPages: 5,
+      timeoutMs: 5000,
+      allowLocal: true,
+    });
+    expect(secondary.requestLog).toHaveLength(0);
+    expect(report.crawl.errors.some((e) => e.includes("Cross-origin redirect blocked"))).toBe(true);
+    await fixture.close();
+    await secondary.close();
+  });
+});
+
+describe("inspect optional discovery fail-soft", () => {
+  it("continues when robots.txt times out", async () => {
+    const fixture = await startFixtureServer({
+      hangPaths: ["/robots.txt"],
+      hangDelayMs: 200,
+    });
+    const report = await runInspect({
+      inputUrl: fixture.baseUrl,
+      maxPages: 3,
+      timeoutMs: 50,
+      allowLocal: true,
+    });
+    expect(report.schemaVersion).toBe("engawa.inspect.v1");
+    expect(report.crawl.errors.some((e) => e.includes("robots.txt"))).toBe(true);
+    await fixture.close();
+  });
+
+  it("continues when llms.txt fetch fails", async () => {
+    const fixture = await startFixtureServer({ failPaths: ["/llms.txt"] });
+    const report = await runInspect({
+      inputUrl: fixture.baseUrl,
+      maxPages: 3,
+      timeoutMs: 5000,
+      allowLocal: true,
+    });
+    expect(report.agentSurfaces.llmsTxt.exists).toBe(false);
+    expect(report.crawl.errors.some((e) => e.includes("llms.txt"))).toBe(true);
+    await fixture.close();
+  });
+
+  it("continues when a markdown sample fails", async () => {
+    const fixture = await startFixtureServer({
+      llmsTxt: "/about.md",
+      failPaths: ["/about.md"],
+    });
+    const report = await runInspect({
+      inputUrl: fixture.baseUrl,
+      maxPages: 3,
+      timeoutMs: 5000,
+      allowLocal: true,
+    });
+    expect(report.agentSurfaces.markdown.resourcesVerified).toBe(0);
+    expect(report.crawl.errors.some((e) => e.includes("markdown"))).toBe(true);
+    await fixture.close();
+  });
+});
+
+describe("inspect scoring correctness", () => {
+  it("requires canonical link for canonical metadata score", async () => {
+    const fixture = await startFixtureServer({ omitCanonical: true, title: "Only Title" });
+    const report = await runInspect({
+      inputUrl: fixture.baseUrl,
+      maxPages: 3,
+      timeoutMs: 5000,
+      allowLocal: true,
+    });
+    const canonical = report.score.categories.find((c) => c.id === "CANONICAL_METADATA_PRESENT");
+    expect(canonical?.pointsEarned).toBe(0);
+    await fixture.close();
+  });
+
+  it("awards scored categories only with evidence", async () => {
+    const fixture = await startFixtureServer({
+      markdown: { "/about.md": "# About\n\nPublic." },
+      llmsTxt: "/mcp\n/about.md",
+    });
+    const report = await runInspect({
+      inputUrl: fixture.baseUrl,
+      maxPages: 10,
+      timeoutMs: 5000,
+      allowLocal: true,
+    });
+    for (const cat of report.score.categories) {
+      if (cat.pointsEarned > 0) {
+        expect(cat.evidence.length).toBeGreaterThan(0);
+      }
+    }
+    await fixture.close();
+  });
+
+  it("does not infer agent onboarding from blind /agents 200", async () => {
+    const fixture = await startFixtureServer();
+    const report = await runInspect({
+      inputUrl: fixture.baseUrl,
+      maxPages: 5,
+      timeoutMs: 5000,
+      allowLocal: true,
+    });
+    expect(report.agentSurfaces.agentOnboarding.status).toBe("NOT_FOUND");
+    const onboarding = report.score.categories.find((c) => c.id === "AGENT_ONBOARDING_PAGE");
+    expect(onboarding?.pointsEarned).toBe(0);
+    await fixture.close();
+  });
+
+  it("rejects MCP substring false positive", async () => {
+    const fixture = await startFixtureServer({
+      llmsTxt: "/about.md",
+      extraLinks: ["/mcpherson"],
+    });
+    const report = await runInspect({
+      inputUrl: fixture.baseUrl,
+      maxPages: 5,
+      timeoutMs: 5000,
+      allowLocal: true,
+    });
+    expect(report.agentSurfaces.mcp.advertised).toBe(false);
+    await fixture.close();
+  });
+});
+
+describe("inspect crawl budget", () => {
+  it("does not overshoot primary crawl page budget", async () => {
+    const fixture = await startFixtureServer({
+      sitemapXml: `<?xml version="1.0"?><urlset>
+        <url><loc>/page1</loc></url>
+        <url><loc>/page2</loc></url>
+        <url><loc>/page3</loc></url>
+        <url><loc>/page4</loc></url>
+        <url><loc>/page5</loc></url>
+      </urlset>`,
+    });
+    const report = await runInspect({
+      inputUrl: fixture.baseUrl,
+      maxPages: 2,
+      timeoutMs: 5000,
+      allowLocal: true,
+    });
+    expect(report.crawl.pagesFetched).toBeLessThanOrEqual(2);
+    const crawlPaths = ["/page1", "/page2", "/page3", "/page4", "/page5", "/about", "/services"];
+    const crawlPageHits = fixture.requestLog.filter((p) => crawlPaths.includes(p)).length;
+    expect(crawlPageHits).toBeLessThanOrEqual(2);
     await fixture.close();
   });
 });

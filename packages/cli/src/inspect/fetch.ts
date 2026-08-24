@@ -1,5 +1,6 @@
 import { InspectError } from "../errors.js";
 import { MAX_REDIRECTS, USER_AGENT } from "./types.js";
+import { assertFetchTargetAllowed, type FetchTargetPolicy } from "./url.js";
 
 export interface FetchPageOptions {
   timeoutMs: number;
@@ -55,11 +56,18 @@ async function readBodyWithLimit(
   return { body: new TextDecoder("utf-8", { fatal: false }).decode(merged), tooLarge: false };
 }
 
-export async function fetchPage(url: string, options: FetchPageOptions): Promise<FetchPageOutcome> {
+export async function fetchPage(
+  url: string,
+  options: FetchPageOptions,
+  policy: FetchTargetPolicy,
+): Promise<FetchPageOutcome> {
   let current = url;
   let redirectCount = 0;
 
   while (true) {
+    const targetUrl = new URL(current);
+    await assertFetchTargetAllowed(targetUrl, policy);
+
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), options.timeoutMs);
     try {
@@ -91,7 +99,9 @@ export async function fetchPage(url: string, options: FetchPageOptions): Promise
         if (redirectCount > MAX_REDIRECTS) {
           throw new InspectError("Redirect limit exceeded");
         }
-        current = new URL(location, current).href;
+        const nextUrl = new URL(location, current);
+        await assertFetchTargetAllowed(nextUrl, policy);
+        current = nextUrl.href;
         continue;
       }
 
@@ -121,5 +131,34 @@ export async function fetchPage(url: string, options: FetchPageOptions): Promise
     } finally {
       clearTimeout(timeout);
     }
+  }
+}
+
+export function emptyFetchOutcome(url: string, error?: string): FetchPageOutcome {
+  return {
+    url,
+    finalUrl: url,
+    status: 0,
+    contentType: "",
+    body: "",
+    headers: {},
+    tooLarge: false,
+    error,
+  };
+}
+
+export async function safeFetchOptional(
+  url: string,
+  label: string,
+  options: FetchPageOptions,
+  policy: FetchTargetPolicy,
+  crawlErrors: string[],
+): Promise<FetchPageOutcome> {
+  try {
+    return await fetchPage(url, options, policy);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "fetch failed";
+    crawlErrors.push(`${label}: ${message}`);
+    return emptyFetchOutcome(url, message);
   }
 }

@@ -1,7 +1,8 @@
-import { fetchPage } from "./fetch.js";
+import { emptyFetchOutcome, fetchPage, safeFetchOptional } from "./fetch.js";
 import { detectFrameworkHints } from "./frameworks.js";
 import { parseHtmlDocument, detectAgentPageLinks } from "./html.js";
 import { parseLlmsTxt } from "./llms.js";
+import { isMcpUrl } from "./mcp.js";
 import { buildRecommendation } from "./recommend.js";
 import { buildRouteEntries, recordDiscoveredUrl, type RouteAccumulator } from "./routes.js";
 import { inspectReportSchema } from "./schema.js";
@@ -22,6 +23,7 @@ import {
   normalizeUrlForCrawl,
   parseTargetUrl,
   pathnameFromUrl,
+  type FetchTargetPolicy,
 } from "./url.js";
 
 async function mapPool<T, R>(
@@ -59,10 +61,15 @@ export async function runInspect(options: InspectOptions): Promise<InspectReport
   const crawlErrors: string[] = [];
   const discovered = new Map<string, RouteAccumulator>();
   const fetchOpts = { timeoutMs: options.timeoutMs, maxBodyBytes: MAX_BODY_BYTES };
+  const seedPolicy: FetchTargetPolicy = { allowLocal: options.allowLocal };
 
-  const seedFetch = await fetchPage(input.href, fetchOpts);
+  const seedFetch = await fetchPage(input.href, fetchOpts, seedPolicy);
   const finalUrl = new URL(seedFetch.finalUrl);
   const origin = new URL(finalUrl.origin);
+  const crawlPolicy: FetchTargetPolicy = {
+    allowLocal: options.allowLocal,
+    lockOrigin: origin.origin,
+  };
 
   recordDiscoveredUrl(discovered, finalUrl, "seed");
 
@@ -93,9 +100,9 @@ export async function runInspect(options: InspectOptions): Promise<InspectReport
   const llmsUrl = new URL("/llms.txt", origin);
 
   const [robotsFetch, defaultSitemapFetch, llmsFetch] = await Promise.all([
-    fetchPage(robotsUrl.href, fetchOpts),
-    fetchPage(sitemapUrl.href, fetchOpts),
-    fetchPage(llmsUrl.href, fetchOpts),
+    safeFetchOptional(robotsUrl.href, "robots.txt", fetchOpts, crawlPolicy, crawlErrors),
+    safeFetchOptional(sitemapUrl.href, "sitemap.xml", fetchOpts, crawlPolicy, crawlErrors),
+    safeFetchOptional(llmsUrl.href, "llms.txt", fetchOpts, crawlPolicy, crawlErrors),
   ]);
 
   let sitemapDiscovered = false;
@@ -123,7 +130,9 @@ export async function runInspect(options: InspectOptions): Promise<InspectReport
     if (seenSitemaps.has(sm)) continue;
     seenSitemaps.add(sm);
     const smFetch =
-      sm === defaultSitemapFetch.finalUrl ? defaultSitemapFetch : await fetchPage(sm, fetchOpts);
+      sm === defaultSitemapFetch.finalUrl
+        ? defaultSitemapFetch
+        : await safeFetchOptional(sm, `sitemap ${sm}`, fetchOpts, crawlPolicy, crawlErrors);
     if (smFetch.status < 200 || smFetch.status >= 300 || !smFetch.body) continue;
     sitemapDiscovered = true;
     if (isSitemapIndex(smFetch.body)) {
@@ -131,7 +140,13 @@ export async function runInspect(options: InspectOptions): Promise<InspectReport
       for (const child of childSitemaps.slice(0, 3)) {
         if (seenSitemaps.has(child)) continue;
         seenSitemaps.add(child);
-        const childFetch = await fetchPage(child, fetchOpts);
+        const childFetch = await safeFetchOptional(
+          child,
+          `sitemap ${child}`,
+          fetchOpts,
+          crawlPolicy,
+          crawlErrors,
+        );
         if (childFetch.body) {
           sitemapPageUrls.push(...extractSitemapUrls(childFetch.body, origin, options.maxPages));
         }
@@ -188,24 +203,17 @@ export async function runInspect(options: InspectOptions): Promise<InspectReport
   const maxPages = options.maxPages;
 
   while (queue.length > 0 && pagesFetched < maxPages) {
-    const batch = queue.splice(0, MAX_CONCURRENCY);
+    const remaining = maxPages - pagesFetched;
+    const batch = queue.splice(0, Math.min(MAX_CONCURRENCY, remaining, queue.length));
     const batchResults = await mapPool(batch, MAX_CONCURRENCY, async (href) => {
       try {
-        const page = await fetchPage(href, fetchOpts);
+        const page = await fetchPage(href, fetchOpts, crawlPolicy);
         return { href, page, error: undefined as string | undefined };
       } catch (error) {
         const message = error instanceof Error ? error.message : "fetch failed";
         return {
           href,
-          page: {
-            url: href,
-            finalUrl: href,
-            status: 0,
-            contentType: "",
-            body: "",
-            headers: {},
-            tooLarge: false,
-          },
+          page: emptyFetchOutcome(href, message),
           error: message,
         };
       }
@@ -219,7 +227,6 @@ export async function runInspect(options: InspectOptions): Promise<InspectReport
         continue;
       }
       if (page.error) crawlErrors.push(`${href}: ${page.error}`);
-      if (!isSameOrigin(new URL(page.finalUrl), origin)) continue;
 
       let parsed: ReturnType<typeof parseHtmlDocument> | undefined;
       if (isHtmlContent(page.contentType) && page.body) {
@@ -268,7 +275,13 @@ export async function runInspect(options: InspectOptions): Promise<InspectReport
   const markdownSamplePaths: string[] = [];
   const markdownToSample = [...markdownAlternateUrls].slice(0, MAX_MARKDOWN_SAMPLES);
   for (const mdUrl of markdownToSample) {
-    const mdFetch = await fetchPage(mdUrl, fetchOpts);
+    const mdFetch = await safeFetchOptional(
+      mdUrl,
+      `markdown ${mdUrl}`,
+      fetchOpts,
+      crawlPolicy,
+      crawlErrors,
+    );
     const path = pathnameFromUrl(new URL(mdUrl));
     if (
       mdFetch.status >= 200 &&
@@ -284,12 +297,12 @@ export async function runInspect(options: InspectOptions): Promise<InspectReport
 
   const mcpEvidence: string[] = [];
   let mcpAdvertised = llmsParsed.mcpReferenced;
-  if (llmsParsed.urls.some((u) => u.toLowerCase().includes("/mcp"))) {
+  if (llmsParsed.urls.some((u) => isMcpUrl(u))) {
     mcpAdvertised = true;
     mcpEvidence.push("llms.txt references /mcp");
   }
   for (const p of fetchedPages) {
-    if (p.parsed?.links.some((l) => l.toLowerCase().includes("/mcp"))) {
+    if (p.parsed?.links.some((l) => isMcpUrl(l))) {
       mcpAdvertised = true;
       mcpEvidence.push("same-origin link references MCP");
       break;
@@ -297,10 +310,6 @@ export async function runInspect(options: InspectOptions): Promise<InspectReport
   }
 
   const agentEvidence = parsedSeed ? detectAgentPageLinks(parsedSeed, finalUrl) : [];
-  const agentsProbe = await fetchPage(new URL("/agents", origin).href, fetchOpts);
-  if (agentsProbe.status >= 200 && agentsProbe.status < 400) {
-    agentEvidence.push(new URL("/agents", origin).href);
-  }
 
   const frameworkHints = detectFrameworkHints(
     parsedSeed ?? { links: [], markdownAlternates: [], hreflang: [] },
@@ -313,28 +322,32 @@ export async function runInspect(options: InspectOptions): Promise<InspectReport
   for (const h of parsedSeed?.hreflang ?? []) locales.add(h);
 
   const routes = buildRouteEntries(discovered, origin);
+  const candidateRouteCount = routes.filter((r) => r.engawaCandidate).length;
 
-  const canonicalPresent = Boolean(parsedSeed?.canonicalUrl || parsedSeed?.title);
+  const canonicalPresent = Boolean(parsedSeed?.canonicalUrl);
   const llmsTxtFull =
     llmsFetch.status >= 200 && llmsFetch.status < 300 && llmsFetch.body.trim().length > 0;
   const markdownScoreFull = markdownVerified > 0;
+  const structuredRouteDiscovery = candidateRouteCount > 3 && !sitemapDiscovered;
+
+  const routeDiscoveryEvidence = sitemapDiscovered
+    ? ["sitemap.xml or robots.txt sitemap"]
+    : structuredRouteDiscovery
+      ? [`${candidateRouteCount} same-origin public routes discovered`]
+      : [];
 
   const score = computeScore({
     siteReachable,
     canonicalPresent,
-    sitemapOrStructuredDiscovery: sitemapDiscovered || routes.length > 3,
+    sitemapOrStructuredDiscovery: sitemapDiscovered || structuredRouteDiscovery,
     llmsTxtFull,
     markdownFull: markdownScoreFull,
     mcpAdvertised,
     agentOnboardingFound: agentEvidence.length > 0,
     evidence: {
       siteReachable: siteReachable ? [`HTTP ${seedFetch.status}`] : [`HTTP ${seedFetch.status}`],
-      canonical: canonicalPresent
-        ? ([parsedSeed?.canonicalUrl ? "canonical link" : "title present"].filter(
-            Boolean,
-          ) as string[])
-        : [],
-      sitemap: sitemapDiscovered ? ["sitemap.xml or robots.txt sitemap"] : [],
+      canonical: canonicalPresent ? ["canonical link"] : [],
+      sitemap: routeDiscoveryEvidence,
       llmsTxt: llmsTxtFull ? ["/llms.txt OK"] : [],
       markdown: markdownScoreFull ? [`${markdownVerified} markdown resource(s) verified`] : [],
       mcp: mcpAdvertised ? mcpEvidence : [],

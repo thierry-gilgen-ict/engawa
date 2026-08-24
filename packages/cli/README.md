@@ -14,6 +14,8 @@ Deterministic **Engawa Inspector** for existing public websites.
 - Candidate public corpus inventory — **always `HUMAN_REVIEW_REQUIRED`**
 - Deterministic Agent Readiness Score (0–100) for machine-readable surfaces
 
+`--max-pages` controls the **primary page crawl budget** (HTML pages fetched from the discovered queue). A small bounded set of well-known discovery probes (`robots.txt`, `sitemap.xml`, `llms.txt`, limited Markdown samples) may run separately; all requests remain globally bounded.
+
 ## What it does NOT do
 
 - Does not execute JavaScript on inspected pages
