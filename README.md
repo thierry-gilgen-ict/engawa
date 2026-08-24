@@ -1,18 +1,37 @@
-# Engawa
+# Engawa 縁側
 
-The open toolkit for agent-native websites.
+![Engawa — a threshold between the human web and the agent web](docs/assets/engawa-hero.png)
 
-**Bring your agent.**
+> **Get Your Website Agent-Ready.**
 
-A website gets two first-class interfaces: one for humans (HTML) and one for AI agents (structured discovery, markdown, MCP). Visitors can use the agent they already trust instead of another embedded chatbot on your site.
+**The open toolkit for agent-native websites. Bring your agent.**
 
-## Why Engawa
+In traditional Japanese architecture, an **engawa (縁側)** is the narrow transitional space running between the interior of a building and the outside — often between rooms and a garden. It is neither fully inside nor fully outside: it is a threshold that connects the two.
 
-Traditional websites optimize for humans browsing HTML. Agents scraping that HTML get noisy, incomplete, or stale context. Engawa gives agents a deliberate read surface—markdown pages, `llms.txt`, and MCP resources—while you keep full control of what is public.
+**Engawa brings that idea to the web.** It creates a deliberate interface between your website and AI agents — giving machines a clean, structured way to discover and understand the public information your site already exposes to people.
 
-Engawa does not replace your site CMS or framework. It sits beside your human routes and exposes only what you register through a **content adapter**.
+Websites were built for people browsing HTML. AI agents increasingly need to understand those same websites, but scraping pages is noisy, inconsistent, and gives site owners little control over what the machine interface actually is.
 
-## What Engawa gives a website
+**Engawa makes your website agent-ready.** It adds intentional machine-readable surfaces alongside your existing human website — structured public content, discovery, Markdown, MCP, and Bring Your Agent UX — while you keep control of what is exposed.
+
+**One website. Two first-class interfaces:** HTML for people, structured interfaces for agents.
+
+Engawa does not replace your website. Engawa does not replace your CMS. Engawa does not add another proprietary chatbot. Engawa gives the existing website a deliberate agent interface.
+
+## What Engawa does
+
+With Engawa, your website can:
+
+- **Be understood by agents** through clean, intentional public content instead of raw HTML scraping.
+- **Be discovered by agents** through `llms.txt` and machine-readable metadata.
+- **Expose structured content** as deterministic Markdown resources.
+- **Offer a safe public MCP interface** for resource discovery, reading, and bounded search.
+- **Support Bring Your Agent** so visitors can use the AI tool they already trust.
+- **Stay under your control** — your adapter defines the public corpus and Engawa is read-only by default.
+
+No runtime phone-home. Joining the public Engawa Distribution Map is optional and operator-initiated.
+
+## Agent surfaces
 
 | Surface                  | Purpose                                                         |
 | ------------------------ | --------------------------------------------------------------- |
