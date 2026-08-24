@@ -214,7 +214,7 @@ Example endpoints: `http://127.0.0.1:3847/llms.txt`, `http://127.0.0.1:3847/mcp`
 | Using a **coding agent** to integrate Engawa         | [Agent integration playbook](docs/agent-integration-playbook.md) · [copy-paste prompt](docs/prompts/integrate-engawa.md) |
 | **Upgrading** an existing Engawa integration         | [Upgrading](docs/upgrading.md) · [Compatibility](docs/compatibility.md)                                                  |
 | Starting from an **empty project**                   | [Getting started](docs/getting-started.md)                                                                               |
-| Working **in this monorepo**                         | [AGENTS.md](AGENTS.md) · [CONTRIBUTING.md](CONTRIBUTING.md)                                                              |
+| Working **in this monorepo**                         | [AGENTS.md](AGENTS.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [Engawa Inspector (source)](packages/cli/README.md)        |
 
 ## Documentation
 

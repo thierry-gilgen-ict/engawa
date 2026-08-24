@@ -43,6 +43,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 - [Distribution Map API contract](distribution-map-api.md) — frozen v1 registry/CLI contract (DM1A)
 - [Distribution Map threat model](distribution-map-threat-model.md) — CLI and registry threats (DM1A)
 - [Roadmap](roadmap.md)
+- [Engawa Inspector CLI (source)](../../packages/cli/README.md) — `engawa inspect` readiness reports
 - [Releasing](releasing.md) — maintainer npm publish
 - [Provider capability matrix](providers/provider-capability-matrix.md)
 - [Launch kit (internal)](launch/launch-kit.md)
