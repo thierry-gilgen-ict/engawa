@@ -52,5 +52,6 @@ Start here (external consumer repos):
 - [CONTRIBUTING.md](CONTRIBUTING.md) — setup, tests, PR expectations
 - [docs/security-model.md](docs/security-model.md)
 - [docs/releasing.md](docs/releasing.md) — maintainer npm publish (not consumer upgrades)
+- [docs/release-and-operations.md](docs/release-and-operations.md) — post-launch release and ops runbook
 
 Do not duplicate full guides in this file—follow the links above.

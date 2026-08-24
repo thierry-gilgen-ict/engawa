@@ -16,4 +16,5 @@ Thumbs.db
 coverage/
 .idea/
 .vscode/
+release-artifacts/
 *.swp
