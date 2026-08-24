@@ -52,6 +52,22 @@ describe("url policy", () => {
     }
   });
 
+  it("blocks full IPv4 240.0.0.0/4 reserved range", () => {
+    const blocked = [
+      "240.0.0.1",
+      "254.255.255.255",
+      "255.0.0.1",
+      "255.1.2.3",
+      "255.255.255.254",
+      "255.255.255.255",
+    ];
+    for (const addr of blocked) {
+      expect(isPrivateOrReservedAddress(addr)).toBe(true);
+    }
+    expect(isPrivateOrReservedAddress("8.8.8.8")).toBe(false);
+    expect(isPrivateOrReservedAddress("1.1.1.1")).toBe(false);
+  });
+
   it("blocks IPv6 unspecified, multicast, and documentation ranges", () => {
     expect(isPrivateOrReservedAddress("::")).toBe(true);
     expect(isPrivateOrReservedAddress("ff02::1")).toBe(true);

@@ -77,7 +77,7 @@ function parseIpv4Octets(dotted: string): number[] | null {
 }
 
 function isPrivateOrReservedIpv4Octets(octets: number[]): boolean {
-  const [a, b, c, d] = octets;
+  const [a, b, c] = octets;
   if (a === 0) return true;
   if (a === 10) return true;
   if (a === 100 && b >= 64 && b <= 127) return true;
@@ -90,8 +90,7 @@ function isPrivateOrReservedIpv4Octets(octets: number[]): boolean {
   if (a === 198 && b === 51 && c === 100) return true;
   if (a === 203 && b === 0 && c === 113) return true;
   if (a >= 224 && a <= 239) return true;
-  if (a >= 240 && a <= 254) return true;
-  if (a === 255 && b === 255 && c === 255 && d === 255) return true;
+  if (a >= 240) return true;
   return false;
 }
 
