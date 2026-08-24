@@ -72,7 +72,9 @@ if (resolveRegistryEndpoint() !== DEFAULT_REGISTRY_ENDPOINT) {
 console.log("ENGAWA_MAP_RELEASE_CANDIDATE_PACK_SMOKE = PASS");
 `;
       await writeFile(join(smokeDir, "smoke.mjs"), smokeCode, "utf8");
-      execSync("node smoke.mjs", { cwd: smokeDir, stdio: "inherit" });
+      const smokeEnv = { ...process.env, npm_config_registry: "https://registry.npmjs.org" };
+      delete smokeEnv.ENGAWA_MAP_ENDPOINT;
+      execSync("node smoke.mjs", { cwd: smokeDir, stdio: "inherit", env: smokeEnv });
     } finally {
       await rm(smokeDir, { recursive: true, force: true });
     }

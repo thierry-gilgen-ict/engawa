@@ -46,6 +46,22 @@ describe("registry endpoint rules", () => {
     expect(DEFAULT_REGISTRY_ENDPOINT).toBe("https://engawa-map.thierry-gilgen-ict.ch");
   });
 
+  it("rejects empty explicit argument without falling back to production", () => {
+    delete process.env.ENGAWA_MAP_ENDPOINT;
+    expect(() => resolveRegistryEndpoint("")).toThrow(/must not be empty/i);
+  });
+
+  it("rejects empty process.env without falling back to production", () => {
+    process.env.ENGAWA_MAP_ENDPOINT = "";
+    expect(() => resolveRegistryEndpoint()).toThrow(/must not be empty/i);
+  });
+
+  it("rejects whitespace-only endpoint without falling back to production", () => {
+    expect(() => resolveRegistryEndpoint("   ")).toThrow(/must not be empty/i);
+    process.env.ENGAWA_MAP_ENDPOINT = "  \t  ";
+    expect(() => resolveRegistryEndpoint()).toThrow(/must not be empty/i);
+  });
+
   it("uses explicit staging override when set", () => {
     expect(resolveRegistryEndpoint("https://staging-engawa-map.thierry-gilgen-ict.ch")).toBe(
       "https://staging-engawa-map.thierry-gilgen-ict.ch",
