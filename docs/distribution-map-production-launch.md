@@ -6,7 +6,7 @@ Design and freeze contract for production launch. **No production deployment in 
 
 | Item                         | Status                                                                                 |
 | ---------------------------- | -------------------------------------------------------------------------------------- |
-| `ENGAWA_MAP_CLI_IMPLEMENTED` | YES — monorepo `packages/map`; **not** on npm                                          |
+| `ENGAWA_MAP_CLI_IMPLEMENTED` | YES — `@thierry-gilgen-ict/engawa-map@0.1.0` on npm                                    |
 | `REGISTRY_IMPLEMENTED`       | YES — [engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry) |
 | `LIVE_STAGING`               | YES — `https://staging-engawa-map.thierry-gilgen-ict.ch`                               |
 | `DM2B_STAGING_ACCEPTANCE`    | PASS (accepted SHA `61623df1422206d86fc0b4aee39e1f843440faa9`)                         |
@@ -325,13 +325,15 @@ Do not publish the CLI until production has passed DM3C acceptance.
 
 OAuth, authenticated MCP tools, user accounts, browser admin UI, domain verification, token rotation, telemetry, analytics, `engawa-analytics`, geolocation, automatic crawling, screenshots, provider integrations, `engawa-nextjs`.
 
-## DM3B implementation status
+## DM3D release status
 
-CLI_DEFAULT_PRODUCTION_ENDPOINT = IMPLEMENTED
-PRODUCTION_SHOWCASE = IMPLEMENTED_IN_REPO (registry)
-PRODUCTION_DEPLOY_ARTIFACTS = IMPLEMENTED_IN_REPO (registry)
-PRODUCTION_DEPLOYMENT = NOT_YET
-NPM_PUBLICATION = NO
+```text
+PRODUCTION_REGISTRY = LIVE
+PRODUCTION_ACCEPTANCE = PASS
+ENGAWA_MAP_NPM_PUBLICATION = @thierry-gilgen-ict/engawa-map@0.1.0
+DM3C = CLOSED
+DM3D = RELEASED
+```
 
 ## Related documents
 

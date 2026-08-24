@@ -1,18 +1,19 @@
 # @thierry-gilgen-ict/engawa-map
 
-Optional CLI client for the [Engawa Distribution Map](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/distribution-map.md). This package is **registry-client tooling only** — it does not run in website runtime, MCP, or React.
+Optional CLI for the [Engawa Distribution Map](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/distribution-map.md). Registry-client tooling only — it does **not** run in website runtime, MCP, or React. Engawa never phones home from normal application packages.
 
-**Status:** Implemented in this monorepo. Not published to npm. Registry is a separate service ([engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry)); staging is live.
+**Status:** `@thierry-gilgen-ict/engawa-map@0.1.0` on npm. Production registry is live at [engawa-map.thierry-gilgen-ict.ch](https://engawa-map.thierry-gilgen-ict.ch).
 
 ## Requirements
 
 - Node.js 24+
-- Registry endpoint: defaults to `https://engawa-map.thierry-gilgen-ict.ch` when `ENGAWA_MAP_ENDPOINT` is unset (DM3B). Override for staging: `https://staging-engawa-map.thierry-gilgen-ict.ch`
+- Default registry endpoint: `https://engawa-map.thierry-gilgen-ict.ch` when `ENGAWA_MAP_ENDPOINT` is unset
+- Staging override: `ENGAWA_MAP_ENDPOINT=https://staging-engawa-map.thierry-gilgen-ict.ch`
 
-## Install (monorepo; npm after DM3D)
+## Install
 
 ```bash
-pnpm add -D @thierry-gilgen-ict/engawa-map
+npm install --save-dev @thierry-gilgen-ict/engawa-map
 ```
 
 ## Configuration
@@ -38,25 +39,31 @@ Secrets live in `.engawa-map.local.json` (gitignored) or `ENGAWA_MAP_TOKEN` for 
 ## Commands
 
 ```bash
-engawa-map register          # interactive confirmation (default: no)
-engawa-map register --dry-run
-engawa-map register --yes    # non-interactive CI / dedicated jobs
-engawa-map status
-engawa-map unregister
+npx engawa-map register          # interactive confirmation (default: no)
+npx engawa-map register --dry-run
+npx engawa-map register --yes    # non-interactive deliberate registration
+npx engawa-map status
+npx engawa-map unregister
 ```
 
 `--dry-run` prints the exact registration JSON with zero network calls and zero local writes.
 
+## Lifecycle
+
+Registration is **voluntary** and **operator-initiated**. The first successful registration is always `PENDING`. Sites become publicly listed only after **manual approval**. There is no automatic publish and no runtime phone-home.
+
 ## Security notes
 
 - Client-generated 256-bit site token; server receives SHA-256 hash only via `Engawa-Map-Site-Token-Hash`
+- Raw bearer token stays local; server stores hash only and never returns the raw token
 - No `--token` flag; no `.env` scanning; no application code execution
 - Package versions read from `node_modules` metadata only
-- Registry responses validated with strict Zod schemas; terminal output sanitized
+- Registry responses validated with strict schemas; terminal output sanitized
 - See [distribution-map-api.md](../../docs/distribution-map-api.md) and [distribution-map-threat-model.md](../../docs/distribution-map-threat-model.md)
 
 ## Related
 
+- Public showcase: [engawa-map.thierry-gilgen-ict.ch](https://engawa-map.thierry-gilgen-ict.ch)
 - [Distribution Map policy](../../docs/distribution-map.md)
 - [API contract](../../docs/distribution-map-api.md)
-- [DM3A production launch contract](../../docs/distribution-map-production-launch.md)
+- [Production launch contract](../../docs/distribution-map-production-launch.md)

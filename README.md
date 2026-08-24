@@ -213,7 +213,7 @@ Example endpoints: `http://127.0.0.1:3847/llms.txt`, `http://127.0.0.1:3847/mcp`
 
 ## Distribution Map (optional)
 
-Engawa never phones home. A voluntary **Join the map** flow lets site operators list their public Engawa integration in the community showcase. The CLI is implemented in this monorepo (`packages/map`); npm publication is deferred until after production acceptance ([DM3A contract](docs/distribution-map-production-launch.md)). Staging registry is live; production is not deployed. See [Distribution Map](docs/distribution-map.md).
+Engawa never phones home. A voluntary **Join the map** flow lets site operators list their public Engawa integration at [engawa-map.thierry-gilgen-ict.ch](https://engawa-map.thierry-gilgen-ict.ch). Install `@thierry-gilgen-ict/engawa-map@0.1.0` and run `npx engawa-map register`. First registration is `PENDING`; public listing requires manual approval. See [Distribution Map](docs/distribution-map.md).
 
 ## Contributing
 
