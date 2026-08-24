@@ -12,6 +12,53 @@ const root = process.cwd();
 const scope = "@thierry-gilgen-ict/engawa-map";
 const mapDir = join(root, "packages/map");
 
+const REQUIRED_TARBALL_PATHS = [
+  "package.json",
+  "README.md",
+  "LICENSE",
+  "dist/cli.js",
+  "dist/index.js",
+  "dist/index.d.ts",
+];
+
+const FORBIDDEN_TARBALL_PATTERNS = [
+  /\.test\.js$/,
+  /\.test\.js\.map$/,
+  /\.test\.d\.ts$/,
+  /\.test\.d\.ts\.map$/,
+  /test-helpers/,
+];
+
+function listTarballEntries(tarballPath) {
+  const listing = execSync(`tar -tzf "${tarballPath}"`, { encoding: "utf8" });
+  return listing
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => line.replace(/^package\//, ""));
+}
+
+function verifyTarballContents(tarballPath) {
+  const entries = listTarballEntries(tarballPath);
+
+  for (const required of REQUIRED_TARBALL_PATHS) {
+    if (!entries.includes(required)) {
+      throw new Error(`Required tarball entry missing: ${required}`);
+    }
+  }
+
+  for (const entry of entries) {
+    for (const pattern of FORBIDDEN_TARBALL_PATTERNS) {
+      if (pattern.test(entry)) {
+        throw new Error(`Forbidden test artifact in tarball: ${entry}`);
+      }
+    }
+  }
+
+  console.log("MAP_RC_RUNTIME_FILES_PRESENT = YES");
+  console.log("MAP_RC_TEST_ARTIFACTS_INCLUDED = NO");
+}
+
 async function main() {
   if (!existsSync(join(mapDir, "dist/cli.js"))) {
     console.error("Run pnpm build first");
@@ -31,6 +78,8 @@ async function main() {
     if (pkgJson.version !== "0.1.0") {
       throw new Error(`Unexpected map version: ${pkgJson.version}`);
     }
+
+    verifyTarballContents(tarballPath);
 
     const smokeDir = await mkdtemp(join(tmpdir(), "engawa-map-rc-smoke-"));
     try {
@@ -75,6 +124,7 @@ console.log("ENGAWA_MAP_RELEASE_CANDIDATE_PACK_SMOKE = PASS");
       const smokeEnv = { ...process.env, npm_config_registry: "https://registry.npmjs.org" };
       delete smokeEnv.ENGAWA_MAP_ENDPOINT;
       execSync("node smoke.mjs", { cwd: smokeDir, stdio: "inherit", env: smokeEnv });
+      console.log("MAP_RC_PACK_INSTALL_SMOKE = PASS");
     } finally {
       await rm(smokeDir, { recursive: true, force: true });
     }
