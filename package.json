@@ -10,7 +10,7 @@
   },
   "packageManager": "pnpm@9.15.9",
   "scripts": {
-    "build": "pnpm --filter @thierry-gilgen-ict/engawa-core build && pnpm --filter @thierry-gilgen-ict/engawa-discovery build && pnpm --filter @thierry-gilgen-ict/engawa-mcp build && pnpm --filter @thierry-gilgen-ict/engawa-react build && pnpm --filter @thierry-gilgen-ict/engawa-map build && pnpm --filter minimal-site build",
+    "build": "pnpm --filter @thierry-gilgen-ict/engawa-core build && pnpm --filter @thierry-gilgen-ict/engawa-discovery build && pnpm --filter @thierry-gilgen-ict/engawa-mcp build && pnpm --filter @thierry-gilgen-ict/engawa-react build && pnpm --filter @thierry-gilgen-ict/engawa-map build && pnpm --filter @thierry-gilgen-ict/engawa-cli build && pnpm --filter minimal-site build",
     "typecheck": "pnpm -r run typecheck",
     "test": "vitest run",
     "smoke:external": "node scripts/external-consumer-smoke.mjs",
