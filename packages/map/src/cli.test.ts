@@ -58,13 +58,20 @@ describe("cli", () => {
     expect(code).toBe(1);
   });
 
-  it("reports missing endpoint without stack trace", async () => {
+  it("uses production default when endpoint unset", async () => {
     const projectRoot = await createTestProject();
     process.chdir(projectRoot);
     delete process.env.ENGAWA_MAP_ENDPOINT;
+    const fetchSpy = vi.fn(async (input) => {
+      expect(String(input)).toContain("https://engawa-map.thierry-gilgen-ict.ch");
+      throw new Error("blocked");
+    });
+    vi.stubGlobal("fetch", fetchSpy);
 
     const code = await runCli(["register", "--yes"]);
     expect(code).toBe(1);
+    expect(fetchSpy).toHaveBeenCalled();
+    vi.unstubAllGlobals();
   });
 
   it("reports malformed package.json without stack trace", async () => {

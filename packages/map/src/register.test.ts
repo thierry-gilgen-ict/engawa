@@ -53,22 +53,23 @@ describe("register command", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("fails with MISSING_ENDPOINT before writing secrets", async () => {
+  it("targets production default when env unset", async () => {
     const projectRoot = await createTestProject();
     delete process.env.ENGAWA_MAP_ENDPOINT;
-    const fetchSpy = vi.fn();
+    const fetchSpy = vi.fn(async (input) => {
+      expect(String(input)).toContain("https://engawa-map.thierry-gilgen-ict.ch");
+      throw new Error("blocked");
+    });
 
-    await expect(
-      runRegister({
-        cwd: projectRoot,
-        yes: true,
-        fetchImpl: fetchSpy,
-        log: () => undefined,
-      }),
-    ).rejects.toThrow(/MISSING_ENDPOINT/);
+    const code = await runRegister({
+      cwd: projectRoot,
+      yes: true,
+      fetchImpl: fetchSpy,
+      log: () => undefined,
+    });
 
-    expect(fetchSpy).not.toHaveBeenCalled();
-    await expect(access(join(projectRoot, ".engawa-map.local.json"))).rejects.toThrow();
+    expect(code).toBe(1);
+    expect(fetchSpy).toHaveBeenCalled();
   });
 
   it("stops on ALREADY_REGISTERED before network", async () => {
