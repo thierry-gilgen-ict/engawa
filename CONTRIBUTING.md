@@ -57,7 +57,7 @@ Reference sites (Next.js) keep host-specific route handlers, guards, and rate li
 
 - Follow semver for published packages.
 - Do not republish existing npm versions.
-- See [docs/releasing.md](docs/releasing.md) for maintainer publish flow.
+- See [docs/releasing.md](docs/releasing.md) for maintainer publish flow and [docs/release-and-operations.md](docs/release-and-operations.md) for post-launch operations.
 
 ### CHANGELOG UPGRADE_IMPACT
 
