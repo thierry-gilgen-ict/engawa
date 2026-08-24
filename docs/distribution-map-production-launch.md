@@ -171,30 +171,43 @@ Production deploy artifacts and `deploy/production/` layout are **DM3B** scope.
 
 Before public production launch, publish a privacy notice on the production hostname covering:
 
-| Topic                  | Accurate v1 statement                                                      |
-| ---------------------- | -------------------------------------------------------------------------- |
-| Voluntary registration | Operator-initiated CLI registration only                                   |
-| Public listing purpose | Community showcase of Engawa-powered public sites                          |
-| Public fields          | Exact registry fields listed above                                         |
-| Lifecycle              | `PENDING` → manual approval → `LISTED`; delist → `DELISTED`                |
-| Token model            | Site-scoped bearer token; hash-only server storage; shown once at register |
-| Retention              | Registry DB until operator delists or maintainer removes                   |
-| Delisting / removal    | Operator `unregister` or maintainer contact                                |
-| Abuse                  | Operational rate limits; manual moderation                                 |
-| Visitor telemetry      | **None** — no page views, MCP queries, prompts, BYA context                |
-| Crawling               | **No** automatic website crawling or canonical URL fetch                   |
+| Topic                  | Accurate v1 statement                                                                                                                                                                                                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Voluntary registration | Operator-initiated CLI registration only                                                                                                                                                                                                                                              |
+| Public listing purpose | Community showcase of Engawa-powered public sites                                                                                                                                                                                                                                     |
+| Public fields          | Exact registry fields listed above                                                                                                                                                                                                                                                    |
+| Lifecycle              | `PENDING` → manual approval → `LISTED`; delist → `DELISTED`                                                                                                                                                                                                                           |
+| Token model            | Site-scoped bearer token generated and retained client-side (`.engawa-map.local.json` or `ENGAWA_MAP_TOKEN` for dedicated CI); registration sends only SHA-256 hash; server stores hash only and never returns the raw token; CLI does not print the raw token on successful register |
+| Public visibility      | Until delisted (`LISTED` or `PENDING` on non-public status endpoints only)                                                                                                                                                                                                            |
+| After delisting        | Record becomes non-public immediately; `token_hash` revoked (`NULL`); non-secret `DELISTED` row remains in registry DB under v1 retention policy until maintainer deletion — **not** hard-deleted by `unregister`                                                                     |
+| Delisting / removal    | Operator `unregister` (token required) or maintainer contact for lost-token / abuse cases                                                                                                                                                                                             |
+| Abuse                  | Operational rate limits; manual moderation                                                                                                                                                                                                                                            |
+| Visitor telemetry      | **None** — no page views, MCP queries, prompts, BYA context                                                                                                                                                                                                                           |
+| Crawling               | **No** automatic website crawling or canonical URL fetch                                                                                                                                                                                                                              |
 
 Do not claim unsupported GDPR/legal conclusions in DM3A.
 
+```text
+SITE_TOKEN_RAW_SERVER_STORAGE = NO
+SITE_TOKEN_RAW_RETURNED_BY_SERVER = NO
+RAW_TOKEN_PRINTED_ON_REGISTER = NO
+DELIST_IS_HARD_DELETE = NO
+```
+
+Bounded hard-deletion retention periods are **not** defined in DM3A. If production requires a numeric policy, record it as an explicit pre-production decision in DM3B/DM3C — do not imply `unregister` erases the database row.
+
 ### Removal / contact path (recommended)
 
-| Channel               | Use                                                                                                                 |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Operator self-service | `engawa-map unregister` with site token                                                                             |
-| Maintainer contact    | **info@thierry-gilgen-ict.ch** (existing [SECURITY.md](../SECURITY.md) channel)                                     |
-| Public tracker        | GitHub issues on [engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry) for abuse reports |
+| Channel                                                                     | Use                                                                                               |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Operator self-service                                                       | `engawa-map unregister` with site token                                                           |
+| Security-sensitive reports; private ownership, removal, or identity details | **info@thierry-gilgen-ict.ch** (existing [SECURITY.md](../SECURITY.md) channel)                   |
+| Non-sensitive public bug or abuse reports                                   | GitHub issues on [engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry) |
 
-`REMOVAL_CONTACT_PATH = info@thierry-gilgen-ict.ch + GitHub issues (engawa-map-registry)`
+Do **not** post secrets, site bearer tokens, identity evidence, or sensitive abuse/security details in public GitHub issues.
+
+`PRIVATE_SECURITY_REMOVAL_CONTACT = info@thierry-gilgen-ict.ch`
+`PUBLIC_ISSUES_SENSITIVE_DATA_WARNING = YES`
 
 ## Moderation model (v1 — unchanged)
 
@@ -239,12 +252,40 @@ DM3A defines gates only — **no PASS claimed here.**
 - [ ] Public showcase renders LISTED sites only
 - [ ] No permissive CORS
 
-### Published-candidate CLI (post DM3D npm, against production)
+### Unpublished release-candidate CLI (DM3C — before npm publication)
 
-- [ ] Default endpoint → production (no env override)
+Production acceptance uses an **unpublished** Engawa release candidate — not the published npm package.
+
+```text
+DM3C_CLI_SOURCE = exact Engawa DM3B/DM3C reviewed commit
+DM3C_CLI_PACKAGING = local build / pnpm pack / equivalent release-candidate artifact
+DM3C_CLI_NPM_PUBLICATION = NO
+DM3C_DEFAULT_ENDPOINT_TEST = production origin with no ENGAWA_MAP_ENDPOINT override
+```
+
+Flow to prove against live production:
+
+```text
+unpublished release-candidate CLI
+    -> default production endpoint (no ENGAWA_MAP_ENDPOINT)
+    -> register --yes -> PENDING
+    -> status -> PENDING
+    -> unregister
+    -> old token -> 401
+    -> local secret removed; siteId removed from engawa-map.config.json
+```
+
+- [ ] Unpublished release-candidate CLI: default production endpoint (no `ENGAWA_MAP_ENDPOINT`)
 - [ ] `register --yes` → `PENDING`
 - [ ] `status` → `PENDING`
 - [ ] `unregister` → old token `401`, local secret removed
+
+### DM3D — published npm smoke (after DM3C PASS)
+
+- [ ] `npm publish @thierry-gilgen-ict/engawa-map@0.1.0`
+- [ ] Fresh external `npm install` against production registry
+- [ ] Published-package CLI smoke (default endpoint, register/status/unregister)
+- [ ] Public documentation updated; announce “Join the map”
 
 ### Manual moderation
 
