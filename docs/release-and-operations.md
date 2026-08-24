@@ -47,12 +47,12 @@ Generic checklist for any `@thierry-gilgen-ict/engawa-*` release:
 
 When a consumer runs `engawa-map register`, version detection reads the **consumer project's** `package.json` and `node_modules`:
 
-| Package | Requirement |
-| ------- | ----------- |
-| `@thierry-gilgen-ict/engawa-core` | **Required** — must be declared in `dependencies` or `devDependencies` and installed in `node_modules` |
-| `@thierry-gilgen-ict/engawa-discovery` | Optional — included in registration payload only if declared and installed |
-| `@thierry-gilgen-ict/engawa-mcp` | Optional — included only if declared and installed |
-| `@thierry-gilgen-ict/engawa-react` | Optional — included only if declared and installed |
+| Package                                | Requirement                                                                                            |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `@thierry-gilgen-ict/engawa-core`      | **Required** — must be declared in `dependencies` or `devDependencies` and installed in `node_modules` |
+| `@thierry-gilgen-ict/engawa-discovery` | Optional — included in registration payload only if declared and installed                             |
+| `@thierry-gilgen-ict/engawa-mcp`       | Optional — included only if declared and installed                                                     |
+| `@thierry-gilgen-ict/engawa-react`     | Optional — included only if declared and installed                                                     |
 
 The map package itself has **no npm dependency** on `engawa-core`. Missing declarations or missing installs produce a clear CLI error before any network call.
 
