@@ -38,9 +38,9 @@ The production registry is a **separate product boundary** from `thierry-gilgen-
 
 ## CLI production endpoint semantics (v1 public release)
 
-**Current (pre-npm):** `ENGAWA_MAP_ENDPOINT` is **required**. Missing env → `MISSING_ENDPOINT`.
+**Current (DM3B):** If `ENGAWA_MAP_ENDPOINT` is unset, the CLI defaults to `https://engawa-map.thierry-gilgen-ict.ch`. Explicit override is still required for staging and loopback development.
 
-**Planned v1 public behavior (implement in DM3B):**
+**Implemented v1 public behavior (DM3B):**
 
 ```text
 CLI_ENDPOINT_PRECEDENCE:
@@ -324,6 +324,14 @@ Do not publish the CLI until production has passed DM3C acceptance.
 ## Explicitly deferred (outside DM3)
 
 OAuth, authenticated MCP tools, user accounts, browser admin UI, domain verification, token rotation, telemetry, analytics, `engawa-analytics`, geolocation, automatic crawling, screenshots, provider integrations, `engawa-nextjs`.
+
+## DM3B implementation status
+
+CLI_DEFAULT_PRODUCTION_ENDPOINT = IMPLEMENTED
+PRODUCTION_SHOWCASE = IMPLEMENTED_IN_REPO (registry)
+PRODUCTION_DEPLOY_ARTIFACTS = IMPLEMENTED_IN_REPO (registry)
+PRODUCTION_DEPLOYMENT = NOT_YET
+NPM_PUBLICATION = NO
 
 ## Related documents
 

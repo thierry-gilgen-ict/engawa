@@ -15,7 +15,11 @@ export {
   type LocalState,
 } from "./schemas.js";
 export { generateSiteToken, hashSiteToken, generateIdempotencyKey } from "./token.js";
-export { resolveRegistryEndpoint, validateRegistryEndpoint } from "./endpoint.js";
+export {
+  DEFAULT_REGISTRY_ENDPOINT,
+  resolveRegistryEndpoint,
+  validateRegistryEndpoint,
+} from "./endpoint.js";
 export { RegistryClient, RegistryClientError, serializeRegistrationPayload } from "./client.js";
 export { buildRegistrationPayload } from "./payload.js";
 export { detectEngawaPackageVersions, findProjectRoot } from "./packages.js";

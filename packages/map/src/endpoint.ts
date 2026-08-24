@@ -1,5 +1,7 @@
 const LOOPBACK_HTTP_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
 
+export const DEFAULT_REGISTRY_ENDPOINT = "https://engawa-map.thierry-gilgen-ict.ch";
+
 export class EndpointError extends Error {
   constructor(message: string) {
     super(message);
@@ -35,9 +37,16 @@ export function validateRegistryEndpoint(raw: string): string {
   );
 }
 
-export function resolveRegistryEndpoint(envValue = process.env.ENGAWA_MAP_ENDPOINT): string {
-  if (!envValue) {
-    throw new EndpointError("MISSING_ENDPOINT");
+export function resolveRegistryEndpoint(envValue?: string): string {
+  const raw = envValue !== undefined ? envValue : process.env.ENGAWA_MAP_ENDPOINT;
+  if (raw === undefined) {
+    return validateRegistryEndpoint(DEFAULT_REGISTRY_ENDPOINT);
   }
-  return validateRegistryEndpoint(envValue);
+
+  const trimmed = raw.trim();
+  if (trimmed === "") {
+    throw new EndpointError("ENGAWA_MAP_ENDPOINT must not be empty");
+  }
+
+  return validateRegistryEndpoint(trimmed);
 }

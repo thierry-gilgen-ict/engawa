@@ -95,7 +95,7 @@ Register command (monorepo today; npm after DM3D):
 ```bash
 # Monorepo: pnpm --filter @thierry-gilgen-ict/engawa-map ...
 # Future npm: npx @thierry-gilgen-ict/engawa-map register
-# Requires ENGAWA_MAP_ENDPOINT (staging) or production default after DM3B/DM3D
+# Defaults to production when ENGAWA_MAP_ENDPOINT unset (DM3B); override for staging
 engawa-map register --yes
 ```
 
@@ -314,6 +314,14 @@ DM0 policy remains authoritative. DM1A/DM2B implemented the CLI and staging regi
 | `ENGAWA_CI_REGISTRY_NETWORK`                   | NO       |
 
 Full contract: [distribution-map-api.md](distribution-map-api.md). Threat model: [distribution-map-threat-model.md](distribution-map-threat-model.md).
+
+## DM3B status
+
+- CLI default production endpoint: **IMPLEMENTED**
+- Production showcase: **IMPLEMENTED_IN_REPO** (engawa-map-registry)
+- Production deployment artifacts: **IMPLEMENTED_IN_REPO** (engawa-map-registry)
+- Production deployment: **NOT_YET**
+- npm publication: **NO**
 
 ## Related
 

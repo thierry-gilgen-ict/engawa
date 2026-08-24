@@ -7,7 +7,7 @@ Optional CLI client for the [Engawa Distribution Map](https://github.com/thierry
 ## Requirements
 
 - Node.js 24+
-- `ENGAWA_MAP_ENDPOINT` — required today. Staging: `https://staging-engawa-map.thierry-gilgen-ict.ch`. Production default after DM3B/DM3D: `https://engawa-map.thierry-gilgen-ict.ch`
+- Registry endpoint: defaults to `https://engawa-map.thierry-gilgen-ict.ch` when `ENGAWA_MAP_ENDPOINT` is unset (DM3B). Override for staging: `https://staging-engawa-map.thierry-gilgen-ict.ch`
 
 ## Install (monorepo; npm after DM3D)
 
