@@ -24,20 +24,23 @@ Requires **Node.js 24+** (with engawa-core 0.1.1+). Depends on `@thierry-gilgen-
 
 ```typescript
 import { createEngawa, StaticContentAdapter } from "@thierry-gilgen-ict/engawa-core";
-import { createEngawaPublicMcpServer } from "@thierry-gilgen-ict/engawa-mcp";
-
-// ... config + adapter
-const engawa = createEngawa(config, adapter);
-const server = await createEngawaPublicMcpServer(engawa);
-// Wire server to your HTTP framework
-```
-
-For fetch-style handlers:
-
-```typescript
 import { createEngawaPublicMcpHandler } from "@thierry-gilgen-ict/engawa-mcp";
 
-const handler = createEngawaPublicMcpHandler(engawa);
+const engawa = createEngawa(config, adapter);
+const mcpHandler = createEngawaPublicMcpHandler(engawa);
+
+// In your HTTP route (Next.js, etc.):
+return mcpHandler.fetch(request);
+```
+
+**Complete Next.js App Router wiring** (host guards, rate limit, GET/POST/DELETE/OPTIONS): [docs/examples/nextjs-mcp-app-router.md](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/examples/nextjs-mcp-app-router.md)
+
+For low-level `McpServer` access (in-memory tests, custom transport):
+
+```typescript
+import { createEngawaPublicMcpServer } from "@thierry-gilgen-ict/engawa-mcp";
+
+const server = await createEngawaPublicMcpServer(engawa);
 ```
 
 ## Public v0.1 API
@@ -45,7 +48,7 @@ const handler = createEngawaPublicMcpHandler(engawa);
 | Export                         | Purpose                   |
 | ------------------------------ | ------------------------- |
 | `createEngawaPublicMcpServer`  | MCP `McpServer` instance  |
-| `createEngawaPublicMcpHandler` | HTTP handler factory      |
+| `createEngawaPublicMcpHandler` | HTTP handler (`.fetch()`) |
 | `assertPublicAgentInterface`   | Fail closed if not public |
 | `EngawaAgentInterfaceError`    | Config guard error        |
 
@@ -62,7 +65,9 @@ Requires `agentInterface.enabled` and `agentInterface.public`.
 
 ## Documentation
 
-[Next.js integration](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/integrations/nextjs.md)
+- [Complete Next.js MCP route](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/examples/nextjs-mcp-app-router.md)
+- [Next.js integration](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/integrations/nextjs.md)
+- [Getting started](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/getting-started.md)
 
 ## License
 

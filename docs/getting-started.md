@@ -80,7 +80,7 @@ export const adapter = new StaticContentAdapter(siteConfig.site.canonicalUrl, [
 ]);
 ```
 
-For production sites, implement a custom adapter that returns the same content your **human HTML routes** show. See [Content publication rule](content-publication.md).
+For production sites, implement a custom adapter that returns the same content your **human HTML routes** show. See [Content publication rule](content-publication.md) and the complete [custom ContentAdapter example](examples/custom-content-adapter.md).
 
 ## Step 3 — createEngawa()
 
@@ -113,14 +113,20 @@ Expose at `GET /llms.txt` with `content-type: text/plain; charset=utf-8`.
 
 **Why:** MCP gives agents structured resource list/read and bounded search without scraping HTML.
 
-```typescript
-import { createEngawaPublicMcpServer } from "@thierry-gilgen-ict/engawa-mcp";
+For **Next.js App Router**, use the complete copy-paste example: [Next.js MCP route](examples/nextjs-mcp-app-router.md).
 
-const server = await createEngawaPublicMcpServer(engawa);
-// Connect server to your HTTP stack (Node, Next.js route handler, etc.)
+For **plain Node.js**, see the monorepo [minimal-site example](../examples/minimal-site/README.md) (`createEngawaPublicMcpHandler` + `@modelcontextprotocol/node`).
+
+Minimal handler shape:
+
+```typescript
+import { createEngawaPublicMcpHandler } from "@thierry-gilgen-ict/engawa-mcp";
+
+const mcpHandler = createEngawaPublicMcpHandler(engawa);
+// In your route: return mcpHandler.fetch(request);
 ```
 
-Or use `createEngawaPublicMcpHandler(engawa)` when your framework provides a fetch-style handler.
+Add host validation, origin validation, and rate limiting in your route layer — Engawa does not provide these. See the [Next.js MCP example](examples/nextjs-mcp-app-router.md).
 
 Public MCP **requires** `agentInterface.enabled` and `agentInterface.public`. Otherwise Engawa throws `EngawaAgentInterfaceError`.
 

@@ -66,30 +66,45 @@ Bilingual sites may partition resources by `metadata.locale` in a site-specific 
 
 ## Route handler — MCP
 
+**Complete copy-paste example:** [Next.js App Router MCP route](../examples/nextjs-mcp-app-router.md) (guards, rate limit, GET/POST/DELETE/OPTIONS, `.fetch(request)`).
+
+Minimal shape:
+
 ```typescript
+import type { NextRequest } from "next/server";
 import { createEngawaPublicMcpHandler } from "@thierry-gilgen-ict/engawa-mcp";
 import { getEngawa } from "@/lib/engawa/instance";
 import { mcpSecurityRejectedResponse } from "@/lib/engawa/mcpGuards";
-import { mcpRateLimitConsume } from "@/lib/engawa/mcpRateLimit";
+import { mcpRateLimitConsume, mcpRateLimitRejectedResponse } from "@/lib/engawa/mcpRateLimit";
 
-const handler = createEngawaPublicMcpHandler(getEngawa());
+const mcpHandler = createEngawaPublicMcpHandler(getEngawa());
 
-export async function POST(request: Request) {
-  const rejected = mcpSecurityRejectedResponse(request, "yourdomain.ch");
+async function handle(request: NextRequest): Promise<Response> {
+  const engawa = getEngawa();
+  const canonicalHost = new URL(engawa.config.site.canonicalUrl).host;
+  const rejected = mcpSecurityRejectedResponse(request, canonicalHost);
   if (rejected) return rejected;
-  if (!mcpRateLimitConsume(request)) {
-    return new Response("Too Many Requests", { status: 429 });
-  }
-  return handler(request);
+  if (!mcpRateLimitConsume(request)) return mcpRateLimitRejectedResponse();
+  return mcpHandler.fetch(request);
 }
 
-export async function GET(request: Request) {
-  // Same guards; MCP Streamable HTTP may use GET for session setup
-  ...
+export async function GET(request: NextRequest) {
+  return handle(request);
+}
+export async function POST(request: NextRequest) {
+  return handle(request);
+}
+export async function DELETE(request: NextRequest) {
+  return handle(request);
+}
+export async function OPTIONS(request: NextRequest) {
+  return handle(request);
 }
 ```
 
-Use `@modelcontextprotocol/server` host/origin validation patterns appropriate to your deployment (production host vs localhost in dev).
+Streamable HTTP uses GET, POST, DELETE, and OPTIONS on the same path. Call **`mcpHandler.fetch(request)`** — not `mcpHandler(request)`.
+
+Host/origin validation uses `@modelcontextprotocol/server` helpers; localhost is allowed in dev when `NODE_ENV !== "production"`. See the [canonical example](../examples/nextjs-mcp-app-router.md).
 
 ## Markdown routes
 

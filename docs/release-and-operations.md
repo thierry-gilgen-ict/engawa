@@ -33,11 +33,13 @@ Generic checklist for any `@thierry-gilgen-ict/engawa-*` release:
 5. **Pack** — produce the exact publish tarball (`pnpm pack`, `scripts/stage-npm-tarballs.mjs`, or package-specific smoke scripts).
 6. **Tarball inspection** — verify `package.json`, `engines`, dependencies, and file list. For map: `node scripts/map-release-candidate-smoke.mjs`. For core/discovery/mcp: `node scripts/v011-release-candidate-smoke.mjs`.
 7. **External install smoke** — `node scripts/external-consumer-smoke.mjs <version>` against published or candidate tarballs as appropriate.
-8. **Live smoke** (where applicable) — for `@thierry-gilgen-ict/engawa-map`: fresh install from npm/tarball, `ENGAWA_MAP_ENDPOINT` unset, register → `PENDING` → status → unregister → old token `401`.
-9. **npm publish once** — maintainer runs `npm publish <exact-tarball> --access public` interactively.
-10. **npm registry verification** — `npm view`, integrity/dist fields, external consumer smoke against live registry.
-11. **Merge release docs/state** — update README, CHANGELOG, publication records; merge PR.
-12. **Post-merge CI** — confirm `main` CI SUCCESS after merge.
+8. **Stranger path smoke** — `node scripts/stranger-path-smoke.mjs` (npm-only external fixture; not in default CI). Run before public announcement and before package-set releases.
+9. **Live reference acceptance** — `node scripts/live-reference-acceptance.mjs` against production reference sites.
+10. **Live smoke** (where applicable) — for `@thierry-gilgen-ict/engawa-map`: fresh install from npm/tarball, `ENGAWA_MAP_ENDPOINT` unset, register → `PENDING` → status → unregister → old token `401`.
+11. **npm publish once** — maintainer runs `npm publish <exact-tarball> --access public` interactively.
+12. **npm registry verification** — `npm view`, integrity/dist fields, external consumer smoke against live registry.
+13. **Merge release docs/state** — update README, CHANGELOG, publication records; merge PR.
+14. **Post-merge CI** — confirm `main` CI SUCCESS after merge.
 
 **Important:** If the tarball was built from an approved PR head, do **not** republish from the merge commit. The published artifact is tied to the approved source SHA.
 
@@ -85,6 +87,7 @@ Distribution Map policy: [distribution-map.md](distribution-map.md).
 
 ## Related
 
+- [announce-readiness](announce-readiness/README.md) — announce phase ops (maintainers)
 - [releasing.md](releasing.md) — detailed v0.1.1 publish flow
 - [distribution-map-production-launch.md](distribution-map-production-launch.md) — launch contract
 - [security-model.md](security-model.md) — Engawa security boundaries
