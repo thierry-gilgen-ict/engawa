@@ -34,14 +34,13 @@
 - Dedicated registry service ([engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry))
 - Live staging at `https://staging-engawa-map.thierry-gilgen-ict.ch` — DM2B acceptance PASS
 - Canonical URL hostname validation hotfix (PR #18)
-- **Not** published to npm; production registry not deployed
 
-## Future — Distribution Map production (DM3)
+## Completed — Distribution Map production release (DM3)
 
-- [DM3A](distribution-map-production-launch.md) — production launch contract (design)
+- [DM3A](distribution-map-production-launch.md) — production launch contract
 - DM3B — public showcase, production deploy artifacts, CLI default endpoint
-- DM3C — production deploy and live acceptance
-- DM3D — npm publish `@thierry-gilgen-ict/engawa-map@0.1.0`
+- DM3C — production deploy and live acceptance PASS
+- DM3D — `@thierry-gilgen-ict/engawa-map@0.1.0` on npm; production showcase live
 
 ## Future — Authenticated capabilities (not started)
 
@@ -59,13 +58,13 @@
 
 ## Package status
 
-| Package            | npm status                        | Notes                                                                                                                    |
-| ------------------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `engawa-core`      | 0.1.1                             | engines metadata in 0.1.1                                                                                                |
-| `engawa-discovery` | 0.1.1                             | depends on core 0.1.1                                                                                                    |
-| `engawa-mcp`       | 0.1.1                             | depends on core 0.1.1                                                                                                    |
-| `engawa-react`     | 0.1.0                             | engines already present                                                                                                  |
-| `engawa-nextjs`    | Not shipped                       | Document pattern only                                                                                                    |
-| `engawa-cli`       | Planned                           |                                                                                                                          |
-| `engawa-map`       | IMPLEMENTED_IN_REPO NOT_PUBLISHED | CLI + staging registry live (DM2B PASS); production not deployed; [DM3A contract](distribution-map-production-launch.md) |
-| `engawa-analytics` | Planned                           | Separate from Distribution Map                                                                                           |
+| Package            | npm status  | Notes                                                                                            |
+| ------------------ | ----------- | ------------------------------------------------------------------------------------------------ |
+| `engawa-core`      | 0.1.1       | engines metadata in 0.1.1                                                                        |
+| `engawa-discovery` | 0.1.1       | depends on core 0.1.1                                                                            |
+| `engawa-mcp`       | 0.1.1       | depends on core 0.1.1                                                                            |
+| `engawa-react`     | 0.1.0       | engines already present                                                                          |
+| `engawa-nextjs`    | Not shipped | Document pattern only                                                                            |
+| `engawa-cli`       | Planned     |                                                                                                  |
+| `engawa-map`       | 0.1.0       | Production registry live; voluntary PENDING→LISTED flow; [Distribution Map](distribution-map.md) |
+| `engawa-analytics` | Planned     | Separate from Distribution Map                                                                   |

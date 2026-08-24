@@ -4,14 +4,14 @@ The Engawa Distribution Map is an **optional public showcase** for sites built w
 
 This document is the canonical policy and security contract for the Distribution Map registry. It is **not** [`engawa-analytics`](roadmap.md) and not telemetry.
 
-| Field            | Value                                                                                                 |
-| ---------------- | ----------------------------------------------------------------------------------------------------- |
-| Package          | `@thierry-gilgen-ict/engawa-map` — **IMPLEMENTED_IN_REPO NOT_PUBLISHED**                              |
-| Public name      | Engawa Distribution Map                                                                               |
-| CTA              | Join the map                                                                                          |
-| CLI              | Implemented in monorepo; npm publication deferred (see [DM3A](distribution-map-production-launch.md)) |
-| Registry backend | Implemented — staging live; production not deployed                                                   |
-| Default state    | `NOT_REGISTERED`                                                                                      |
+| Field            | Value                                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| Package          | `@thierry-gilgen-ict/engawa-map@0.1.0` (npm)                                             |
+| Public name      | Engawa Distribution Map                                                                  |
+| CTA              | Join the map                                                                             |
+| CLI              | Published npm CLI; defaults to production registry                                       |
+| Registry backend | Production live at `https://engawa-map.thierry-gilgen-ict.ch`; staging remains for tests |
+| Default state    | `NOT_REGISTERED`                                                                         |
 
 There is no `distributionMap` field in `EngawaConfig` or `engawaConfigSchema`. Installing Engawa packages does not register a site.
 
@@ -44,7 +44,7 @@ www.example.com
 staging Engawa registry host (STAGING_REGISTRY_HOST)
     -> https://staging-engawa-map.thierry-gilgen-ict.ch (live, DM2B PASS)
 
-production Engawa registry host (PRODUCTION_REGISTRY_HOST — not deployed)
+production Engawa registry host (PRODUCTION_REGISTRY_HOST — live)
     -> https://engawa-map.thierry-gilgen-ict.ch (frozen in DM3A)
 
 Each host:
@@ -57,7 +57,7 @@ Each host:
 | ------------------------------------ | ------------------------------------------------- |
 | `DEDICATED_REGISTRY_SERVICE`         | REQUIRED                                          |
 | `STAGING_REGISTRY_HOST`              | `staging-engawa-map.thierry-gilgen-ict.ch` (live) |
-| `PRODUCTION_REGISTRY_HOST`           | `engawa-map.thierry-gilgen-ict.ch` (not deployed) |
+| `PRODUCTION_REGISTRY_HOST`           | `engawa-map.thierry-gilgen-ict.ch` (live)         |
 | Registry write API on main `www` app | FORBIDDEN                                         |
 
 `REGISTRY_COMPROMISE_BLAST_RADIUS != MAIN_WEBSITE` — design for independent service boundaries. This does not claim perfect isolation, but the registry must not be a normal route inside the main website application.
@@ -90,13 +90,14 @@ or explicitly configured dedicated CI registration job
 
 If CI is used, wording must be: **manual or explicitly configured dedicated CI registration job** — not generic deploy-time registration.
 
-Register command (monorepo today; npm after DM3D):
+Register command:
 
 ```bash
-# Monorepo: pnpm --filter @thierry-gilgen-ict/engawa-map ...
-# Future npm: npx @thierry-gilgen-ict/engawa-map register
-# Defaults to production when ENGAWA_MAP_ENDPOINT unset (DM3B); override for staging
-engawa-map register --yes
+npm install --save-dev @thierry-gilgen-ict/engawa-map
+npx engawa-map register
+# Non-interactive deliberate registration:
+npx engawa-map register --yes
+# Defaults to https://engawa-map.thierry-gilgen-ict.ch when ENGAWA_MAP_ENDPOINT is unset
 ```
 
 ## Registration lifecycle
@@ -315,13 +316,15 @@ DM0 policy remains authoritative. DM1A/DM2B implemented the CLI and staging regi
 
 Full contract: [distribution-map-api.md](distribution-map-api.md). Threat model: [distribution-map-threat-model.md](distribution-map-threat-model.md).
 
-## DM3B status
+## Release status
 
-- CLI default production endpoint: **IMPLEMENTED**
-- Production showcase: **IMPLEMENTED_IN_REPO** (engawa-map-registry)
-- Production deployment artifacts: **IMPLEMENTED_IN_REPO** (engawa-map-registry)
-- Production deployment: **NOT_YET**
-- npm publication: **NO**
+```text
+PRODUCTION_REGISTRY = LIVE
+PRODUCTION_ACCEPTANCE = PASS
+ENGAWA_MAP_NPM_PUBLICATION = @thierry-gilgen-ict/engawa-map@0.1.0
+DM3C = CLOSED
+DM3D = RELEASED
+```
 
 ## Related
 

@@ -14,6 +14,7 @@ Open toolkit for **agent-native websites**: human HTML plus structured agent sur
 | `@thierry-gilgen-ict/engawa-discovery` | 0.1.1   |
 | `@thierry-gilgen-ict/engawa-mcp`       | 0.1.1   |
 | `@thierry-gilgen-ict/engawa-react`     | 0.1.0   |
+| `@thierry-gilgen-ict/engawa-map`       | 0.1.0   |
 
 **Node.js 24+** required (`engines` in package manifests).
 
@@ -27,7 +28,7 @@ Package versions may diverge by design. See [docs/compatibility.md](docs/compati
 - No `engawa-nextjs` package in v0.1—document patterns in `docs/integrations/` (including [headless CMS](docs/integrations/headless-cms.md)).
 - Do not expose secrets, sessions, drafts, or admin-only corpus on public surfaces.
 - Do not register a site on the [Distribution Map](docs/distribution-map.md) without explicit user request (`DO_NOT_REGISTER_MAP_WITHOUT_EXPLICIT_USER_REQUEST`).
-- Distribution Map CLI and staging registry are implemented (DM2B). Do not register against production until DM3C acceptance. Respect `ENGAWA_CI_REGISTRY_NETWORK` in tests. See [distribution-map-api.md](docs/distribution-map-api.md).
+- Distribution Map CLI is published (`@thierry-gilgen-ict/engawa-map@0.1.0`); production registry is live. Staging remains available via `ENGAWA_MAP_ENDPOINT`. Respect `ENGAWA_CI_REGISTRY_NETWORK` in tests. See [distribution-map-api.md](docs/distribution-map-api.md).
 - Do not execute application config or import app modules for map registration (`DO_NOT_EXECUTE_APPLICATION_CONFIG_FOR_MAP`; `ENGAWA_MAP_EXECUTES_APPLICATION_CODE = NO`).
 - Do not place map tokens in website runtime, MCP, or React (`DO_NOT_USE_MAP_TOKEN_IN_WEBSITE_RUNTIME`).
 

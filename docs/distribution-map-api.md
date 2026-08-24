@@ -2,13 +2,13 @@
 
 This document freezes the **registry API** and **engawa-map CLI** behavior. Contract and implementation exist; staging is live (DM2B PASS). Production registry not deployed. See [DM3A production launch contract](distribution-map-production-launch.md).
 
-| Field                    | Value                                                                |
-| ------------------------ | -------------------------------------------------------------------- |
-| Package                  | `@thierry-gilgen-ict/engawa-map` — IMPLEMENTED_IN_REPO NOT_PUBLISHED |
-| CLI                      | Functional in monorepo; npm publication deferred                     |
-| Staging registry         | `https://staging-engawa-map.thierry-gilgen-ict.ch` (live)            |
-| Production registry host | `https://engawa-map.thierry-gilgen-ict.ch` (frozen, not deployed)    |
-| API version              | `/api/v1`                                                            |
+| Field                    | Value                                                     |
+| ------------------------ | --------------------------------------------------------- |
+| Package                  | `@thierry-gilgen-ict/engawa-map@0.1.0` (npm)              |
+| CLI                      | Public npm CLI; defaults to production registry           |
+| Staging registry         | `https://staging-engawa-map.thierry-gilgen-ict.ch` (live) |
+| Production registry host | `https://engawa-map.thierry-gilgen-ict.ch` (live)         |
+| API version              | `/api/v1`                                                 |
 
 Canonical policy remains in [distribution-map.md](distribution-map.md). Threat analysis is in [distribution-map-threat-model.md](distribution-map-threat-model.md).
 
