@@ -66,34 +66,122 @@ function parseFirstIpv6Hextet(host: string): number | undefined {
   return Number.isNaN(value) ? undefined : value;
 }
 
+function parseIpv4Octets(dotted: string): number[] | null {
+  const match = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(dotted);
+  if (!match) return null;
+  const octets = match.slice(1).map((part) => Number(part));
+  if (octets.some((octet) => Number.isNaN(octet) || octet < 0 || octet > 255)) {
+    return null;
+  }
+  return octets;
+}
+
+function isPrivateOrReservedIpv4Octets(octets: number[]): boolean {
+  const [a, b, c, d] = octets;
+  if (a === 0) return true;
+  if (a === 10) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true;
+  if (a === 127) return true;
+  if (a === 169 && b === 254) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 198 && b >= 18 && b <= 19) return true;
+  if (a === 192 && b === 0 && c === 2) return true;
+  if (a === 198 && b === 51 && c === 100) return true;
+  if (a === 203 && b === 0 && c === 113) return true;
+  if (a >= 224 && a <= 239) return true;
+  if (a >= 240 && a <= 254) return true;
+  if (a === 255 && b === 255 && c === 255 && d === 255) return true;
+  return false;
+}
+
+function isPrivateOrReservedIpv4(dotted: string): boolean {
+  const octets = parseIpv4Octets(dotted);
+  if (!octets) return true;
+  return isPrivateOrReservedIpv4Octets(octets);
+}
+
+function extractIpv4FromMappedIpv6(host: string): string | null {
+  const lower = normalizeIpv6Host(host).toLowerCase();
+  const dottedTail = lower.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/);
+  if (dottedTail) {
+    return dottedTail[1];
+  }
+  const hexTail = lower.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+  if (hexTail) {
+    const hi = Number.parseInt(hexTail[1], 16);
+    const lo = Number.parseInt(hexTail[2], 16);
+    if (Number.isNaN(hi) || Number.isNaN(lo)) return null;
+    const a = (hi >> 8) & 0xff;
+    const b = hi & 0xff;
+    const c = (lo >> 8) & 0xff;
+    const d = lo & 0xff;
+    return `${a}.${b}.${c}.${d}`;
+  }
+  return null;
+}
+
+function parseIpv6Hextets(host: string): number[] | null {
+  const normalized = normalizeIpv6Host(host).toLowerCase();
+  if (!normalized.includes(":")) return null;
+
+  const [head, tail] = normalized.split("::");
+  const headParts = head ? head.split(":").filter(Boolean) : [];
+  const tailParts = tail ? tail.split(":").filter(Boolean) : [];
+
+  const parsePart = (part: string): number | null => {
+    const value = Number.parseInt(part, 16);
+    return Number.isNaN(value) ? null : value;
+  };
+
+  const hextets: number[] = [];
+  for (const part of headParts) {
+    const value = parsePart(part);
+    if (value === null) return null;
+    hextets.push(value);
+  }
+  for (const part of tailParts) {
+    const value = parsePart(part);
+    if (value === null) return null;
+    hextets.push(value);
+  }
+  return hextets;
+}
+
+function isPrivateOrReservedIpv6Native(host: string): boolean {
+  const normalized = normalizeIpv6Host(host).toLowerCase();
+  if (normalized === "::" || normalized === "") return true;
+  if (normalized === "::1") return true;
+
+  const mappedIpv4 = extractIpv4FromMappedIpv6(normalized);
+  if (mappedIpv4) {
+    return isPrivateOrReservedIpv4(mappedIpv4);
+  }
+
+  const firstHextet = parseFirstIpv6Hextet(normalized);
+  if (firstHextet === undefined) return true;
+  if (firstHextet >= 0xfc00 && firstHextet <= 0xfdff) return true;
+  if (firstHextet >= 0xfe80 && firstHextet <= 0xfebf) return true;
+  if (firstHextet >= 0xff00) return true;
+
+  const hextets = parseIpv6Hextets(normalized);
+  if (hextets && hextets.length >= 2 && hextets[0] === 0x2001 && hextets[1] === 0xdb8) {
+    return true;
+  }
+
+  return false;
+}
+
 export function isPrivateOrReservedAddress(address: string): boolean {
   const normalized = normalizeIpv6Host(address).toLowerCase();
   const ipVersion = isIP(normalized);
 
   if (ipVersion === 4) {
-    const match = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(normalized);
-    if (!match) return true;
-    const octets = match.slice(1).map((part) => Number(part));
-    if (octets.some((octet) => Number.isNaN(octet) || octet < 0 || octet > 255)) {
-      return true;
-    }
-    const [a, b] = octets;
-    if (a === 127) return true;
-    if (a === 10) return true;
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a === 169 && b === 254) return true;
-    if (a === 0) return true;
-    return false;
+    return isPrivateOrReservedIpv4(normalized);
   }
 
   if (ipVersion === 6) {
-    if (normalized === "::1") return true;
-    const firstHextet = parseFirstIpv6Hextet(normalized);
-    if (firstHextet === undefined) return true;
-    if (firstHextet >= 0xfc00 && firstHextet <= 0xfdff) return true;
-    if (firstHextet >= 0xfe80 && firstHextet <= 0xfebf) return true;
-    return false;
+    return isPrivateOrReservedIpv6Native(normalized);
   }
 
   return false;
