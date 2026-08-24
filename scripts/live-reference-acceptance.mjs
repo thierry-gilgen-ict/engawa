@@ -17,8 +17,11 @@ import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { request as httpsRequest } from "node:https";
-import { Client } from "@modelcontextprotocol/client";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
+import {
+  Client,
+  LATEST_PROTOCOL_VERSION,
+  StreamableHTTPClientTransport,
+} from "@modelcontextprotocol/client";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ENGAWA_ROOT = resolve(__dirname, "..");
@@ -60,9 +63,24 @@ function parseArgs(argv) {
   return { allowLiveRateLimitProbe, urls };
 }
 
+const MCP_PROBE_CLIENT = { name: "live-acceptance", version: "0.1.1" };
+
+function buildMcpInitializeProbeBody() {
+  return JSON.stringify({
+    jsonrpc: "2.0",
+    method: "initialize",
+    params: {
+      protocolVersion: LATEST_PROTOCOL_VERSION,
+      capabilities: {},
+      clientInfo: MCP_PROBE_CLIENT,
+    },
+    id: 1,
+  });
+}
+
 function classifySecurityResponse(status, err) {
   if (typeof status === "number") {
-    if (status === 403 || (status >= 400 && status < 500)) return "PASS_APP";
+    if (status === 403) return "PASS_APP";
     return `FAIL_${status}`;
   }
   const msg = err instanceof Error ? err.message : String(err);
@@ -117,7 +135,7 @@ async function checkHostValidation(mcpUrl) {
     const status = await httpsPost(
       mcpUrl,
       { Host: "evil.example" },
-      JSON.stringify({ jsonrpc: "2.0", method: "initialize", params: {}, id: 1 }),
+      buildMcpInitializeProbeBody(),
     );
     return classifySecurityResponse(status);
   } catch (err) {
@@ -133,7 +151,7 @@ async function checkOriginValidation(mcpUrl, canonicalHost) {
         Host: canonicalHost,
         Origin: "https://evil.example",
       },
-      JSON.stringify({ jsonrpc: "2.0", method: "initialize", params: {}, id: 1 }),
+      buildMcpInitializeProbeBody(),
     );
     return classifySecurityResponse(status);
   } catch (err) {
@@ -159,7 +177,7 @@ function runConsumerRateLimitTests(site) {
 
 async function probeLiveRateLimit(mcpUrl, limit, canonicalHost) {
   const probeKey = `engawa-acceptance-${Date.now()}`;
-  const body = JSON.stringify({ jsonrpc: "2.0", method: "initialize", params: {}, id: 1 });
+  const body = buildMcpInitializeProbeBody();
   let saw429 = false;
   for (let i = 0; i < limit + 1; i++) {
     const status = await httpsPost(
@@ -355,6 +373,9 @@ async function main() {
 
   console.log("ACCEPTANCE_CONTRACT_FAIL_CLOSED = YES");
   console.log("RATE_LIMIT_NOT_TESTED_CAN_PASS = NO");
+  console.log("ARBITRARY_4XX_CAN_PASS_SECURITY = NO");
+  console.log("MCP_INITIALIZE_PROBE_VALID = YES");
+  console.log(`MCP_INITIALIZE_PROTOCOL_VERSION = ${LATEST_PROTOCOL_VERSION}`);
 
   const failed = reports.filter((r) => r.overall !== "PASS");
   if (failed.length > 0) {
