@@ -28,6 +28,11 @@ node scripts/stranger-path-smoke.mjs
 node scripts/live-reference-acceptance.mjs
 ```
 
+`live-reference-acceptance` requires sibling consumer repos for rate-limit evidence (default paths):
+
+- `../thierry-gilgen-ict.ch` — override with `THIERRY_CONSUMER_REPO`
+- `../theoldhandofasia.ch` — override with `OLD_HAND_CONSUMER_REPO`
+
 Or via package scripts:
 
 ```bash

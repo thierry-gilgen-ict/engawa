@@ -2,7 +2,21 @@
 
 This is the **canonical copy-paste example** for wiring `@thierry-gilgen-ict/engawa-mcp@0.1.1` to a Next.js App Router site. Both [production reference integrations](../production-references.md) use this pattern.
 
-**Requirements:** Node.js 24+, Next.js App Router, Engawa packages installed per [getting started](../getting-started.md).
+**Requirements:** Node.js 24+, Next.js App Router.
+
+## Install (prerequisites)
+
+Engawa packages plus an **explicit** MCP SDK dependency for host/origin guard helpers. `engawa-mcp` depends on `@modelcontextprotocol/server` transitively, but `mcpGuards.ts` imports it directly — strict package managers (npm, pnpm) require declaring it in your app:
+
+```bash
+npm install \
+  @thierry-gilgen-ict/engawa-core@0.1.1 \
+  @thierry-gilgen-ict/engawa-discovery@0.1.1 \
+  @thierry-gilgen-ict/engawa-mcp@0.1.1 \
+  @modelcontextprotocol/server@2.0.0
+```
+
+Use `@modelcontextprotocol/server@2.0.0` — the version pinned by `engawa-mcp@0.1.1`. Do not add this SDK to generic Engawa installs unless your host route copies the guard code below.
 
 ## What you are wiring
 

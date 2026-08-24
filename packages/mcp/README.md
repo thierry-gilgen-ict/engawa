@@ -33,7 +33,7 @@ const mcpHandler = createEngawaPublicMcpHandler(engawa);
 return mcpHandler.fetch(request);
 ```
 
-**Complete Next.js App Router wiring** (host guards, rate limit, GET/POST/DELETE/OPTIONS): [docs/examples/nextjs-mcp-app-router.md](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/examples/nextjs-mcp-app-router.md)
+**Complete Next.js App Router wiring** (host guards, rate limit, GET/POST/DELETE/OPTIONS, prerequisites including `@modelcontextprotocol/server@2.0.0`): [docs/examples/nextjs-mcp-app-router.md](https://github.com/thierry-gilgen-ict/engawa/blob/main/docs/examples/nextjs-mcp-app-router.md)
 
 For low-level `McpServer` access (in-memory tests, custom transport):
 

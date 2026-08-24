@@ -1,20 +1,17 @@
 /**
  * Stranger-path smoke test.
  * Builds a temporary consumer OUTSIDE the Engawa workspace using public npm only.
- * Proves a stranger can integrate from docs + npm without the monorepo.
+ * Orchestrator uses Node built-ins only — server and MCP client run in temp fixture.
  *
  * Usage: node scripts/stranger-path-smoke.mjs
  *
  * Not part of default CI (external registry dependency).
  */
-import { spawn } from "node:child_process";
+import { spawn, execSync } from "node:child_process";
 import { writeFile, mkdtemp, rm } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { execSync } from "node:child_process";
-import { Client } from "@modelcontextprotocol/client";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 
 const scope = "@thierry-gilgen-ict";
 const VERSION = "0.1.1";
@@ -160,6 +157,82 @@ server.listen(PORT_PLACEHOLDER, HOST_PLACEHOLDER, () => {
 });
 `;
 
+const clientSmokeSource = `
+import { Client } from "@modelcontextprotocol/client";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
+
+const baseUrl = process.argv[2];
+if (!baseUrl) {
+  console.error("Usage: node client-smoke.mjs <baseUrl>");
+  process.exit(1);
+}
+
+const llms = await fetch(new URL("/llms.txt", baseUrl));
+const llmsType = llms.headers.get("content-type") ?? "";
+const llmsBody = await llms.text();
+if (!llms.ok || !llmsType.includes("text/plain") || !llmsBody.includes("Stranger Smoke")) {
+  throw new Error("llms.txt check failed");
+}
+console.log("STRANGER_LLMS_TXT = PASS");
+
+const md = await fetch(new URL("/about.md", baseUrl));
+const mdType = md.headers.get("content-type") ?? "";
+const mdBody = await md.text();
+if (!md.ok || !mdType.includes("text/markdown") || !mdBody.includes("# About")) {
+  throw new Error("about.md check failed");
+}
+console.log("STRANGER_MARKDOWN = PASS");
+
+const mcpUrl = new URL("/mcp", baseUrl);
+const transport = new StreamableHTTPClientTransport(mcpUrl);
+const client = new Client({ name: "stranger-smoke", version: "0.1.1" });
+await client.connect(transport);
+
+const { resources } = await client.listResources();
+if (resources.length < 1) throw new Error("MCP resource list empty");
+
+const about = resources.find((r) => r.uri.includes("/r/about"));
+if (!about) throw new Error("about resource missing");
+
+const read = await client.readResource({ uri: about.uri });
+const text = read.contents[0]?.text ?? "";
+if (!text.includes("Stranger smoke")) throw new Error("resource read content mismatch");
+
+let unknownFailed = false;
+try {
+  await client.readResource({ uri: "engawa://127.0.0.1/r/nonexistent" });
+} catch {
+  unknownFailed = true;
+}
+if (!unknownFailed) throw new Error("unknown resource should fail");
+
+const tools = await client.listTools();
+const toolNames = tools.tools.map((t) => t.name);
+if (toolNames.length !== 1 || toolNames[0] !== "search_site") {
+  throw new Error("unexpected tools: " + toolNames.join(", "));
+}
+
+const search = await client.callTool({
+  name: "search_site",
+  arguments: { query: "about", limit: 5 },
+});
+const searchText =
+  search.content?.[0]?.type === "text" ? search.content[0].text : JSON.stringify(search);
+if (!searchText.toLowerCase().includes("about")) throw new Error("search_site miss");
+
+const rejected = await client.callTool({
+  name: "search_site",
+  arguments: { query: "", limit: 5 },
+});
+if (!rejected.isError) throw new Error("empty search should error");
+
+await client.close();
+console.log("STRANGER_MCP = PASS");
+console.log("STRANGER_RESOURCE_LIST = PASS");
+console.log("STRANGER_RESOURCE_READ = PASS");
+console.log("STRANGER_SEARCH_SITE = PASS");
+`;
+
 async function waitForReady(child, timeoutMs = 30000) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error("server start timeout")), timeoutMs);
@@ -205,51 +278,12 @@ function getEphemeralPort() {
   });
 }
 
-async function runMcpChecks(baseUrl) {
-  const mcpUrl = new URL("/mcp", baseUrl);
-  const transport = new StreamableHTTPClientTransport(mcpUrl);
-  const client = new Client({ name: "stranger-smoke", version: "0.1.1" });
-  await client.connect(transport);
-
-  const { resources } = await client.listResources();
-  if (resources.length < 1) throw new Error("MCP resource list empty");
-
-  const about = resources.find((r) => r.uri.includes("/r/about"));
-  if (!about) throw new Error("about resource missing");
-
-  const read = await client.readResource({ uri: about.uri });
-  const text = read.contents[0]?.text ?? "";
-  if (!text.includes("Stranger smoke")) throw new Error("resource read content mismatch");
-
-  let unknownFailed = false;
-  try {
-    await client.readResource({ uri: "engawa://127.0.0.1/r/nonexistent" });
-  } catch {
-    unknownFailed = true;
-  }
-  if (!unknownFailed) throw new Error("unknown resource should fail");
-
-  const tools = await client.listTools();
-  const toolNames = tools.tools.map((t) => t.name);
-  if (toolNames.length !== 1 || toolNames[0] !== "search_site") {
-    throw new Error(`unexpected tools: ${toolNames.join(", ")}`);
-  }
-
-  const search = await client.callTool({
-    name: "search_site",
-    arguments: { query: "about", limit: 5 },
+function runClientSmoke(dir, baseUrl) {
+  execSync(`node client-smoke.mjs ${baseUrl}`, {
+    cwd: dir,
+    stdio: "inherit",
+    env: process.env,
   });
-  const searchText =
-    search.content?.[0]?.type === "text" ? search.content[0].text : JSON.stringify(search);
-  if (!searchText.toLowerCase().includes("about")) throw new Error("search_site miss");
-
-  const rejected = await client.callTool({
-    name: "search_site",
-    arguments: { query: "", limit: 5 },
-  });
-  if (!rejected.isError) throw new Error("empty search should error");
-
-  await client.close();
 }
 
 async function main() {
@@ -268,6 +302,7 @@ async function main() {
         [`${scope}/engawa-discovery`]: VERSION,
         [`${scope}/engawa-mcp`]: VERSION,
         "@modelcontextprotocol/node": "2.0.0",
+        "@modelcontextprotocol/client": "2.0.0",
       },
     };
 
@@ -278,6 +313,7 @@ async function main() {
       .replaceAll("HOST_PLACEHOLDER", `"${HOST}"`);
 
     await writeFile(join(dir, "server.mjs"), serverCode);
+    await writeFile(join(dir, "client-smoke.mjs"), clientSmokeSource);
 
     execSync("npm install --no-package-lock", {
       cwd: dir,
@@ -292,29 +328,11 @@ async function main() {
     });
 
     await waitForReady(child);
+    runClientSmoke(dir, baseUrl);
 
-    const llms = await fetch(`${baseUrl}/llms.txt`);
-    const llmsType = llms.headers.get("content-type") ?? "";
-    const llmsBody = await llms.text();
-    if (!llms.ok || !llmsType.includes("text/plain") || !llmsBody.includes("Stranger Smoke")) {
-      throw new Error("llms.txt check failed");
-    }
-    console.log("STRANGER_LLMS_TXT = PASS");
-
-    const md = await fetch(`${baseUrl}/about.md`);
-    const mdType = md.headers.get("content-type") ?? "";
-    const mdBody = await md.text();
-    if (!md.ok || !mdType.includes("text/markdown") || !mdBody.includes("# About")) {
-      throw new Error("about.md check failed");
-    }
-    console.log("STRANGER_MARKDOWN = PASS");
-
-    await runMcpChecks(baseUrl);
-    console.log("STRANGER_MCP = PASS");
-    console.log("STRANGER_RESOURCE_LIST = PASS");
-    console.log("STRANGER_RESOURCE_READ = PASS");
-    console.log("STRANGER_SEARCH_SITE = PASS");
     console.log("STRANGER_SOURCE = PUBLIC_NPM_ONLY");
+    console.log("STRANGER_SERVER_MONOREPO_DEPENDENCY = NO");
+    console.log("STRANGER_CLIENT_MONOREPO_DEPENDENCY = NO");
     console.log("STRANGER_MONOREPO_DEPENDENCY = NO");
     console.log("STRANGER_SMOKE = PASS");
   } finally {

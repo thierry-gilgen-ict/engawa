@@ -126,7 +126,7 @@ const mcpHandler = createEngawaPublicMcpHandler(engawa);
 // In your route: return mcpHandler.fetch(request);
 ```
 
-Add host validation, origin validation, and rate limiting in your route layer — Engawa does not provide these. See the [Next.js MCP example](examples/nextjs-mcp-app-router.md).
+Add host validation, origin validation, and rate limiting in your route layer — Engawa does not provide these. The [Next.js MCP example](examples/nextjs-mcp-app-router.md) also requires `@modelcontextprotocol/server@2.0.0` in your app when copying guard helpers (transitive dependency alone is not enough under strict package managers).
 
 Public MCP **requires** `agentInterface.enabled` and `agentInterface.public`. Otherwise Engawa throws `EngawaAgentInterfaceError`.
 
