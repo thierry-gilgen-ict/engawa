@@ -1,7 +1,7 @@
 /**
  * @vitest-environment node
  */
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -658,6 +658,74 @@ describe("import resolution", () => {
 });
 
 describe("bundle write hardening", () => {
+  it("blocks init when output directory is symlink to outside empty dir", async () => {
+    const workDir = await mkdtemp(join(tmpdir(), "engawa-bundle-"));
+    const repoDir = join(workDir, "repo");
+    await mkdir(repoDir, { recursive: true });
+    createGenericNodeFixture(repoDir);
+    const outsideDir = join(workDir, "outside");
+    await mkdir(outsideDir);
+    const outDir = join(workDir, ".engawa");
+    try {
+      await symlink(outsideDir, outDir);
+    } catch {
+      return;
+    }
+    const reportPath = await writeInspectReport(
+      workDir,
+      minimalInspectReport("http://127.0.0.1:1", [{ path: "/" }]),
+    );
+    await expect(
+      runInit({
+        url: undefined,
+        inspectReportPath: reportPath,
+        repoPath: repoDir,
+        outputDir: outDir,
+        dryRun: false,
+        json: false,
+        force: false,
+        maxPages: 5,
+        timeoutMs: 8000,
+        allowLocal: true,
+      }),
+    ).rejects.toThrow(/symbolic link|symlink/i);
+    expect(readdirSync(outsideDir)).toHaveLength(0);
+  });
+
+  it("blocks init with --force when output directory is symlink", async () => {
+    const workDir = await mkdtemp(join(tmpdir(), "engawa-bundle-"));
+    const repoDir = join(workDir, "repo");
+    await mkdir(repoDir, { recursive: true });
+    createGenericNodeFixture(repoDir);
+    const outsideDir = join(workDir, "outside");
+    await mkdir(outsideDir);
+    const outDir = join(workDir, ".engawa");
+    try {
+      await symlink(outsideDir, outDir);
+    } catch {
+      return;
+    }
+    const reportPath = await writeInspectReport(
+      workDir,
+      minimalInspectReport("http://127.0.0.1:1", [{ path: "/" }]),
+    );
+    await expect(
+      runInit({
+        url: undefined,
+        inspectReportPath: reportPath,
+        repoPath: repoDir,
+        outputDir: outDir,
+        dryRun: false,
+        json: false,
+        force: true,
+        maxPages: 5,
+        timeoutMs: 8000,
+        allowLocal: true,
+      }),
+    ).rejects.toThrow(/symbolic link|symlink/i);
+    expect(readdirSync(outsideDir)).toHaveLength(0);
+  });
+
   it("blocks force overwrite when generated file is symlink", async () => {
     const workDir = await mkdtemp(join(tmpdir(), "engawa-bundle-"));
     const repoDir = join(workDir, "repo");

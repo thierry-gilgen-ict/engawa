@@ -19,6 +19,19 @@ export const GENERATED_FILES = [
 
 const ALL_BUNDLE_FILES = ["manifest.json", ...GENERATED_FILES] as const;
 
+function assertRealOutputDirectory(outputDir: string): void {
+  if (!existsSync(outputDir)) return;
+  const stat = lstatSync(outputDir);
+  if (stat.isSymbolicLink()) {
+    throw new InitError(
+      `Output directory must be a real directory, not a symbolic link: ${outputDir}`,
+    );
+  }
+  if (!stat.isDirectory()) {
+    throw new InitError(`Output path must be a directory: ${outputDir}`);
+  }
+}
+
 function assertRegularFileWritable(filePath: string): void {
   if (!existsSync(filePath)) return;
   const stat = lstatSync(filePath);
@@ -59,6 +72,8 @@ export function readExistingManifest(outputDir: string): InitBundleManifest | nu
 export function validateOutputDirectory(outputDir: string, force: boolean): void {
   if (!existsSync(outputDir)) return;
 
+  assertRealOutputDirectory(outputDir);
+
   const entries = readdirSync(outputDir);
   if (entries.length === 0) return;
 
@@ -96,6 +111,8 @@ export function writeInitBundle(
 
   if (!existsSync(outputDir)) {
     mkdirSync(outputDir, { recursive: true });
+  } else {
+    assertRealOutputDirectory(outputDir);
   }
 
   validateBundleTargets(outputDir);
