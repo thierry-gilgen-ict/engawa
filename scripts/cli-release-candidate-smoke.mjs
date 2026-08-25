@@ -58,39 +58,65 @@ function engawaBin(consumerDir) {
   throw new Error("Installed engawa binary not found under node_modules/.bin");
 }
 
-function installedCliEntry(consumerDir) {
-  const cliJs = join(consumerDir, "node_modules", scope, "dist", "cli.js");
-  if (!existsSync(cliJs)) {
-    throw new Error("Installed dist/cli.js missing from packed package");
-  }
-  return cliJs;
+function truncateDiagnostic(text, max = 2000) {
+  const s = String(text ?? "");
+  return s.length <= max ? s : `${s.slice(0, max)}…`;
 }
 
-async function runEngawa(consumerDir, args, options = {}) {
-  // Assert npm bin link exists, then invoke the packed entry with node for
-  // cross-platform reliability (Windows .cmd teardown can abort after success).
-  engawaBin(consumerDir);
-  const cliJs = installedCliEntry(consumerDir);
+/**
+ * Execute the npm-installed engawa binary (not node dist/cli.js).
+ * Default requires exit code 0. Opt-in expectedExitCode for intentional failures.
+ */
+async function runInstalledEngawa(consumerDir, args, options = {}) {
+  const expectedExitCode = options.expectedExitCode ?? 0;
+  const bin = engawaBin(consumerDir);
   const env = { ...process.env, npm_config_registry: "https://registry.npmjs.org" };
+  const execOpts = {
+    cwd: consumerDir,
+    encoding: "utf8",
+    env,
+    maxBuffer: 10 * 1024 * 1024,
+  };
+
+  let stdout = "";
+  let stderr = "";
+  let exitCode = 0;
+
   try {
-    const { stdout } = await execFileAsync(process.execPath, [cliJs, ...args], {
-      cwd: consumerDir,
-      encoding: "utf8",
-      env,
-      maxBuffer: 10 * 1024 * 1024,
-      ...options,
-    });
-    return stdout;
-  } catch (err) {
-    const stdout = typeof err?.stdout === "string" ? err.stdout : "";
-    if (stdout.trim()) {
-      return stdout;
+    let result;
+    if (process.platform === "win32") {
+      const comspec = process.env.ComSpec || "cmd.exe";
+      result = await execFileAsync(comspec, ["/d", "/s", "/c", bin, ...args], execOpts);
+    } else {
+      result = await execFileAsync(bin, args, execOpts);
     }
-    const stderr = typeof err?.stderr === "string" ? err.stderr.trim() : "";
+    stdout = result.stdout ?? "";
+    stderr = result.stderr ?? "";
+    exitCode = 0;
+  } catch (err) {
+    stdout = typeof err?.stdout === "string" ? err.stdout : "";
+    stderr = typeof err?.stderr === "string" ? err.stderr : "";
+    if (typeof err?.code === "number") {
+      exitCode = err.code;
+    } else {
+      exitCode = 1;
+    }
+  }
+
+  if (exitCode !== expectedExitCode) {
     throw new Error(
-      `engawa ${args.join(" ")} failed (code=${err?.code ?? "?"}): ${stderr || err?.message || err}`,
+      `engawa ${args.join(" ")} exited ${exitCode} (expected ${expectedExitCode})\n` +
+        `stdout: ${truncateDiagnostic(stdout)}\n` +
+        `stderr: ${truncateDiagnostic(stderr)}`,
     );
   }
+
+  return stdout;
+}
+
+/** Acceptance alias — always the installed npm binary. */
+async function runEngawa(consumerDir, args, options = {}) {
+  return runInstalledEngawa(consumerDir, args, options);
 }
 
 function listTarballEntries(tarballPath) {
@@ -392,21 +418,37 @@ async function main() {
     console.log("WORKSPACE_DEPENDENCY_LEAK = NO");
     console.log("DEV_DEPENDENCY_RUNTIME_LEAK = NO");
 
+    const installedCliJs = join(consumerDir, "node_modules", scope, "dist", "cli.js");
+    if (!existsSync(installedCliJs)) {
+      throw new Error("Installed dist/cli.js missing from packed package");
+    }
+
     const versionOut = (await runEngawa(consumerDir, ["--version"])).trim();
     if (versionOut !== VERSION) {
       throw new Error(`PACKED_VERSION expected ${VERSION}, got ${JSON.stringify(versionOut)}`);
     }
-    const binPath = engawaBin(consumerDir);
-    const binText = readFileSync(binPath, "utf8");
-    if (
-      !binText.includes("engawa-cli") &&
-      !binText.includes("dist/cli.js") &&
-      !binText.includes("cli.js")
-    ) {
-      throw new Error(`PACKED_BIN_LINK unexpected shim contents at ${binPath}`);
-    }
-    console.log("PACKED_VERSION_SMOKE = PASS");
+    console.log("PACKED_BIN_EXECUTION = PASS");
     console.log("PACKED_BIN_LINK = PASS");
+    console.log("PACKED_VERSION_SMOKE = PASS");
+
+    // Non-zero exit with stdout (root usage) must fail under default expectedExitCode=0.
+    let nonzeroRejected = false;
+    try {
+      await runEngawa(consumerDir, []);
+    } catch (err) {
+      const msg = String(err?.message ?? err);
+      if (!/exited [1-9]/.test(msg)) {
+        throw new Error(`NONZERO_WITH_STDOUT_IS_FAILURE: unexpected error shape: ${msg}`);
+      }
+      if (!/stdout:/i.test(msg)) {
+        throw new Error("NONZERO_WITH_STDOUT_IS_FAILURE: diagnostic missing stdout");
+      }
+      nonzeroRejected = true;
+    }
+    if (!nonzeroRejected) {
+      throw new Error("NONZERO_WITH_STDOUT_IS_FAILURE: zero-arg engawa unexpectedly succeeded");
+    }
+    console.log("NONZERO_WITH_STDOUT_IS_FAILURE = PASS");
 
     const rootHelp = await runEngawa(consumerDir, ["--help"]);
     for (const cmd of ["inspect", "init", "doctor"]) {
