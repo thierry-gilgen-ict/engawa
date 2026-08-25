@@ -24,7 +24,7 @@ function copyFixtureToTemp() {
 }
 
 function runExtract(tempRoot) {
-  execSync("node dist/build.js", {
+  execSync("node .build/build.js", {
     cwd: exampleRoot,
     stdio: "inherit",
     env: { ...process.env, STATIC_BUILD_ROOT: tempRoot },

@@ -36,6 +36,13 @@
       "canonicalPath": "/contact.html",
       "markdownPath": "/contact.md",
       "contentSelector": "main"
+    },
+    {
+      "id": "guides-start",
+      "source": "guides/start.html",
+      "canonicalPath": "/guides/start.html",
+      "markdownPath": "/guides/start.md",
+      "contentSelector": "main"
     }
   ]
 }

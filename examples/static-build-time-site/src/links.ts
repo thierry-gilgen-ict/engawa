@@ -1,4 +1,4 @@
-export function absolutizeHref(href: string, siteOrigin: string): string {
+export function absolutizeHref(href: string, pageBaseUrl: string): string {
   const trimmed = href.trim();
   if (!trimmed) return trimmed;
 
@@ -16,7 +16,7 @@ export function absolutizeHref(href: string, siteOrigin: string): string {
     return trimmed;
   }
 
-  const base = new URL(siteOrigin.endsWith("/") ? siteOrigin : `${siteOrigin}/`);
+  const base = linkResolutionBase(pageBaseUrl);
 
   if (trimmed.startsWith("//")) {
     return `${base.protocol}${trimmed}`;
@@ -27,4 +27,21 @@ export function absolutizeHref(href: string, siteOrigin: string): string {
   } catch {
     return trimmed;
   }
+}
+
+export function linkResolutionBase(pageBaseUrl: string): URL {
+  const url = new URL(pageBaseUrl);
+  const path = url.pathname;
+  if (path === "/" || path.endsWith("/")) {
+    return url;
+  }
+  if (/\.[a-z0-9]+$/i.test(path)) {
+    const parent = path.slice(0, path.lastIndexOf("/"));
+    url.pathname = parent === "" ? "/" : `${parent}/`;
+    return url;
+  }
+  if (!path.endsWith("/")) {
+    url.pathname = `${path}/`;
+  }
+  return url;
 }

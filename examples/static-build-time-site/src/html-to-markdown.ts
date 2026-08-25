@@ -11,7 +11,11 @@ function isElement(node: { nodeType: NodeType }): node is HTMLElement {
   return node.nodeType === 1;
 }
 
-function normalizeInline(text: string): string {
+function preserveTextNodeSpacing(text: string): string {
+  return text.replace(/[\t\r\f\v]+/g, " ").replace(/ +/g, " ");
+}
+
+function normalizeBlockText(text: string): string {
   return text.replace(/\s+/g, " ").trim();
 }
 
@@ -21,57 +25,57 @@ function stripDisallowedDescendants(root: HTMLElement): void {
   }
 }
 
-function convertInline(node: HTMLElement, siteOrigin: string): string {
+function convertInline(node: HTMLElement, pageBaseUrl: string): string {
   const parts: string[] = [];
   for (const child of node.childNodes) {
     if (isTextNode(child)) {
-      const text = normalizeInline(child.rawText);
-      if (text) parts.push(text);
+      const text = preserveTextNodeSpacing(child.rawText);
+      if (text.length > 0) parts.push(text);
       continue;
     }
     if (!isElement(child)) continue;
     const tag = child.tagName?.toLowerCase();
     if (!tag) continue;
     if (tag === "strong" || tag === "b") {
-      const inner = convertInline(child, siteOrigin);
+      const inner = convertInline(child, pageBaseUrl);
       if (inner) parts.push(`**${inner}**`);
     } else if (tag === "em" || tag === "i") {
-      const inner = convertInline(child, siteOrigin);
+      const inner = convertInline(child, pageBaseUrl);
       if (inner) parts.push(`*${inner}*`);
     } else if (tag === "code") {
-      const inner = normalizeInline(child.text);
+      const inner = preserveTextNodeSpacing(child.text);
       if (inner) parts.push(`\`${inner}\``);
     } else if (tag === "a") {
       const href = child.getAttribute("href") ?? "";
-      const label = convertInline(child, siteOrigin) || href;
-      const url = absolutizeHref(href, siteOrigin);
+      const label = convertInline(child, pageBaseUrl) || href;
+      const url = absolutizeHref(href, pageBaseUrl);
       parts.push(`[${label}](${url})`);
     } else {
-      parts.push(convertInline(child, siteOrigin));
+      parts.push(convertInline(child, pageBaseUrl));
     }
   }
-  return parts.join("");
+  return parts.join("").replace(/^\s+/, "").replace(/\s+$/, "");
 }
 
-function convertBlockList(listEl: HTMLElement, ordered: boolean, siteOrigin: string): string {
+function convertBlockList(listEl: HTMLElement, ordered: boolean, pageBaseUrl: string): string {
   const items = listEl.childNodes.filter(
     (n) => isElement(n) && n.tagName?.toLowerCase() === "li",
   ) as HTMLElement[];
   const lines: string[] = [];
   items.forEach((li, index) => {
     const prefix = ordered ? `${index + 1}. ` : "- ";
-    const inner = convertBlocks(li, siteOrigin).replace(/\n+/g, " ").trim();
+    const inner = convertBlocks(li, pageBaseUrl).replace(/\n+/g, " ").trim();
     lines.push(`${prefix}${inner}`);
   });
   return lines.join("\n");
 }
 
-function convertBlocks(container: HTMLElement, siteOrigin: string): string {
+function convertBlocks(container: HTMLElement, pageBaseUrl: string): string {
   const blocks: string[] = [];
 
   for (const child of container.childNodes) {
     if (isTextNode(child)) {
-      const text = normalizeInline(child.rawText);
+      const text = normalizeBlockText(child.rawText);
       if (text) blocks.push(text);
       continue;
     }
@@ -88,16 +92,16 @@ function convertBlocks(container: HTMLElement, siteOrigin: string): string {
       tag === "h6"
     ) {
       const level = Number(tag[1]);
-      const text = convertInline(child, siteOrigin);
+      const text = convertInline(child, pageBaseUrl);
       if (text) blocks.push(`${"#".repeat(level)} ${text}`);
     } else if (tag === "p") {
-      const text = convertInline(child, siteOrigin);
+      const text = convertInline(child, pageBaseUrl);
       if (text) blocks.push(text);
     } else if (tag === "ul") {
-      const list = convertBlockList(child, false, siteOrigin);
+      const list = convertBlockList(child, false, pageBaseUrl);
       if (list) blocks.push(list);
     } else if (tag === "ol") {
-      const list = convertBlockList(child, true, siteOrigin);
+      const list = convertBlockList(child, true, pageBaseUrl);
       if (list) blocks.push(list);
     } else if (tag === "pre") {
       const codeEl = child.querySelector("code");
@@ -105,7 +109,7 @@ function convertBlocks(container: HTMLElement, siteOrigin: string): string {
       const trimmed = codeText.replace(/\n$/, "");
       blocks.push(`\`\`\`\n${trimmed}\n\`\`\``);
     } else if (tag === "blockquote") {
-      const inner = convertBlocks(child, siteOrigin);
+      const inner = convertBlocks(child, pageBaseUrl);
       if (inner) {
         blocks.push(
           inner
@@ -115,10 +119,10 @@ function convertBlocks(container: HTMLElement, siteOrigin: string): string {
         );
       }
     } else if (tag === "div" || tag === "section" || tag === "article") {
-      const inner = convertBlocks(child, siteOrigin);
+      const inner = convertBlocks(child, pageBaseUrl);
       if (inner) blocks.push(inner);
     } else {
-      const inner = convertInline(child, siteOrigin);
+      const inner = convertInline(child, pageBaseUrl);
       if (inner) blocks.push(inner);
     }
   }
@@ -145,9 +149,9 @@ export function normalizeMarkdown(markdown: string): string {
   return normalized.join("\n").trim();
 }
 
-export function htmlMainToMarkdown(mainEl: HTMLElement, siteOrigin: string): string {
+export function htmlMainToMarkdown(mainEl: HTMLElement, pageBaseUrl: string): string {
   stripDisallowedDescendants(mainEl);
-  const markdown = convertBlocks(mainEl, siteOrigin);
+  const markdown = convertBlocks(mainEl, pageBaseUrl);
   if (!markdown) {
     throw new Error("Content selector matched an element with no extractable content");
   }

@@ -41,14 +41,17 @@ Reference implementation: [`examples/static-build-time-site`](../../examples/sta
 html/public/*.html          ← canonical authored HTML (no hand-written .md sources)
 engawa.manifest.json        ← explicit public route allowlist
         ↓
+pnpm run build              ← compile extractor to .build/ (tooling only)
 pnpm run extract            ← build-time extraction (Node 24+)
         ↓
 generated/engawa/resources.json
-dist/*.md
+dist/*.md                   ← public generated artifacts only
 dist/llms.txt
         ↓
 StaticContentAdapter + createEngawa() + generateLlmsTxt()
 ```
+
+**Compiled extractor tooling** (`src/*.ts` → `.build/*.js`) is separate from **public generated output** (`dist/`, `generated/`). Do not deploy `.build/` to your static site.
 
 **Node 24+** is required for the Engawa build tooling in this example. The deployed human HTML and generated Markdown static files themselves do **not** require a Node runtime.
 
@@ -76,6 +79,16 @@ Inside the boundary, `script`, `style`, `noscript`, and `template` nodes are str
 ## Determinism
 
 Same HTML inputs and manifest → byte-identical generated manifest, Markdown files, and `llms.txt`. No timestamps, random IDs, or environment-dependent paths in outputs.
+
+Re-running extraction performs a **clean rebuild** of generated Markdown under `dist/`: files for resources removed from the allowlist are deleted so stale public Markdown cannot outlive the current human-public corpus.
+
+## Link resolution
+
+Relative links inside extracted content resolve against the **human page canonical URL** (`canonicalPath` in the manifest), not merely the site origin. Sibling links such as `next.html` on `/guides/start.html` resolve to `/guides/next.html`. Root-relative links such as `/services.html` still resolve against the site origin.
+
+## Path safety
+
+Configured `sourceRoot`, `outputRoot`, and manifest paths are resolved with filesystem-aware checks. Symlinks that escape the project root or configured bounded roots are rejected fail-closed.
 
 ## Private exclusion
 

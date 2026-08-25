@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -21,7 +21,10 @@ function copyFixtureToTemp(): string {
   cpSync(EXAMPLE_ROOT, dir, {
     recursive: true,
     filter: (src) =>
-      !src.includes("node_modules") && !src.includes("dist") && !src.includes("generated"),
+      !src.includes("node_modules") &&
+      !src.includes("dist") &&
+      !src.includes("generated") &&
+      !src.includes(".build"),
   });
   return dir;
 }
@@ -38,7 +41,7 @@ describe("static build-time extraction", () => {
     tempDir = copyFixtureToTemp();
     const result = await runExtractAsync(tempDir);
 
-    expect(result.resources.length).toBe(4);
+    expect(result.resources.length).toBe(5);
     const manifestJson = readFileSync(join(tempDir, result.manifestPath), "utf8");
     expect(manifestJson).not.toContain(SENTINEL);
     expect(manifestJson).not.toContain("Unlisted public HTML");
@@ -204,7 +207,7 @@ describe("static build-time extraction", () => {
     const result = await runExtractAsync(tempDir);
     const engawa = createEngawaFromExtractResult(result, "https://example.invalid");
     const listed = await engawa.listResources();
-    expect(listed.length).toBe(4);
+    expect(listed.length).toBe(5);
 
     const about = await engawa.getResource("about");
     expect(about?.title).toContain("About");
@@ -225,7 +228,92 @@ describe("static build-time extraction", () => {
     const llms = generateLlmsTxt(engawa.config, resources);
     const written = readFileSync(join(tempDir, result.llmsTxtPath), "utf8");
     expect(written).toBe(llms);
-    expect(written).toContain("[Welcome to Static Example Co]");
+    expect(written).toContain("Welcome to Static Example Co");
+  });
+
+  it("removes stale markdown when a resource is removed from the allowlist", async () => {
+    tempDir = copyFixtureToTemp();
+    await runExtractAsync(tempDir);
+    expect(existsSync(join(tempDir, "dist/services.md"))).toBe(true);
+
+    const manifest = loadManifest(join(tempDir, "engawa.manifest.json"));
+    manifest.resources = manifest.resources.filter((r) => r.id !== "services");
+    writeFileSync(join(tempDir, "engawa.manifest.json"), JSON.stringify(manifest, null, 2));
+
+    await runExtractAsync(tempDir);
+    expect(existsSync(join(tempDir, "dist/services.md"))).toBe(false);
+
+    const manifestJson = readFileSync(join(tempDir, "generated/engawa/resources.json"), "utf8");
+    expect(manifestJson).not.toMatch(/"id": "services"/);
+    const llms = readFileSync(join(tempDir, "dist/llms.txt"), "utf8");
+    expect(llms).not.toContain("/services.md");
+    expect(llms).not.toContain("Services");
+  });
+
+  it("preserves inline whitespace around emphasis and links", () => {
+    const pageBase = "https://example.invalid/about.html";
+    const bold = parse("<main><p>Text <strong>bold</strong> text</p></main>").querySelector(
+      "main",
+    )!;
+    expect(htmlMainToMarkdown(bold, pageBase)).toContain("Text **bold** text");
+
+    const italic = parse("<main><p>Text <em>italic</em> text</p></main>").querySelector("main")!;
+    expect(htmlMainToMarkdown(italic, pageBase)).toContain("Text *italic* text");
+
+    const link = parse(
+      '<main><p>Text <a href="/about.html">link</a> text</p></main>',
+    ).querySelector("main")!;
+    expect(htmlMainToMarkdown(link, pageBase)).toContain(
+      "Text [link](https://example.invalid/about.html) text",
+    );
+
+    const punct = parse("<main><p><strong>Hello</strong>, world.</p></main>").querySelector(
+      "main",
+    )!;
+    expect(htmlMainToMarkdown(punct, pageBase)).toBe("**Hello**, world.");
+  });
+
+  it("resolves nested relative links against the human page URL", async () => {
+    tempDir = copyFixtureToTemp();
+    const result = await runExtractAsync(tempDir);
+    const guides = result.resources.find((r) => r.id === "guides-start");
+    expect(guides?.content).toContain("[Next](https://example.invalid/guides/next.html)");
+    expect(guides?.content).toContain("[Services](https://example.invalid/services.html)");
+  });
+
+  it("blocks source file symlink escaping sourceRoot", async () => {
+    tempDir = copyFixtureToTemp();
+    const outsideDir = mkdtempSync(join(tmpdir(), "static-outside-"));
+    const outsideFile = join(outsideDir, "secret.html");
+    writeFileSync(outsideFile, `<!DOCTYPE html><html><body><main>${SENTINEL}</main></body></html>`);
+    const linkPath = join(tempDir, "html/public/leak.html");
+    try {
+      symlinkSync(outsideFile, linkPath);
+    } catch {
+      return;
+    }
+
+    const manifest = loadManifest(join(tempDir, "engawa.manifest.json"));
+    manifest.resources.push({
+      id: "leak",
+      source: "leak.html",
+      canonicalPath: "/leak.html",
+      markdownPath: "/leak.md",
+      contentSelector: "main",
+    });
+    writeFileSync(join(tempDir, "engawa.manifest.json"), JSON.stringify(manifest, null, 2));
+    await expect(runExtractAsync(tempDir)).rejects.toThrow(/escapes bounded root/i);
+  });
+
+  it("blocks outputRoot symlink escaping project root", async () => {
+    tempDir = copyFixtureToTemp();
+    const outsideDir = mkdtempSync(join(tmpdir(), "static-out-dist-"));
+    try {
+      symlinkSync(outsideDir, join(tempDir, "dist"));
+    } catch {
+      return;
+    }
+    await expect(runExtractAsync(tempDir)).rejects.toThrow(/escapes project root/i);
   });
 
   it("does not use network during extraction", async () => {

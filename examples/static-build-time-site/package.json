@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "extract": "node dist/build.js",
+    "extract": "node .build/build.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

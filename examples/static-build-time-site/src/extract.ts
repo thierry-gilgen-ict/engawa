@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { parse } from "node-html-parser";
 import {
@@ -12,21 +12,33 @@ import {
 import { generateLlmsTxt } from "@thierry-gilgen-ict/engawa-discovery";
 import { htmlMainToMarkdown } from "./html-to-markdown.js";
 import { loadManifest, defaultManifestPath } from "./manifest.js";
-import { outputRelativePath, resolveUnderRoot } from "./paths.js";
+import {
+  markdownPathToOutputRel,
+  outputRelativePath,
+  resolveBoundedRootUnderProject,
+  resolveExistingUnderBoundedRoot,
+  resolveRealProjectRoot,
+  resolveWriteTargetUnderBoundedRoot,
+  walkMarkdownFiles,
+} from "./paths.js";
 import type { ExtractResult, GeneratedResourceRecord } from "./types.js";
 
 function sha256Hex(bytes: Buffer): string {
   return createHash("sha256").update(bytes).digest("hex");
 }
 
-function buildCanonicalUrl(siteUrl: string, canonicalPath: string): string {
+function buildCanonicalUrl(siteUrl: string, path: string): string {
   const normalized = normalizeCanonicalUrl(siteUrl);
-  if (canonicalPath === "/") {
+  if (path === "/") {
     return normalized.endsWith("/") ? normalized : `${normalized}/`;
   }
-  const path = canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   const base = normalized.endsWith("/") ? normalized.slice(0, -1) : normalized;
-  return `${base}${path}`;
+  return `${base}${normalizedPath}`;
+}
+
+export function buildHumanPageUrl(siteUrl: string, canonicalPath: string): string {
+  return buildCanonicalUrl(siteUrl, canonicalPath);
 }
 
 function buildEngawaConfig(manifest: ReturnType<typeof loadManifest>): Record<string, unknown> {
@@ -55,8 +67,17 @@ function buildEngawaConfig(manifest: ReturnType<typeof loadManifest>): Record<st
   };
 }
 
+function removeStaleMarkdown(outputRootAbs: string, expectedMdRels: Set<string>): void {
+  walkMarkdownFiles(outputRootAbs, (absPath, relPath) => {
+    if (!expectedMdRels.has(relPath)) {
+      unlinkSync(absPath);
+    }
+  });
+}
+
 function extractSingleResource(
-  projectRoot: string,
+  realProjectRoot: string,
+  realSourceRoot: string,
   manifest: ReturnType<typeof loadManifest>,
   resource: {
     id: string;
@@ -66,9 +87,8 @@ function extractSingleResource(
     contentSelector: string;
   },
 ): GeneratedResourceRecord {
-  const sourceRoot = resolveUnderRoot(projectRoot, manifest.sourceRoot, "sourceRoot");
-  const sourceAbs = resolveUnderRoot(
-    sourceRoot,
+  const sourceAbs = resolveExistingUnderBoundedRoot(
+    realSourceRoot,
     resource.source,
     `resources[${resource.id}].source`,
   );
@@ -89,8 +109,8 @@ function extractSingleResource(
     root.querySelector('meta[name="description"]')?.getAttribute("content")?.trim() || undefined;
   const titleFromHead = root.querySelector("title")?.text.trim();
 
-  const siteOrigin = normalizeCanonicalUrl(manifest.site.canonicalUrl);
-  const markdown = htmlMainToMarkdown(boundary, siteOrigin);
+  const pageBaseUrl = buildHumanPageUrl(manifest.site.canonicalUrl, resource.canonicalPath);
+  const markdown = htmlMainToMarkdown(boundary, pageBaseUrl);
 
   const titleMatch = markdown.match(/^#\s+(.+)$/m);
   const title = titleMatch?.[1]?.trim() || titleFromHead || resource.id;
@@ -119,14 +139,43 @@ export async function runExtractAsync(
   const manifestFile = manifestPath ?? defaultManifestPath(projectRoot);
   const manifest = loadManifest(manifestFile);
 
-  const outputRootAbs = resolveUnderRoot(projectRoot, manifest.outputRoot, "outputRoot");
-  const manifestOutAbs = resolveUnderRoot(projectRoot, manifest.manifestPath, "manifestPath");
-
-  const generated: GeneratedResourceRecord[] = manifest.resources.map((resource) =>
-    extractSingleResource(projectRoot, manifest, resource),
+  const realProjectRoot = resolveRealProjectRoot(projectRoot);
+  const realSourceRoot = resolveBoundedRootUnderProject(
+    realProjectRoot,
+    manifest.sourceRoot,
+    "sourceRoot",
+  );
+  let realOutputRoot = resolveBoundedRootUnderProject(
+    realProjectRoot,
+    manifest.outputRoot,
+    "outputRoot",
+  );
+  const manifestOutAbs = resolveWriteTargetUnderBoundedRoot(
+    realProjectRoot,
+    manifest.manifestPath,
+    "manifestPath",
   );
 
-  mkdirSync(outputRootAbs, { recursive: true });
+  const expectedMdRels = new Set(
+    manifest.resources.map((resource) => markdownPathToOutputRel(resource.markdownPath)),
+  );
+
+  if (!existsSync(realOutputRoot)) {
+    mkdirSync(realOutputRoot, { recursive: true });
+    realOutputRoot = resolveBoundedRootUnderProject(
+      realProjectRoot,
+      manifest.outputRoot,
+      "outputRoot",
+    );
+  }
+
+  removeStaleMarkdown(realOutputRoot, expectedMdRels);
+
+  const generated: GeneratedResourceRecord[] = manifest.resources.map((resource) =>
+    extractSingleResource(realProjectRoot, realSourceRoot, manifest, resource),
+  );
+
+  mkdirSync(realOutputRoot, { recursive: true });
   mkdirSync(dirname(manifestOutAbs), { recursive: true });
 
   for (const record of generated) {
@@ -135,7 +184,12 @@ export async function runExtractAsync(
       record.path.replace(/^\/+/, ""),
       `markdown output for ${record.id}`,
     );
-    const mdAbs = resolveUnderRoot(outputRootAbs, mdRel, `markdown output for ${record.id}`);
+    const mdAbs = resolveWriteTargetUnderBoundedRoot(
+      realOutputRoot,
+      mdRel,
+      `markdown output for ${record.id}`,
+    );
+    mkdirSync(dirname(mdAbs), { recursive: true });
     writeFileSync(mdAbs, record.content, "utf8");
   }
 
@@ -164,12 +218,12 @@ export async function runExtractAsync(
   const engawa = createEngawa(engawaConfig, adapter);
   const resources = await engawa.listResources();
   const llmsTxt = generateLlmsTxt(engawa.config, resources);
-  const llmsPath = join(outputRootAbs, "llms.txt");
-  writeFileSync(llmsPath, llmsTxt, "utf8");
+  const llmsAbs = resolveWriteTargetUnderBoundedRoot(realOutputRoot, "llms.txt", "llms.txt");
+  writeFileSync(llmsAbs, llmsTxt, "utf8");
 
   return {
     projectRoot,
-    manifestPath: relative(projectRoot, manifestOutAbs).replace(/\\/g, "/"),
+    manifestPath: relative(realProjectRoot, manifestOutAbs).replace(/\\/g, "/"),
     outputRoot: manifest.outputRoot,
     resources: generated,
     llmsTxtPath: join(manifest.outputRoot, "llms.txt").replace(/\\/g, "/"),

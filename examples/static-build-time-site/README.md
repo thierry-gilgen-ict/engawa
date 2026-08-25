@@ -36,6 +36,8 @@ Public prose exists only in HTML. Generated Markdown is disposable build output.
 
 Outputs are gitignored; tests and `pnpm run extract` recreate them.
 
+**Tooling vs public output:** TypeScript compiles to `.build/` (extractor implementation). `dist/` and `generated/` hold only generated Engawa public artifacts — never compiled JS.
+
 ## Commands
 
 From repository root (Node **24+** required for tooling):
@@ -61,6 +63,8 @@ Deployed static HTML and Markdown files do **not** require Node at runtime.
 
 Each entry defines `id`, `source`, `canonicalPath`, `markdownPath`, and `contentSelector` (usually `main`).
 
+Re-running extraction removes stale Markdown files that are no longer on the allowlist. Relative links resolve against each resource's human `canonicalPath` URL (e.g. `next.html` on `/guides/start.html` → `/guides/next.html`).
+
 ## Private routes stay excluded
 
 `html/private/admin.html` contains `ENGAWA_PRIVATE_SENTINEL_DO_NOT_PUBLISH`. It is not listed in the manifest, so it never enters generated Engawa output.
@@ -81,11 +85,11 @@ See [`src/extract.ts`](src/extract.ts) and [`src/build.ts`](src/build.ts).
 ┌──────────▼──────────┐
 │ engawa.manifest.json│  explicit allowlist (no directory crawl)
 └──────────┬──────────┘
+           │  pnpm run build → .build/
            │  pnpm run extract
 ┌──────────▼──────────────────────────┐
 │ generated/engawa/resources.json     │
-│ dist/*.md                           │
-│ dist/llms.txt                       │
+│ dist/*.md  dist/llms.txt            │  public generated artifacts
 └──────────┬──────────────────────────┘
            │
 ┌──────────▼──────────────────────────┐
