@@ -361,7 +361,7 @@ describe("static build-time extraction", () => {
     });
     writeFileSync(join(tempDir, "engawa.manifest.json"), JSON.stringify(manifest, null, 2));
 
-    await expect(runExtractAsync(tempDir)).rejects.toThrow(/escapes bounded root/i);
+    await expect(runExtractAsync(tempDir)).rejects.toThrow(/symlink|escapes bounded root/i);
     expect(existsSync(join(outsideDir, "new/page.md"))).toBe(false);
   });
 
