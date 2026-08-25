@@ -3,12 +3,7 @@ import { matchInspectPathToAppRoute } from "./framework/nextjs-app-router.js";
 import { matchInspectPathToPagesRoute } from "./framework/nextjs-pages-router.js";
 import { collectLocalImports, parsePathAliases } from "./source-candidates.js";
 import { classifyFileFromContent } from "./source-classify.js";
-import type {
-  FrameworkInfo,
-  NextjsRoute,
-  RepoScanResult,
-  SourceStatus,
-} from "./types.js";
+import type { FrameworkInfo, NextjsRoute, RepoScanResult, SourceStatus } from "./types.js";
 
 export interface RouteMappingInput {
   inspectReport: InspectReport;
