@@ -1,6 +1,7 @@
 import { Client } from "@modelcontextprotocol/client";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 import { evidenceText, sha256Hex, stableSortStrings } from "./helpers.js";
+import { createGuardedMcpFetch } from "./mcp-fetch.js";
 import {
   GENERIC_SEARCH_QUERY,
   type CheckStatus,
@@ -83,6 +84,9 @@ export async function verifyMcp(options: {
   maxResources: number;
   maxReads: number;
   knownQuery?: string;
+  lockOrigin: string;
+  allowLocal: boolean;
+  onRequest?: (url: string) => void;
 }): Promise<McpVerifyResult> {
   const failures: string[] = [];
   const sampledBodies: string[] = [];
@@ -110,7 +114,13 @@ export async function verifyMcp(options: {
     failures,
   };
 
-  const transport = new StreamableHTTPClientTransport(new URL(options.endpoint));
+  const transport = new StreamableHTTPClientTransport(new URL(options.endpoint), {
+    fetch: createGuardedMcpFetch({
+      lockOrigin: options.lockOrigin,
+      allowLocal: options.allowLocal,
+      onRequest: options.onRequest,
+    }),
+  });
   const client = new Client({ name: "engawa-doctor", version: "0.1.0" });
 
   try {

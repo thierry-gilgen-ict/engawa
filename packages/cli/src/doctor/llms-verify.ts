@@ -3,7 +3,12 @@ import { parseLlmsTxt } from "../inspect/llms.js";
 import { isMcpUrl } from "../inspect/mcp.js";
 import type { FetchTargetPolicy } from "../inspect/url.js";
 import { MAX_BODY_BYTES, USER_AGENT, type CheckStatus, type DoctorProfile } from "./types.js";
-import { contentTypeIsTextLike, evidenceText } from "./helpers.js";
+import {
+  contentTypeIsTextLike,
+  evidenceText,
+  expectedCanonicalRoot,
+  llmsContainsCanonicalSiteRoot,
+} from "./helpers.js";
 
 export interface LlmsVerifyResult {
   status: CheckStatus;
@@ -23,6 +28,7 @@ export interface LlmsVerifyResult {
 export async function verifyLlmsTxt(options: {
   origin: string;
   canonicalUrl?: string;
+  finalUrl: string;
   profile: DoctorProfile;
   timeoutMs: number;
   policy: FetchTargetPolicy;
@@ -59,26 +65,16 @@ export async function verifyLlmsTxt(options: {
   }
 
   const parsed = parseLlmsTxt(outcome.body, new URL(options.origin));
-  const originHost = new URL(options.origin).host;
-  const canonicalHost = options.canonicalUrl
-    ? (() => {
-        try {
-          return new URL(options.canonicalUrl).host;
-        } catch {
-          return undefined;
-        }
-      })()
-    : undefined;
-
-  const bodyLower = outcome.body.toLowerCase();
-  const canonicalOk =
-    bodyLower.includes(originHost.toLowerCase()) ||
-    (canonicalHost !== undefined && bodyLower.includes(canonicalHost.toLowerCase())) ||
-    (options.canonicalUrl !== undefined && bodyLower.includes(options.canonicalUrl.toLowerCase()));
+  const expectedRoot = expectedCanonicalRoot({
+    canonicalUrl: options.canonicalUrl,
+    finalUrl: options.finalUrl,
+    origin: options.origin,
+  });
+  const canonicalOk = llmsContainsCanonicalSiteRoot(outcome.body, expectedRoot);
 
   const canonicalSiteReference: CheckStatus = canonicalOk ? "PASS" : "FAIL";
   if (!canonicalOk) {
-    failures.push("llms.txt missing canonical site URL reference");
+    failures.push("llms.txt missing exact canonical site URL reference");
   }
 
   let mcpAdvertisement: CheckStatus;

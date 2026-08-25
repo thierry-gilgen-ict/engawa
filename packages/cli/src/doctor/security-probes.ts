@@ -1,4 +1,4 @@
-import { request as httpRequest } from "node:http";
+import { request as httpRequest, type IncomingMessage } from "node:http";
 import { request as httpsRequest } from "node:https";
 import { LATEST_PROTOCOL_VERSION } from "@modelcontextprotocol/client";
 import {
@@ -8,6 +8,8 @@ import {
   type OriginValidation,
   type RateLimitObservation,
 } from "./types.js";
+
+export const MAX_SECURITY_PROBE_BODY_BYTES = 256 * 1024;
 
 function buildMcpInitializeBody(): string {
   return JSON.stringify({
@@ -37,14 +39,48 @@ async function rawRequest(
     body?: string;
     timeoutMs: number;
     overrideHost?: string;
+    maxBodyBytes?: number;
   },
 ): Promise<RawProbeResult> {
   const parsed = new URL(targetUrl);
   const isHttps = parsed.protocol === "https:";
   const requestFn = isHttps ? httpsRequest : httpRequest;
   const body = options.body ?? "";
+  const maxBodyBytes = options.maxBodyBytes ?? MAX_SECURITY_PROBE_BODY_BYTES;
 
   return new Promise((resolve) => {
+    const state: {
+      settled: boolean;
+      res?: IncomingMessage;
+      req?: ReturnType<typeof httpRequest>;
+      absoluteTimer?: ReturnType<typeof setTimeout>;
+    } = { settled: false };
+
+    const settle = (result: RawProbeResult) => {
+      if (state.settled) return;
+      state.settled = true;
+      if (state.absoluteTimer) clearTimeout(state.absoluteTimer);
+      try {
+        state.res?.destroy();
+      } catch {
+        // ignore
+      }
+      try {
+        state.req?.destroy();
+      } catch {
+        // ignore
+      }
+      resolve({
+        ...result,
+        body: result.body.slice(0, 4096),
+        error: result.error ? result.error.slice(0, 200) : undefined,
+      });
+    };
+
+    state.absoluteTimer = setTimeout(() => {
+      settle({ status: 0, headers: {}, body: "", error: "timeout" });
+    }, options.timeoutMs);
+
     const headers: Record<string, string> = {
       ...options.headers,
     };
@@ -55,7 +91,7 @@ async function rawRequest(
       headers["Content-Length"] = String(Buffer.byteLength(body));
     }
 
-    const req = requestFn(
+    state.req = requestFn(
       {
         protocol: parsed.protocol,
         hostname: parsed.hostname,
@@ -66,32 +102,50 @@ async function rawRequest(
         timeout: options.timeoutMs,
         servername: isHttps ? parsed.hostname : undefined,
       },
-      (res) => {
+      (incoming) => {
+        state.res = incoming;
         const chunks: Buffer[] = [];
-        res.on("data", (c) => chunks.push(c));
-        res.on("end", () => {
+        let total = 0;
+        incoming.on("data", (c: Buffer) => {
+          if (state.settled) return;
+          total += c.length;
+          if (total > maxBodyBytes) {
+            settle({
+              status: incoming.statusCode ?? 0,
+              headers: {},
+              body: "",
+              error: "BODY_TOO_LARGE",
+            });
+            return;
+          }
+          chunks.push(c);
+        });
+        incoming.on("end", () => {
+          if (state.settled) return;
           const headerRecord: Record<string, string> = {};
-          for (const [k, v] of Object.entries(res.headers)) {
+          for (const [k, v] of Object.entries(incoming.headers)) {
             if (typeof v === "string") headerRecord[k.toLowerCase()] = v;
             else if (Array.isArray(v)) headerRecord[k.toLowerCase()] = v.join(", ");
           }
-          resolve({
-            status: res.statusCode ?? 0,
+          settle({
+            status: incoming.statusCode ?? 0,
             headers: headerRecord,
             body: Buffer.concat(chunks).toString("utf8"),
           });
         });
+        incoming.on("error", (err) => {
+          settle({ status: 0, headers: {}, body: "", error: err.message });
+        });
       },
     );
-    req.on("timeout", () => {
-      req.destroy();
-      resolve({ status: 0, headers: {}, body: "", error: "timeout" });
+    state.req.on("timeout", () => {
+      settle({ status: 0, headers: {}, body: "", error: "timeout" });
     });
-    req.on("error", (err) => {
-      resolve({ status: 0, headers: {}, body: "", error: err.message });
+    state.req.on("error", (err) => {
+      settle({ status: 0, headers: {}, body: "", error: err.message });
     });
-    if (body) req.write(body);
-    req.end();
+    if (body) state.req.write(body);
+    state.req.end();
   });
 }
 
@@ -183,3 +237,6 @@ export async function probeRateLimit(options: {
   }
   return "NOT_OBSERVED_WITHIN_SAFE_BUDGET";
 }
+
+/** Exported for hermetic oversized/timeout tests. */
+export const __testRawRequest = rawRequest;

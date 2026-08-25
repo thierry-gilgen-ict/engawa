@@ -138,6 +138,7 @@ export async function runDoctor(options: DoctorOptions): Promise<EngawaDoctorRep
   const llms = await verifyLlmsTxt({
     origin,
     canonicalUrl: inspect.site.canonicalUrl ?? inspect.target.finalUrl,
+    finalUrl: inspect.target.finalUrl,
     profile: options.profile,
     timeoutMs: options.timeoutMs,
     policy,
@@ -212,6 +213,8 @@ export async function runDoctor(options: DoctorOptions): Promise<EngawaDoctorRep
       maxResources: options.maxResources,
       maxReads: options.maxReads,
       knownQuery: options.query,
+      lockOrigin: origin,
+      allowLocal: options.allowLocal,
     });
     failures.push(...mcp.failures);
     mcpBodies = mcp.sampledBodies;

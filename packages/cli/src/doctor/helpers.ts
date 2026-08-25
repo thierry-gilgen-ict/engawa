@@ -26,3 +26,54 @@ export function contentTypeIsTextLike(contentType: string): boolean {
 export function contentTypeIsMarkdown(contentType: string): boolean {
   return /text\/markdown|text\/x-markdown|text\/plain/i.test(contentType);
 }
+
+/** Normalize a URL to comparable site-root form, or null if not a root URL. */
+export function normalizeSiteRootUrl(input: string): string | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(input);
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+  const path = parsed.pathname === "" || parsed.pathname === "/" ? "/" : parsed.pathname;
+  if (path !== "/") return null;
+  if (parsed.search || parsed.hash) return null;
+  return `${parsed.origin}/`;
+}
+
+export function expectedCanonicalRoot(options: {
+  canonicalUrl?: string;
+  finalUrl: string;
+  origin: string;
+}): string {
+  const candidates = [options.canonicalUrl, options.finalUrl, options.origin];
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    try {
+      const parsed = new URL(candidate);
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+        return `${parsed.origin}/`;
+      }
+    } catch {
+      continue;
+    }
+  }
+  return `${options.origin}/`;
+}
+
+/** Extract absolute http(s) URLs from llms body (evidence only; not a fetch list). */
+export function extractAbsoluteUrls(body: string): string[] {
+  const found = body.match(/https?:\/\/[^\s)<>"']+/gi) ?? [];
+  return [...new Set(found.map((u) => u.replace(/[.,;:]+$/, "")))];
+}
+
+export function llmsContainsCanonicalSiteRoot(body: string, expectedRoot: string): boolean {
+  const expected = normalizeSiteRootUrl(expectedRoot);
+  if (!expected) return false;
+  for (const raw of extractAbsoluteUrls(body)) {
+    const root = normalizeSiteRootUrl(raw);
+    if (root === expected) return true;
+  }
+  return false;
+}

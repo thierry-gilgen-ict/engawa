@@ -1,6 +1,8 @@
 /**
  * @vitest-environment node
  */
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -8,6 +10,9 @@ import { afterEach, describe, expect, it } from "vitest";
 import { runCli } from "../cli.js";
 import { engawaDoctorSchema } from "../doctor/schema.js";
 import { runDoctor } from "../doctor/run-doctor.js";
+import { createGuardedMcpFetch } from "../doctor/mcp-fetch.js";
+import { llmsContainsCanonicalSiteRoot, normalizeSiteRootUrl } from "../doctor/helpers.js";
+import { __testRawRequest } from "../doctor/security-probes.js";
 import {
   REMOTE_BODY_SENTINEL,
   startDoctorFixtureServer,
@@ -576,5 +581,167 @@ describe("engawa doctor output", () => {
     const b = await runDoctor(opts);
     expect(JSON.stringify(a)).toBe(JSON.stringify(b));
     expect(JSON.stringify(a)).not.toMatch(/T\d{2}:\d{2}:\d{2}/);
+  });
+});
+
+describe("engawa doctor MCP transport origin lock", () => {
+  it("rejects same-origin MCP redirect without following", async () => {
+    const f = await start();
+    const redirecting = await start({
+      mcpRedirectTo: `${f.origin}/mcp`,
+      includeMcp: true,
+    });
+    const report = await runDoctor({
+      inputUrl: redirecting.baseUrl,
+      profile: "full",
+      mcpUrl: `${redirecting.origin}/mcp`,
+      denyTerms: [],
+      maxPages: 5,
+      maxResources: 50,
+      maxReads: 3,
+      timeoutMs: 8000,
+      rateLimitProbe: 0,
+      strict: false,
+      allowLocal: true,
+      json: true,
+    });
+    expect(report.mcp.connect).toBe("FAIL");
+    expect(report.summary.status).toBe("FAIL");
+    expect(f.requestLog.filter((l) => l.includes("/mcp")).length).toBe(0);
+  });
+
+  it("rejects cross-origin MCP redirect with zero destination requests", async () => {
+    const secondary = await start();
+    const primary = await start({
+      mcpRedirectTo: `${secondary.origin}/mcp`,
+    });
+    const report = await runDoctor({
+      inputUrl: primary.baseUrl,
+      profile: "full",
+      mcpUrl: `${primary.origin}/mcp`,
+      denyTerms: [],
+      maxPages: 5,
+      maxResources: 50,
+      maxReads: 3,
+      timeoutMs: 8000,
+      rateLimitProbe: 0,
+      strict: false,
+      allowLocal: true,
+      json: true,
+    });
+    expect(report.mcp.connect).toBe("FAIL");
+    expect(secondary.requestLog.filter((l) => l.includes("/mcp")).length).toBe(0);
+  });
+});
+
+describe("engawa doctor llms canonical exact match", () => {
+  it("passes exact and trailing-slash equivalent roots", () => {
+    expect(
+      llmsContainsCanonicalSiteRoot("- Site: https://example.com/", "https://example.com"),
+    ).toBe(true);
+    expect(
+      llmsContainsCanonicalSiteRoot("- Site: https://example.com", "https://example.com/"),
+    ).toBe(true);
+  });
+
+  it("fails mcp-only, markdown-only, prose hostname, and wrong origin", () => {
+    expect(
+      llmsContainsCanonicalSiteRoot(
+        "- MCP endpoint: https://example.com/mcp",
+        "https://example.com/",
+      ),
+    ).toBe(false);
+    expect(
+      llmsContainsCanonicalSiteRoot(
+        "- [About](https://example.com/about.md)",
+        "https://example.com/",
+      ),
+    ).toBe(false);
+    expect(
+      llmsContainsCanonicalSiteRoot("Visit example.com for more", "https://example.com/"),
+    ).toBe(false);
+    expect(
+      llmsContainsCanonicalSiteRoot("- Site: https://evil.example/", "https://example.com/"),
+    ).toBe(false);
+  });
+
+  it("normalizeSiteRootUrl rejects non-root paths", () => {
+    expect(normalizeSiteRootUrl("https://example.com/mcp")).toBeNull();
+    expect(normalizeSiteRootUrl("https://example.com/about.md")).toBeNull();
+    expect(normalizeSiteRootUrl("https://example.com/")).toBe("https://example.com/");
+  });
+});
+
+describe("engawa doctor security probe bounds", () => {
+  it("classifies oversized continuous response as UNKNOWN without huge body", async () => {
+    const server = createServer((req, res) => {
+      res.writeHead(200, { "content-type": "application/json" });
+      const chunk = Buffer.alloc(64 * 1024, 0x61);
+      const pump = () => {
+        if (!res.write(chunk)) {
+          res.once("drain", pump);
+          return;
+        }
+        setImmediate(pump);
+      };
+      pump();
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const addr = server.address() as AddressInfo;
+    const result = await __testRawRequest(`http://127.0.0.1:${addr.port}/`, {
+      method: "GET",
+      headers: {},
+      timeoutMs: 2000,
+      maxBodyBytes: 8 * 1024,
+    });
+    await new Promise<void>((resolve, reject) => server.close((e) => (e ? reject(e) : resolve())));
+    expect(result.error).toBe("BODY_TOO_LARGE");
+    expect(result.body.length).toBeLessThan(5000);
+  });
+
+  it("absolute timeout terminates slow stream", async () => {
+    const server = createServer((_req, res) => {
+      res.writeHead(200, { "content-type": "text/plain" });
+      const interval = setInterval(() => {
+        res.write("x");
+      }, 50);
+      res.on("close", () => clearInterval(interval));
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const addr = server.address() as AddressInfo;
+    const result = await __testRawRequest(`http://127.0.0.1:${addr.port}/`, {
+      method: "GET",
+      headers: {},
+      timeoutMs: 200,
+      maxBodyBytes: 1024 * 1024,
+    });
+    await new Promise<void>((resolve, reject) => server.close((e) => (e ? reject(e) : resolve())));
+    expect(result.error).toBe("timeout");
+  });
+});
+
+describe("engawa doctor guarded MCP fetch unit", () => {
+  it("blocks private targets when allowLocal is false", async () => {
+    const requests: string[] = [];
+    const guarded = createGuardedMcpFetch({
+      lockOrigin: "http://192.168.0.5",
+      allowLocal: false,
+      onRequest: (u) => requests.push(u),
+      underlyingFetch: async () => new Response("ok"),
+    });
+    await expect(guarded("http://192.168.0.5/mcp")).rejects.toThrow(/private|local|refusing/i);
+    expect(requests).toHaveLength(0);
+  });
+
+  it("blocks cross-origin before fetch", async () => {
+    const requests: string[] = [];
+    const guarded = createGuardedMcpFetch({
+      lockOrigin: "https://example.com",
+      allowLocal: true,
+      onRequest: (u) => requests.push(u),
+      underlyingFetch: async () => new Response("ok"),
+    });
+    await expect(guarded("https://evil.example/mcp")).rejects.toThrow(/cross-origin/i);
+    expect(requests).toHaveLength(0);
   });
 });

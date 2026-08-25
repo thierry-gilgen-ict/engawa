@@ -73,8 +73,11 @@ engawa doctor https://example.com --profile discovery
 - Scan or modify the source repository
 - Invoke any MCP tool other than `search_site`
 - Actively stress rate limits unless `--rate-limit-probe` is set
+- Follow MCP HTTP redirects (v0.1 rejects redirects; endpoint must be direct same-origin)
 
 `--query` is sent to the target site’s public `search_site` tool. Use a known public term only.
+
+Doctor MCP transport uses a guarded custom `fetch`: same-origin lock, private/reserved address policy, `redirect: "manual"`, no credentials.
 
 ## What inspect does NOT do
 

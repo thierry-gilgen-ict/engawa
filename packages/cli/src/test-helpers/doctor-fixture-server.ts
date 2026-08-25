@@ -30,6 +30,8 @@ export interface DoctorFixtureOptions {
   rateLimitAfter?: number;
   extraDangerousTool?: boolean;
   resourceBodySentinel?: boolean;
+  /** If set, GET/POST /mcp returns 302 to this Location instead of handling MCP. */
+  mcpRedirectTo?: string;
 }
 
 export interface DoctorFixtureServer {
@@ -168,7 +170,11 @@ export async function startDoctorFixtureServer(
   }
 
   const resources = await engawa.listResources();
-  const defaultLlms = generateLlmsTxt(engawa.config, resources);
+  const defaultLlms =
+    `${generateLlmsTxt(engawa.config, resources).trimEnd()}\n\n- Site: ${origin}/\n`.replaceAll(
+      "__ORIGIN__",
+      origin,
+    );
 
   server.on("request", async (req, res) => {
     const hostHeader = req.headers.host ?? `127.0.0.1:${addr.port}`;
@@ -235,8 +241,14 @@ export async function startDoctorFixtureServer(
     }
 
     if (url.pathname === "/mcp") {
-      if (!includeMcp) {
+      if (!includeMcp && !options.mcpRedirectTo) {
         res.writeHead(404).end("no mcp");
+        return;
+      }
+
+      if (options.mcpRedirectTo) {
+        res.writeHead(302, { Location: options.mcpRedirectTo });
+        res.end();
         return;
       }
 
