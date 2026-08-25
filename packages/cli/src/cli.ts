@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -447,7 +447,19 @@ export async function runCli(argv: string[]): Promise<number> {
 }
 
 const entry = process.argv[1];
-if (entry && fileURLToPath(import.meta.url) === entry) {
+function isDirectCliEntry(): boolean {
+  if (!entry) return false;
+  try {
+    // npm bin shims may pass a non-realpath argv[1]; compare resolved paths so
+    // `engawa` from node_modules/.bin actually runs (required for packed installs).
+    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(resolve(entry));
+  } catch {
+    return false;
+  }
+}
+if (isDirectCliEntry()) {
   const code = await runCli(process.argv.slice(2));
-  process.exit(code);
+  // Prefer exitCode over process.exit so Windows npm .cmd shims do not hit
+  // libuv UV_HANDLE_CLOSING aborts after a successful CLI run.
+  process.exitCode = code;
 }
