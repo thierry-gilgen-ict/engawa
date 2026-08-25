@@ -53,18 +53,18 @@
 
 - Optional provider handoff UX where vendors document support
 - Analytics helpers (metadata-only patterns exist in reference sites)
-- CLI for local Engawa development — **in progress:** `engawa inspect` + `engawa init` + `engawa doctor` in `@thierry-gilgen-ict/engawa-cli` (source, not published)
+- CLI for local Engawa development — `engawa inspect` + `engawa init` + `engawa doctor` in `@thierry-gilgen-ict/engawa-cli` (**0.1.0 release candidate**, publication pending)
 - `engawa-nextjs` — only if duplication across consumers justifies extraction
 
 ## Package status
 
-| Package            | npm status                     | Notes                                                                                            |
-| ------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------ |
-| `engawa-core`      | 0.1.1                          | engines metadata in 0.1.1                                                                        |
-| `engawa-discovery` | 0.1.1                          | depends on core 0.1.1                                                                            |
-| `engawa-mcp`       | 0.1.1                          | depends on core 0.1.1                                                                            |
-| `engawa-react`     | 0.1.0                          | engines already present                                                                          |
-| `engawa-nextjs`    | Not shipped                    | Document pattern only                                                                            |
-| `engawa-cli`       | In development (not published) | CLI-1 `inspect` + CLI-2 `init` implemented in source; `doctor` planned                           |
-| `engawa-map`       | 0.1.0                          | Production registry live; voluntary PENDING→LISTED flow; [Distribution Map](distribution-map.md) |
-| `engawa-analytics` | Planned                        | Separate from Distribution Map                                                                   |
+| Package            | npm status                              | Notes                                                                                            |
+| ------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `engawa-core`      | 0.1.1                                   | engines metadata in 0.1.1                                                                        |
+| `engawa-discovery` | 0.1.1                                   | depends on core 0.1.1                                                                            |
+| `engawa-mcp`       | 0.1.1                                   | depends on core 0.1.1                                                                            |
+| `engawa-react`     | 0.1.0                                   | engines already present                                                                          |
+| `engawa-nextjs`    | Not shipped                             | Document pattern only                                                                            |
+| `engawa-cli`       | 0.1.0 release candidate (not published) | `inspect` + `init` + `doctor` implemented; publication pending                                   |
+| `engawa-map`       | 0.1.0                                   | Production registry live; voluntary PENDING→LISTED flow; [Distribution Map](distribution-map.md) |
+| `engawa-analytics` | Planned                                 | Separate from Distribution Map                                                                   |

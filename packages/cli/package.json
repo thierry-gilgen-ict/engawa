@@ -1,7 +1,7 @@
 {
   "name": "@thierry-gilgen-ict/engawa-cli",
   "version": "0.1.0",
-  "description": "Engawa CLI — deterministic website inspector for agent readiness",
+  "description": "Engawa CLI — inspect, plan, and verify agent-native websites",
   "license": "MIT",
   "repository": {
     "type": "git",

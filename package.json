@@ -18,6 +18,7 @@
     "smoke:live-references": "node scripts/live-reference-acceptance.mjs",
     "smoke:v011-rc": "node scripts/v011-release-candidate-smoke.mjs",
     "smoke:map-rc": "node scripts/map-release-candidate-smoke.mjs",
+    "smoke:cli-rc": "node scripts/cli-release-candidate-smoke.mjs",
     "lint": "eslint .",
     "format": "prettier --check .",
     "format:write": "prettier --write ."

@@ -2,7 +2,7 @@
 
 Deterministic Engawa CLI for inspecting public websites, planning integrations, and verifying deployed agent surfaces.
 
-**Not published on npm yet** — source-only `0.1.0` in this monorepo.
+**0.1.0 release candidate** — publication pending. Not available on npm yet.
 
 ## Commands
 
@@ -91,12 +91,12 @@ Doctor MCP transport uses a guarded custom `fetch`: same-origin lock, private/re
 ## CLI flow
 
 ```text
-inspect → integrate → verify
+inspect → plan → verify
 ```
 
 - **CLI-1:** `engawa inspect` — implemented
-- **CLI-2:** `engawa init` — implemented in source
-- **CLI-3:** `engawa doctor` — implemented in source
+- **CLI-2:** `engawa init` — implemented
+- **CLI-3:** `engawa doctor` — implemented
 
 ## Development (monorepo)
 

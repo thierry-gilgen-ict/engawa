@@ -45,5 +45,8 @@ jobs:
       - name: engawa-map release-candidate pack smoke
         run: node scripts/map-release-candidate-smoke.mjs
 
+      - name: engawa-cli release-candidate pack smoke
+        run: node scripts/cli-release-candidate-smoke.mjs
+
       - name: External npm consumer smoke
         run: node scripts/external-consumer-smoke.mjs 0.1.1
