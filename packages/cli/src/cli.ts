@@ -3,7 +3,23 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { InspectError, isCliError } from "./errors.js";
+import { DoctorError, InspectError, isCliError } from "./errors.js";
+import { formatDoctorHumanReport } from "./doctor/format-human.js";
+import { writeDoctorOutput } from "./doctor/output.js";
+import { runDoctor } from "./doctor/run-doctor.js";
+import {
+  DEFAULT_MAX_PAGES as DOCTOR_DEFAULT_MAX_PAGES,
+  DEFAULT_MAX_READS,
+  DEFAULT_MAX_RESOURCES,
+  DEFAULT_PROFILE,
+  DEFAULT_RATE_LIMIT_PROBE,
+  DEFAULT_TIMEOUT_MS as DOCTOR_DEFAULT_TIMEOUT_MS,
+  HARD_MAX_PAGES as DOCTOR_HARD_MAX_PAGES,
+  HARD_MAX_READS,
+  HARD_MAX_RESOURCES,
+  HARD_RATE_LIMIT_PROBE,
+  type DoctorProfile,
+} from "./doctor/types.js";
 import { formatHumanReport } from "./inspect/format-human.js";
 import { formatMarkdownReport } from "./inspect/format-markdown.js";
 import { runInspect } from "./inspect/run-inspect.js";
@@ -23,8 +39,6 @@ function printRootUsage(): void {
 Commands:
   inspect     Inspect a public website and produce an Agent Readiness Report
   init        Plan Engawa integration from inspection report and local repository
-
-Planned (not yet implemented):
   doctor      Verify agent surfaces and security on a live site
 
 Options:
@@ -70,6 +84,33 @@ Options:
 `);
 }
 
+function printDoctorUsage(): void {
+  process.stdout.write(`Usage: engawa doctor <url> [options]
+
+Verify that a deployed Engawa public agent interface works.
+Read-only live checks: llms.txt, Markdown, MCP protocol, search_site, bounded security observations.
+Does not prove HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE.
+Does not send credentials or call Distribution Map.
+
+Options:
+  --profile <full|discovery>  Verification profile (default ${DEFAULT_PROFILE})
+  --plan <path>               Optional engawa.plan.v1 for expectation comparison
+  --mcp-url <url>             Explicit same-origin MCP endpoint
+  --query <text>              Known public search_site query (sent to target)
+  --deny-term <text>          Synthetic sentinel that must not appear (repeatable)
+  --max-pages <n>             Inspect discovery budget (default ${DOCTOR_DEFAULT_MAX_PAGES}, max ${DOCTOR_HARD_MAX_PAGES})
+  --max-resources <n>         MCP resources/list bound (default ${DEFAULT_MAX_RESOURCES}, max ${HARD_MAX_RESOURCES})
+  --max-reads <n>             MCP resources/read samples (default ${DEFAULT_MAX_READS}, max ${HARD_MAX_READS})
+  --timeout-ms <n>            Per-operation timeout ms (default ${DOCTOR_DEFAULT_TIMEOUT_MS})
+  --rate-limit-probe <n>      Opt-in sequential rate probes (default ${DEFAULT_RATE_LIMIT_PROBE}, max ${HARD_RATE_LIMIT_PROBE})
+  --strict                    Fail on unresolved production-security evidence
+  --allow-local               Allow localhost and private-network targets
+  --json                      Output engawa.doctor.v1 JSON to stdout
+  --output <path>             Write report to .json or .md (fails if file exists)
+  --help, -h                  Show this help
+`);
+}
+
 function parsePositiveInt(value: string, flag: string, max?: number): number {
   const n = Number(value);
   if (!Number.isInteger(n) || n < 1) {
@@ -81,12 +122,37 @@ function parsePositiveInt(value: string, flag: string, max?: number): number {
   return n;
 }
 
+function parseNonNegativeInt(value: string, flag: string, max?: number): number {
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < 0) {
+    throw new DoctorError(`Invalid value for ${flag}: ${value}`);
+  }
+  if (max !== undefined && n > max) {
+    throw new DoctorError(`${flag} must be <= ${max}`);
+  }
+  return n;
+}
+
 function getFlagValue(args: string[], flag: string): string | undefined {
   const eq = args.find((a) => a.startsWith(`${flag}=`));
   if (eq) return eq.slice(flag.length + 1);
   const idx = args.indexOf(flag);
   if (idx >= 0 && idx + 1 < args.length) return args[idx + 1];
   return undefined;
+}
+
+function getRepeatableFlagValues(args: string[], flag: string): string[] {
+  const values: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === flag && i + 1 < args.length) {
+      values.push(args[i + 1]);
+      i += 1;
+    } else if (a.startsWith(`${flag}=`)) {
+      values.push(a.slice(flag.length + 1));
+    }
+  }
+  return values;
 }
 
 function hasFlag(args: string[], flag: string): boolean {
@@ -219,6 +285,129 @@ async function runInitCommand(args: string[]): Promise<number> {
   return 0;
 }
 
+async function runDoctorCommand(args: string[]): Promise<number> {
+  if (hasFlag(args, "--help") || hasFlag(args, "-h")) {
+    printDoctorUsage();
+    return 0;
+  }
+
+  // Collect positional URL: skip values of known flags that take arguments
+  const flagNames = new Set([
+    "--profile",
+    "--plan",
+    "--mcp-url",
+    "--query",
+    "--deny-term",
+    "--max-pages",
+    "--max-resources",
+    "--max-reads",
+    "--timeout-ms",
+    "--rate-limit-probe",
+    "--output",
+  ]);
+  const positionals: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a.startsWith("--")) {
+      if (flagNames.has(a) && !a.includes("=") && i + 1 < args.length) {
+        i += 1;
+      }
+      continue;
+    }
+    positionals.push(a);
+  }
+
+  const url = positionals[0];
+  if (!url) {
+    throw new DoctorError("URL is required");
+  }
+
+  const profileRaw = getFlagValue(args, "--profile") ?? DEFAULT_PROFILE;
+  if (profileRaw !== "full" && profileRaw !== "discovery") {
+    throw new DoctorError(`Invalid --profile: ${profileRaw} (expected full|discovery)`);
+  }
+  const profile = profileRaw as DoctorProfile;
+
+  const maxPagesRaw = getFlagValue(args, "--max-pages");
+  const maxResourcesRaw = getFlagValue(args, "--max-resources");
+  const maxReadsRaw = getFlagValue(args, "--max-reads");
+  const timeoutRaw = getFlagValue(args, "--timeout-ms");
+  const rateProbeRaw = getFlagValue(args, "--rate-limit-probe");
+
+  const maxPages = maxPagesRaw
+    ? parsePositiveInt(maxPagesRaw, "--max-pages", DOCTOR_HARD_MAX_PAGES)
+    : DOCTOR_DEFAULT_MAX_PAGES;
+  const maxResources = maxResourcesRaw
+    ? parsePositiveInt(maxResourcesRaw, "--max-resources", HARD_MAX_RESOURCES)
+    : DEFAULT_MAX_RESOURCES;
+  const maxReads = maxReadsRaw
+    ? parsePositiveInt(maxReadsRaw, "--max-reads", HARD_MAX_READS)
+    : DEFAULT_MAX_READS;
+  const timeoutMs = timeoutRaw
+    ? parsePositiveInt(timeoutRaw, "--timeout-ms")
+    : DOCTOR_DEFAULT_TIMEOUT_MS;
+  const rateLimitProbe = rateProbeRaw
+    ? parseNonNegativeInt(rateProbeRaw, "--rate-limit-probe", HARD_RATE_LIMIT_PROBE)
+    : DEFAULT_RATE_LIMIT_PROBE;
+
+  const knownFlags = [
+    "--profile",
+    "--plan",
+    "--mcp-url",
+    "--query",
+    "--deny-term",
+    "--max-pages",
+    "--max-resources",
+    "--max-reads",
+    "--timeout-ms",
+    "--rate-limit-probe",
+    "--strict",
+    "--allow-local",
+    "--json",
+    "--output",
+    "--help",
+    "-h",
+  ];
+  const unknown = args.filter(
+    (a) => a.startsWith("--") && !knownFlags.some((f) => a === f || a.startsWith(`${f}=`)),
+  );
+  if (unknown.length > 0) {
+    throw new DoctorError(`Unknown option: ${unknown[0]}`);
+  }
+
+  const json = hasFlag(args, "--json");
+  const report = await runDoctor({
+    inputUrl: url,
+    profile,
+    planPath: getFlagValue(args, "--plan"),
+    mcpUrl: getFlagValue(args, "--mcp-url"),
+    query: getFlagValue(args, "--query"),
+    denyTerms: getRepeatableFlagValues(args, "--deny-term"),
+    maxPages,
+    maxResources,
+    maxReads,
+    timeoutMs,
+    rateLimitProbe,
+    strict: hasFlag(args, "--strict"),
+    allowLocal: hasFlag(args, "--allow-local"),
+    json,
+    outputPath: getFlagValue(args, "--output"),
+  });
+
+  if (json) {
+    process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+  } else {
+    process.stdout.write(`${formatDoctorHumanReport(report)}\n`);
+  }
+
+  const outputPath = getFlagValue(args, "--output");
+  if (outputPath) {
+    await writeDoctorOutput(report, outputPath);
+  }
+
+  return report.summary.status === "FAIL" ? 1 : 0;
+}
+
 export async function runCli(argv: string[]): Promise<number> {
   const args = [...argv];
   if (args.length === 0 || args[0] === "--help" || args[0] === "-h") {
@@ -237,6 +426,8 @@ export async function runCli(argv: string[]): Promise<number> {
         return await runInspectCommand(args);
       case "init":
         return await runInitCommand(args);
+      case "doctor":
+        return await runDoctorCommand(args);
       default:
         process.stderr.write(`Unknown command: ${command}\n`);
         printRootUsage();

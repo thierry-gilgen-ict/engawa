@@ -5,6 +5,7 @@ import { assertFetchTargetAllowed, type FetchTargetPolicy } from "./url.js";
 export interface FetchPageOptions {
   timeoutMs: number;
   maxBodyBytes: number;
+  userAgent?: string;
 }
 
 export interface FetchPageOutcome {
@@ -76,7 +77,7 @@ export async function fetchPage(
         redirect: "manual",
         signal: controller.signal,
         headers: {
-          "User-Agent": USER_AGENT,
+          "User-Agent": options.userAgent ?? USER_AGENT,
           Accept: "text/html,text/plain,application/xml,text/xml,*/*;q=0.8",
         },
       });

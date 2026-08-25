@@ -6,10 +6,13 @@ All notable changes to Engawa are documented here. Versions follow [Semantic Ver
 
 ### `@thierry-gilgen-ict/engawa-cli@0.1.0` (not published)
 
+- Add `engawa doctor` — live verifier for deployed Engawa agent surfaces (`engawa.doctor.v1`).
+- Verifies llms.txt, Markdown samples, real MCP Streamable HTTP connect, resources/list + bounded resources/read, tools/list (`search_site` only), and live `search_site` probes.
+- Bounded security observations (invalid Host, untrusted Origin, opt-in rate-limit probe); optional `--plan` comparison; synthetic `--deny-term` sentinels.
+- Read-only, no credentials, no telemetry, no Distribution Map calls, no repository scan, no LLM calls.
 - Add `engawa init` — repository-aware integration planner (`engawa.plan.v1` bundle from `engawa.inspect.v1` + read-only repo scan).
 - Bounded repository inspection with secret/symlink/cache exclusions; Next.js App/Pages router route and source-candidate discovery.
 - Generates `ENGAWA_INTEGRATION_PLAN.md` and provider-neutral `AGENT_PROMPT.md` without modifying application source.
-- No LLM calls, no telemetry, no Distribution Map registration.
 
 ## [0.1.1] — 2026-08-23
 

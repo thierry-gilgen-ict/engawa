@@ -88,12 +88,31 @@ importers:
 
   packages/cli:
     dependencies:
+      "@modelcontextprotocol/client":
+        specifier: 2.0.0
+        version: 2.0.0
       node-html-parser:
         specifier: ^7.0.1
         version: 7.1.0
       zod:
         specifier: ^4.2.0
         version: 4.4.3
+    devDependencies:
+      "@modelcontextprotocol/node":
+        specifier: 2.0.0
+        version: 2.0.0(@modelcontextprotocol/server@2.0.0)(hono@4.13.3)
+      "@modelcontextprotocol/server":
+        specifier: 2.0.0
+        version: 2.0.0
+      "@thierry-gilgen-ict/engawa-core":
+        specifier: workspace:^
+        version: link:../core
+      "@thierry-gilgen-ict/engawa-discovery":
+        specifier: workspace:^
+        version: link:../discovery
+      "@thierry-gilgen-ict/engawa-mcp":
+        specifier: workspace:^
+        version: link:../mcp
 
   packages/core:
     dependencies:

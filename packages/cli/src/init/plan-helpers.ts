@@ -134,7 +134,7 @@ export function buildReviewSection(
 
   if (disposition === "EXISTING_INTEGRATION_DETECTED") {
     questions.push(
-      "Review existing Engawa integration before adding duplicate surfaces; use engawa doctor when available",
+      "Review existing Engawa integration before adding duplicate surfaces; use engawa doctor on the live site",
     );
   }
 

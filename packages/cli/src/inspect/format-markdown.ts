@@ -6,7 +6,7 @@ export function formatMarkdownReport(report: InspectReport): string {
   lines.push("");
   lines.push("> **HUMAN_REVIEW_REQUIRED** — Candidate routes are not auto-approved for Engawa.");
   lines.push(
-    "> **SECURITY_ASSESSMENT = NOT_PERFORMED** — Use future engawa doctor for operational checks.",
+    "> **SECURITY_ASSESSMENT = NOT_PERFORMED** — Use engawa doctor for operational checks.",
   );
   lines.push("");
   lines.push("## Site");
