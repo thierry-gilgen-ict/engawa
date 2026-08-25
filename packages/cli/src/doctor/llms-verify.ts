@@ -97,10 +97,7 @@ export async function verifyLlmsTxt(options: {
       : options.markdownDiscoveredElsewhere
         ? "PASS"
         : "FAIL";
-  if (
-    markdownAdvertisement === "FAIL" &&
-    !options.markdownDiscoveredElsewhere
-  ) {
+  if (markdownAdvertisement === "FAIL" && !options.markdownDiscoveredElsewhere) {
     failures.push("llms.txt missing Markdown advertisement");
   }
 
