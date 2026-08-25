@@ -1,4 +1,5 @@
 import type { NextjsRoute } from "../types.js";
+import { matchInspectPathToRoute } from "./nextjs-route-match.js";
 
 const EXCLUDED_BASENAMES = new Set([
   "_app.ts",
@@ -75,29 +76,5 @@ export function matchInspectPathToPagesRoute(
   inspectPath: string,
   routes: NextjsRoute[],
 ): NextjsRoute[] {
-  const normalized = inspectPath === "/" ? "/" : inspectPath.replace(/\/$/, "") || "/";
-
-  const exact = routes.filter((r) => r.publicPath === normalized);
-  if (exact.length > 0) return exact;
-
-  const inspectSegments = normalized.split("/").filter(Boolean);
-  const matches: NextjsRoute[] = [];
-
-  for (const route of routes) {
-    const routeSegments = route.publicPath.split("/").filter(Boolean);
-    if (routeSegments.length !== inspectSegments.length) continue;
-
-    let match = true;
-    for (let i = 0; i < routeSegments.length; i++) {
-      const rs = routeSegments[i];
-      if (rs.startsWith("[") && rs.endsWith("]")) continue;
-      if (rs !== inspectSegments[i]) {
-        match = false;
-        break;
-      }
-    }
-    if (match) matches.push(route);
-  }
-
-  return matches;
+  return routes.filter((r) => matchInspectPathToRoute(inspectPath, r.publicPath));
 }

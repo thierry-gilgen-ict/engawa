@@ -2,7 +2,7 @@ import type { InspectReport } from "../inspect/types.js";
 import { matchInspectPathToAppRoute } from "./framework/nextjs-app-router.js";
 import { matchInspectPathToPagesRoute } from "./framework/nextjs-pages-router.js";
 import { collectLocalImports, parsePathAliases } from "./source-candidates.js";
-import { classifyFileKind } from "./source-classify.js";
+import { classifyFileFromContent } from "./source-classify.js";
 import type {
   FrameworkInfo,
   NextjsRoute,
@@ -18,6 +18,10 @@ export interface RouteMappingInput {
   pagesRoutes: NextjsRoute[];
   scan: RepoScanResult;
   metadata: RepoMetadata;
+}
+
+function importProvenanceEvidence(depth: number): string {
+  return depth === 1 ? "direct-local-import-from-route" : "transitive-local-import-depth-2";
 }
 
 export function buildRouteMappings(input: RouteMappingInput): Array<{
@@ -38,7 +42,7 @@ export function buildRouteMappings(input: RouteMappingInput): Array<{
   }>;
   sourceStatus: SourceStatus;
 }> {
-  const { inspectReport, framework, appRoutes, pagesRoutes, scan, metadata } = input;
+  const { inspectReport, framework, appRoutes, pagesRoutes, scan } = input;
   const aliases = parsePathAliases(scan.fileContents);
 
   const mappings = inspectReport.routes.map((route) => {
@@ -82,16 +86,14 @@ export function buildRouteMappings(input: RouteMappingInput): Array<{
         scan.filePaths,
         aliases,
       );
-      for (const path of resolved) {
-        const { kind, evidence } = classifyFileKind(path, undefined, {
-          ...metadata.dependencies,
-          ...metadata.devDependencies,
-        });
+      for (const { path, depth } of resolved) {
+        const content = scan.fileContents.get(path);
+        const { kind, evidence } = classifyFileFromContent(path, content);
         sourceCandidates.push({
           path,
           kind,
           confidence: "medium",
-          evidence: ["direct-local-import-from-route", ...evidence].sort(),
+          evidence: [importProvenanceEvidence(depth), ...evidence].sort(),
         });
       }
       for (const u of unresolved) {

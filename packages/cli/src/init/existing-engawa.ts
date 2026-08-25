@@ -16,6 +16,26 @@ const SURFACE_PATTERNS: Array<{ pattern: RegExp; hint: string }> = [
   { pattern: /\/agents/i, hint: "agents-route-or-file" },
 ];
 
+const RANGE_OR_WORKSPACE_PREFIX = /^[~^>=<]|^\*|^workspace:/;
+
+function isExactTestedVersion(declared: string, tested: string): boolean {
+  return declared.trim() === tested;
+}
+
+function isConservativeVersionDeclaration(declared: string): boolean {
+  const trimmed = declared.trim();
+  if (trimmed === "*") return true;
+  if (trimmed.startsWith("workspace:")) return true;
+  return RANGE_OR_WORKSPACE_PREFIX.test(trimmed);
+}
+
+function versionMatchesTestedSet(name: string, declared: string): boolean {
+  const tested = TESTED_PACKAGE_VERSIONS[name];
+  if (!tested) return true;
+  if (isConservativeVersionDeclaration(declared)) return false;
+  return isExactTestedVersion(declared, tested);
+}
+
 export function detectExistingEngawa(
   metadata: RepoMetadata,
   fileContents: Map<string, string>,
@@ -60,13 +80,15 @@ export function detectExistingEngawa(
   } else if (packages.length < corePkgs.length) {
     status = "PARTIAL";
   } else {
-    const allMatch = packages.every((p) => {
-      const tested = TESTED_PACKAGE_VERSIONS[p.name];
-      if (!tested) return true;
-      return p.version.includes(tested) || p.version === tested;
-    });
     const coreInstalled = corePkgs.every((c) => packages.some((p) => p.name === c));
-    if (allMatch && coreInstalled) {
+    const allCoreExact = corePkgs.every((c) => {
+      const pkg = packages.find((p) => p.name === c);
+      if (!pkg) return false;
+      return versionMatchesTestedSet(c, pkg.version);
+    });
+    const optionalMismatch = packages.some((p) => !versionMatchesTestedSet(p.name, p.version));
+
+    if (coreInstalled && allCoreExact && !optionalMismatch) {
       status = "TESTED_SET";
     } else {
       status = "VERSION_MISMATCH_REVIEW_REQUIRED";

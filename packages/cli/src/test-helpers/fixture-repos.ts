@@ -51,6 +51,18 @@ export default function About() { return <div>{aboutContent.title}</div>; }`,
   );
 
   writeFileSync(join(root, "middleware.ts"), `export function middleware() {}`, "utf8");
+
+  const docsCatchAll = join(root, "src", "app", "docs", "[...slug]", "page.tsx");
+  mkdirSync(join(root, "src", "app", "docs", "[...slug]"), { recursive: true });
+  writeFileSync(docsCatchAll, `export default function Doc() { return <div>doc</div>; }`, "utf8");
+
+  const docsOptional = join(root, "src", "app", "docs", "[[...slug]]", "page.tsx");
+  mkdirSync(join(root, "src", "app", "docs", "[[...slug]]"), { recursive: true });
+  writeFileSync(
+    docsOptional,
+    `export default function DocOpt() { return <div>doc</div>; }`,
+    "utf8",
+  );
 }
 
 export function createNextPagesRouterFixture(root: string): void {
@@ -72,6 +84,18 @@ export function createNextPagesRouterFixture(root: string): void {
   mkdirSync(join(root, "pages", "api"), { recursive: true });
   writeFileSync(join(root, "pages", "api", "hello.ts"), `export default () => null`, "utf8");
   writeFileSync(join(root, "pages", "_app.tsx"), `export default () => null`, "utf8");
+
+  mkdirSync(join(root, "pages", "docs"), { recursive: true });
+  writeFileSync(
+    join(root, "pages", "docs", "[...slug].tsx"),
+    `export default () => <div>Doc</div>`,
+    "utf8",
+  );
+  writeFileSync(
+    join(root, "pages", "docs", "[[...slug]].tsx"),
+    `export default () => <div>DocOpt</div>`,
+    "utf8",
+  );
 }
 
 export function createGenericNodeFixture(root: string): void {
@@ -132,4 +156,102 @@ export function createSymlinkEscapeFixture(root: string): void {
   } catch {
     // skip on platforms without symlink support
   }
+}
+
+export function createCmsDependencyOnlyFixture(root: string): void {
+  createNextAppRouterFixture(root);
+  const pkgPath = join(root, "package.json");
+  const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+  pkg.dependencies = { ...pkg.dependencies, "@sanity/client": "6.0.0" };
+  writeJson(pkgPath, pkg);
+}
+
+export function createCmsImportFixture(root: string): void {
+  createNextAppRouterFixture(root);
+  const cmsFile = join(root, "src", "lib", "cms", "posts.ts");
+  mkdirSync(join(root, "src", "lib", "cms"), { recursive: true });
+  writeFileSync(
+    cmsFile,
+    `import { createClient } from "@sanity/client";
+export const posts = createClient({});`,
+    "utf8",
+  );
+  const pagePath = join(root, "src", "app", "posts", "page.tsx");
+  mkdirSync(join(root, "src", "app", "posts"), { recursive: true });
+  writeFileSync(
+    pagePath,
+    `import { posts } from "@/lib/cms/posts";
+export default function Posts() { return <div>{posts}</div>; }`,
+    "utf8",
+  );
+}
+
+export function createPrismaDependencyOnlyFixture(root: string): void {
+  createNextAppRouterFixture(root);
+  const pkgPath = join(root, "package.json");
+  const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+  pkg.dependencies = { ...pkg.dependencies, "@prisma/client": "5.0.0" };
+  writeJson(pkgPath, pkg);
+}
+
+export function createPrismaImportFixture(root: string): void {
+  createNextAppRouterFixture(root);
+  const dbFile = join(root, "src", "lib", "db", "articles.ts");
+  mkdirSync(join(root, "src", "lib", "db"), { recursive: true });
+  writeFileSync(
+    dbFile,
+    `import { PrismaClient } from "@prisma/client";
+export const prisma = new PrismaClient();`,
+    "utf8",
+  );
+  const pagePath = join(root, "src", "app", "articles", "page.tsx");
+  mkdirSync(join(root, "src", "app", "articles"), { recursive: true });
+  writeFileSync(
+    pagePath,
+    `import { prisma } from "@/lib/db/articles";
+export default function Articles() { return <div>articles</div>; }`,
+    "utf8",
+  );
+}
+
+export function createExtensionImportFixture(root: string): void {
+  mkdirSync(join(root, "src", "app", "demo"), { recursive: true });
+  writeJson(join(root, "package.json"), {
+    name: "fixture-extensions",
+    dependencies: { next: "15.0.0" },
+  });
+  writeFileSync(
+    join(root, "tsconfig.json"),
+    JSON.stringify({ compilerOptions: { paths: { "@/*": ["./src/*"] } } }),
+    "utf8",
+  );
+  mkdirSync(join(root, "src", "content"), { recursive: true });
+  writeFileSync(join(root, "src", "content", "content.ts"), `export const c = 1;`, "utf8");
+  writeFileSync(
+    join(root, "src", "content", "component.tsx"),
+    `export const C = () => null;`,
+    "utf8",
+  );
+  writeFileSync(join(root, "src", "content", "loader.js"), `export const l = 1;`, "utf8");
+  writeFileSync(
+    join(root, "src", "content", "component.jsx"),
+    `export const J = () => null;`,
+    "utf8",
+  );
+  writeFileSync(join(root, "src", "content", "article.mdx"), `# Article`, "utf8");
+  writeFileSync(join(root, "src", "content", "article.md"), `# Article`, "utf8");
+  mkdirSync(join(root, "src", "content", "folder"), { recursive: true });
+  writeFileSync(join(root, "src", "content", "folder", "index.ts"), `export const i = 1;`, "utf8");
+  writeFileSync(
+    join(root, "src", "app", "demo", "page.tsx"),
+    `import { c } from "../../content/content";
+import { C } from "../../content/component";
+import { l } from "../../content/loader";
+import { J } from "../../content/component.jsx";
+import { ax } from "../../content/article";
+import { am } from "../../content/article.md";
+import { i } from "../../content/folder";
+export default function Demo() { return null; }`,
+    "utf8",
+  );
 }

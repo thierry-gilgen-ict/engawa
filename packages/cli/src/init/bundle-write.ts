@@ -1,4 +1,11 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { InitError } from "../errors.js";
 import { initBundleManifestSchema } from "./schema.js";
@@ -10,9 +17,37 @@ export const GENERATED_FILES = [
   "AGENT_PROMPT.md",
 ] as const;
 
+const ALL_BUNDLE_FILES = ["manifest.json", ...GENERATED_FILES] as const;
+
+function assertRegularFileWritable(filePath: string): void {
+  if (!existsSync(filePath)) return;
+  const stat = lstatSync(filePath);
+  if (stat.isSymbolicLink()) {
+    throw new InitError(`Refusing to overwrite symlink in output bundle: ${filePath}`);
+  }
+  if (stat.isDirectory()) {
+    throw new InitError(`Refusing to overwrite directory in output bundle: ${filePath}`);
+  }
+  if (!stat.isFile()) {
+    throw new InitError(`Refusing to overwrite non-regular file in output bundle: ${filePath}`);
+  }
+}
+
+function validateBundleTargets(outputDir: string): void {
+  for (const name of ALL_BUNDLE_FILES) {
+    assertRegularFileWritable(join(outputDir, name));
+  }
+}
+
 export function readExistingManifest(outputDir: string): InitBundleManifest | null {
   const manifestPath = join(outputDir, "manifest.json");
   if (!existsSync(manifestPath)) return null;
+
+  const stat = lstatSync(manifestPath);
+  if (stat.isSymbolicLink() || stat.isDirectory() || !stat.isFile()) {
+    return null;
+  }
+
   try {
     const raw = readFileSync(manifestPath, "utf8");
     return initBundleManifestSchema.parse(JSON.parse(raw));
@@ -39,6 +74,8 @@ export function validateOutputDirectory(outputDir: string, force: boolean): void
       `Output directory already contains an Engawa init bundle. Use --force to overwrite known files.`,
     );
   }
+
+  validateBundleTargets(outputDir);
 }
 
 export interface BundleFiles {
@@ -61,22 +98,14 @@ export function writeInitBundle(
     mkdirSync(outputDir, { recursive: true });
   }
 
+  validateBundleTargets(outputDir);
+
   const manifest: InitBundleManifest = {
     schemaVersion: BUNDLE_SCHEMA_VERSION,
     generatedFiles: [...GENERATED_FILES],
   };
 
   const manifestPath = join(outputDir, "manifest.json");
-  const existingManifest = readExistingManifest(outputDir);
-
-  if (existingManifest && force) {
-    for (const name of existingManifest.generatedFiles) {
-      const filePath = join(outputDir, name);
-      if (existsSync(filePath)) {
-        // only overwrite known generated files
-      }
-    }
-  }
 
   writeFileSync(join(outputDir, "engawa-plan.json"), files.planJson, "utf8");
   writeFileSync(join(outputDir, "ENGAWA_INTEGRATION_PLAN.md"), files.planMarkdown, "utf8");

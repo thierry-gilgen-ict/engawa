@@ -13,6 +13,7 @@ import {
   evaluateNodeCompatibility,
 } from "./plan-helpers.js";
 import { buildRouteMappings, collectPublicSourceUnclearRoutes } from "./route-mapping.js";
+import { classifyDependencies } from "./source-classify.js";
 import { collectSecurityEvidence } from "./security-evidence.js";
 import type { EngawaPlan, InspectionSource, RepoScanResult } from "./types.js";
 import { PLAN_SCHEMA_VERSION } from "./types.js";
@@ -28,6 +29,14 @@ export function buildEngawaPlan(
   const metadata = extractRepoMetadata(repoName, scan.fileContents, scan.filePaths);
   const displayName = deriveRepoName(repoRoot, metadata);
   const framework = detectFramework(metadata, scan.filePaths);
+  const dependencyHints = classifyDependencies({
+    ...metadata.dependencies,
+    ...metadata.devDependencies,
+  });
+  const frameworkEvidence = [
+    ...framework.evidence,
+    ...dependencyHints.map((h) => h.evidence),
+  ].sort();
   const existingEngawa = detectExistingEngawa(metadata, scan.fileContents, scan.filePaths);
   const appRoutes = framework.nextjsAppRouter ? discoverAppRouterRoutes(scan.filePaths) : [];
   const pagesRoutes = framework.nextjsPagesRouter ? discoverPagesRouterRoutes(scan.filePaths) : [];
@@ -72,7 +81,7 @@ export function buildEngawaPlan(
         id: framework.id,
         nextjsAppRouter: framework.nextjsAppRouter,
         nextjsPagesRouter: framework.nextjsPagesRouter,
-        evidence: framework.evidence,
+        evidence: frameworkEvidence,
       },
       node: {
         enginesNode: metadata.enginesNode,

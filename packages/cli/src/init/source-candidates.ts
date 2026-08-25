@@ -4,9 +4,18 @@ import { LOCAL_IMPORT_DEPTH } from "./types.js";
 const IMPORT_REGEX =
   /import\s+(?:type\s+)?(?:[\w*{}\s,]+\s+from\s+)?['"]([^'"]+)['"]|require\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 
+const RESOLVE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mdx", ".md"];
+const INDEX_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx"];
+
 export interface PathAlias {
   prefix: string;
   target: string;
+}
+
+function normalizeAliasTarget(target: string): string {
+  let normalized = target.replace(/\\/g, "/");
+  if (normalized.startsWith("./")) normalized = normalized.slice(2);
+  return normalized.replace(/\/$/, "");
 }
 
 export function parsePathAliases(fileContents: Map<string, string>): PathAlias[] {
@@ -22,7 +31,7 @@ export function parsePathAliases(fileContents: Map<string, string>): PathAlias[]
       for (const [key, values] of Object.entries(paths)) {
         if (!values?.[0]) continue;
         const prefix = key.replace(/\*$/, "");
-        const target = values[0].replace(/\*$/, "");
+        const target = normalizeAliasTarget(values[0].replace(/\*$/, ""));
         aliases.push({ prefix, target });
       }
     } catch {
@@ -43,36 +52,42 @@ export function extractImports(content: string): string[] {
   return imports;
 }
 
-function resolveRelativeImport(fromDir: string, spec: string): string {
-  const joined = posixNormalize(posixJoin(fromDir, spec));
-  const exts = [".ts", ".tsx", ".js", ".jsx", ".mdx", ".md"];
-  if (joined.includes(".")) return joined;
-  for (const ext of exts) {
-    return `${joined}${ext}`;
+function candidatePathsForBase(base: string): string[] {
+  const normalized = posixNormalize(base);
+  const candidates: string[] = [normalized];
+  for (const ext of RESOLVE_EXTENSIONS) {
+    candidates.push(`${normalized}${ext}`);
   }
-  return `${joined}.ts`;
+  for (const ext of INDEX_EXTENSIONS) {
+    candidates.push(`${normalized}/index${ext}`);
+  }
+  return candidates;
+}
+
+function resolveRelativeToExistingPath(
+  fromDir: string,
+  spec: string,
+  filePaths: string[],
+  filePathSet: Set<string>,
+): string | null {
+  const joined = posixNormalize(posixJoin(fromDir, spec));
+  for (const candidate of candidatePathsForBase(joined)) {
+    if (filePathSet.has(candidate)) return candidate;
+  }
+  return null;
 }
 
 function resolveAliasImport(
   spec: string,
   aliases: PathAlias[],
-  filePaths: string[],
+  filePathSet: Set<string>,
 ): string | null {
   for (const alias of aliases) {
     if (!spec.startsWith(alias.prefix)) continue;
     const rest = spec.slice(alias.prefix.length);
-    const base = posixNormalize(`${alias.target}${rest}`);
-    const candidates = [
-      base,
-      `${base}.ts`,
-      `${base}.tsx`,
-      `${base}.js`,
-      `${base}.jsx`,
-      `${base}/index.ts`,
-      `${base}/index.tsx`,
-    ];
-    for (const c of candidates) {
-      if (filePaths.includes(c)) return c;
+    const base = posixNormalize(posixJoin(alias.target, rest));
+    for (const candidate of candidatePathsForBase(base)) {
+      if (filePathSet.has(candidate)) return candidate;
     }
     return null;
   }
@@ -85,30 +100,25 @@ export function resolveImportToPath(
   aliases: PathAlias[],
   filePaths: string[],
 ): string | null {
+  const filePathSet = new Set(filePaths);
+
   if (spec.startsWith(".")) {
     const fromDir = modulePath.includes("/")
       ? modulePath.slice(0, modulePath.lastIndexOf("/"))
       : "";
-    const resolved = resolveRelativeImport(fromDir, spec);
-    if (filePaths.includes(resolved)) return resolved;
-    const withoutExt = resolved.replace(/\.(tsx?|jsx?|mdx?)$/, "");
-    const indexCandidates = [
-      `${withoutExt}/index.ts`,
-      `${withoutExt}/index.tsx`,
-      `${withoutExt}.ts`,
-      `${withoutExt}.tsx`,
-    ];
-    for (const c of indexCandidates) {
-      if (filePaths.includes(c)) return c;
-    }
-    return null;
+    return resolveRelativeToExistingPath(fromDir, spec, filePaths, filePathSet);
   }
 
   if (spec.startsWith("@/") || aliases.some((a) => spec.startsWith(a.prefix))) {
-    return resolveAliasImport(spec, aliases, filePaths);
+    return resolveAliasImport(spec, aliases, filePathSet);
   }
 
   return null;
+}
+
+export interface ResolvedImport {
+  path: string;
+  depth: number;
 }
 
 export function collectLocalImports(
@@ -117,8 +127,8 @@ export function collectLocalImports(
   filePaths: string[],
   aliases: PathAlias[],
   maxDepth = LOCAL_IMPORT_DEPTH,
-): { resolved: string[]; unresolved: string[] } {
-  const resolved: string[] = [];
+): { resolved: ResolvedImport[]; unresolved: string[] } {
+  const resolved: ResolvedImport[] = [];
   const unresolved: string[] = [];
   const visited = new Set<string>();
   const queue: Array<{ path: string; depth: number }> = [{ path: startModule, depth: 0 }];
@@ -131,7 +141,9 @@ export function collectLocalImports(
     const content = fileContents.get(path);
     if (!content) continue;
 
-    if (depth > 0) resolved.push(path);
+    if (depth > 0) {
+      resolved.push({ path, depth });
+    }
 
     if (depth >= maxDepth) continue;
 
@@ -155,7 +167,7 @@ export function collectLocalImports(
     }
   }
 
-  resolved.sort();
+  resolved.sort((a, b) => a.path.localeCompare(b.path));
   unresolved.sort();
   return { resolved, unresolved };
 }

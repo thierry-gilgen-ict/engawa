@@ -152,5 +152,10 @@ export const engawaPlanSchema = z.object({
 
 export const initBundleManifestSchema = z.object({
   schemaVersion: z.literal(BUNDLE_SCHEMA_VERSION),
-  generatedFiles: z.array(z.string()),
+  generatedFiles: z
+    .array(z.enum(["engawa-plan.json", "ENGAWA_INTEGRATION_PLAN.md", "AGENT_PROMPT.md"]))
+    .length(3)
+    .refine((arr) => new Set(arr).size === 3, {
+      message: "generatedFiles must contain exactly the three known Engawa init artifacts",
+    }),
 });

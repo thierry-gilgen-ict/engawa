@@ -16,14 +16,24 @@ import { resolveRepoRoot } from "../init/repo-path.js";
 import { formatAgentPrompt } from "../init/format-agent-prompt.js";
 import { startFixtureServer } from "../test-helpers/fixture-server.js";
 import {
+  createCmsDependencyOnlyFixture,
+  createCmsImportFixture,
   createExistingEngawaFixture,
+  createExtensionImportFixture,
   createGenericNodeFixture,
   createNextAppRouterFixture,
   createNextPagesRouterFixture,
+  createPrismaDependencyOnlyFixture,
+  createPrismaImportFixture,
   createSensitiveFilesFixture,
   createSymlinkEscapeFixture,
   SECRET_SENTINEL,
 } from "../test-helpers/fixture-repos.js";
+import { evaluateNodeCompatibility } from "./plan-helpers.js";
+import { detectExistingEngawa } from "./existing-engawa.js";
+import { extractRepoMetadata } from "./repo-metadata.js";
+import { resolveImportToPath, parsePathAliases, collectLocalImports } from "./source-candidates.js";
+import { symlink, unlink } from "node:fs/promises";
 
 function minimalInspectReport(
   origin: string,
@@ -503,5 +513,286 @@ describe("existing engawa detection", () => {
     });
     expect(result.plan.integration.disposition).toBe("EXISTING_INTEGRATION_DETECTED");
     expect(result.plan.repository.existingEngawa.status).toBe("TESTED_SET");
+  });
+});
+
+describe("source classification", () => {
+  it("does not classify static candidate as CMS when only repo dependency exists", async () => {
+    const workDir = await mkdtemp(join(tmpdir(), "engawa-classify-"));
+    const repoDir = join(workDir, "repo");
+    await mkdir(repoDir, { recursive: true });
+    createCmsDependencyOnlyFixture(repoDir);
+    const reportPath = await writeInspectReport(
+      workDir,
+      minimalInspectReport("http://127.0.0.1:1", [{ path: "/about" }]),
+    );
+    const result = await runInit({
+      url: undefined,
+      inspectReportPath: reportPath,
+      repoPath: repoDir,
+      outputDir: join(workDir, "out"),
+      dryRun: true,
+      json: false,
+      force: false,
+      maxPages: 5,
+      timeoutMs: 8000,
+      allowLocal: true,
+    });
+    const aboutMapping = result.plan.routeMappings.find((m) => m.publicPath === "/about");
+    const candidate = aboutMapping?.sourceCandidates.find((c) => c.path.includes("about.ts"));
+    expect(candidate?.kind).toBe("STATIC_MODULE");
+    expect(result.plan.repository.framework.evidence).toContain(
+      "package-dependency:@sanity/client",
+    );
+  });
+
+  it("classifies CMS import in candidate as HEADLESS_CMS", async () => {
+    const workDir = await mkdtemp(join(tmpdir(), "engawa-classify-"));
+    const repoDir = join(workDir, "repo");
+    await mkdir(repoDir, { recursive: true });
+    createCmsImportFixture(repoDir);
+    const reportPath = await writeInspectReport(
+      workDir,
+      minimalInspectReport("http://127.0.0.1:1", [{ path: "/posts" }]),
+    );
+    const result = await runInit({
+      url: undefined,
+      inspectReportPath: reportPath,
+      repoPath: repoDir,
+      outputDir: join(workDir, "out"),
+      dryRun: true,
+      json: false,
+      force: false,
+      maxPages: 5,
+      timeoutMs: 8000,
+      allowLocal: true,
+    });
+    const cmsCandidate = result.plan.routeMappings
+      .flatMap((m) => m.sourceCandidates)
+      .find((c) => c.path.includes("cms/posts"));
+    expect(cmsCandidate?.kind).toBe("HEADLESS_CMS");
+  });
+
+  it("does not classify unrelated candidate as DATABASE_ORM when only prisma dependency", async () => {
+    const workDir = await mkdtemp(join(tmpdir(), "engawa-classify-"));
+    const repoDir = join(workDir, "repo");
+    await mkdir(repoDir, { recursive: true });
+    createPrismaDependencyOnlyFixture(repoDir);
+    const reportPath = await writeInspectReport(
+      workDir,
+      minimalInspectReport("http://127.0.0.1:1", [{ path: "/about" }]),
+    );
+    const result = await runInit({
+      url: undefined,
+      inspectReportPath: reportPath,
+      repoPath: repoDir,
+      outputDir: join(workDir, "out"),
+      dryRun: true,
+      json: false,
+      force: false,
+      maxPages: 5,
+      timeoutMs: 8000,
+      allowLocal: true,
+    });
+    const candidate = result.plan.routeMappings
+      .flatMap((m) => m.sourceCandidates)
+      .find((c) => c.path.includes("about.ts"));
+    expect(candidate?.kind).toBe("STATIC_MODULE");
+  });
+
+  it("classifies prisma import in candidate as DATABASE_ORM", async () => {
+    const workDir = await mkdtemp(join(tmpdir(), "engawa-classify-"));
+    const repoDir = join(workDir, "repo");
+    await mkdir(repoDir, { recursive: true });
+    createPrismaImportFixture(repoDir);
+    const reportPath = await writeInspectReport(
+      workDir,
+      minimalInspectReport("http://127.0.0.1:1", [{ path: "/articles" }]),
+    );
+    const result = await runInit({
+      url: undefined,
+      inspectReportPath: reportPath,
+      repoPath: repoDir,
+      outputDir: join(workDir, "out"),
+      dryRun: true,
+      json: false,
+      force: false,
+      maxPages: 5,
+      timeoutMs: 8000,
+      allowLocal: true,
+    });
+    const dbCandidate = result.plan.routeMappings
+      .flatMap((m) => m.sourceCandidates)
+      .find((c) => c.path.includes("db/articles"));
+    expect(dbCandidate?.kind).toBe("DATABASE_ORM");
+  });
+});
+
+describe("import resolution", () => {
+  it("resolves @/* alias with ./src/* and extension variants", async () => {
+    const workDir = await mkdtemp(join(tmpdir(), "engawa-import-"));
+    const repoDir = join(workDir, "repo");
+    await mkdir(repoDir, { recursive: true });
+    createExtensionImportFixture(repoDir);
+    const scan = scanRepository(resolveRepoRoot(repoDir));
+    const aliases = parsePathAliases(scan.fileContents);
+    expect(
+      resolveImportToPath("src/app/demo/page.tsx", "@/content/content", aliases, scan.filePaths),
+    ).toBe("src/content/content.ts");
+    const collected = collectLocalImports(
+      "src/app/demo/page.tsx",
+      scan.fileContents,
+      scan.filePaths,
+      aliases,
+    );
+    expect(
+      collected.resolved.some((r) => r.path === "src/content/content.ts" && r.depth === 1),
+    ).toBe(true);
+    expect(collected.resolved.some((r) => r.path === "src/content/component.tsx")).toBe(true);
+    expect(collected.resolved.some((r) => r.path === "src/content/loader.js")).toBe(true);
+    expect(collected.resolved.some((r) => r.path === "src/content/component.jsx")).toBe(true);
+    expect(collected.resolved.some((r) => r.path === "src/content/article.mdx")).toBe(true);
+    expect(collected.resolved.some((r) => r.path === "src/content/article.md")).toBe(true);
+    expect(collected.resolved.some((r) => r.path === "src/content/folder/index.ts")).toBe(true);
+  });
+});
+
+describe("bundle write hardening", () => {
+  it("blocks force overwrite when generated file is symlink", async () => {
+    const workDir = await mkdtemp(join(tmpdir(), "engawa-bundle-"));
+    const repoDir = join(workDir, "repo");
+    await mkdir(repoDir, { recursive: true });
+    createGenericNodeFixture(repoDir);
+    const outside = join(workDir, "outside.txt");
+    await writeFile(outside, "KEEP", "utf8");
+    const reportPath = await writeInspectReport(
+      workDir,
+      minimalInspectReport("http://127.0.0.1:1", [{ path: "/" }]),
+    );
+    const outDir = join(workDir, ".engawa");
+    await runInit({
+      url: undefined,
+      inspectReportPath: reportPath,
+      repoPath: repoDir,
+      outputDir: outDir,
+      dryRun: false,
+      json: false,
+      force: false,
+      maxPages: 5,
+      timeoutMs: 8000,
+      allowLocal: true,
+    });
+    await unlink(join(outDir, "AGENT_PROMPT.md"));
+    try {
+      await symlink(outside, join(outDir, "AGENT_PROMPT.md"));
+    } catch {
+      return;
+    }
+    await expect(
+      runInit({
+        url: undefined,
+        inspectReportPath: reportPath,
+        repoPath: repoDir,
+        outputDir: outDir,
+        dryRun: false,
+        json: false,
+        force: true,
+        maxPages: 5,
+        timeoutMs: 8000,
+        allowLocal: true,
+      }),
+    ).rejects.toThrow(/symlink/i);
+    expect(await readFile(outside, "utf8")).toBe("KEEP");
+  });
+
+  it("rejects malicious manifest generatedFiles", async () => {
+    const workDir = await mkdtemp(join(tmpdir(), "engawa-bundle-"));
+    const outDir = join(workDir, ".engawa");
+    await mkdir(outDir);
+    await writeFile(
+      join(outDir, "manifest.json"),
+      JSON.stringify({
+        schemaVersion: "engawa.init.bundle.v1",
+        generatedFiles: ["../../evil", "engawa-plan.json", "ENGAWA_INTEGRATION_PLAN.md"],
+      }),
+      "utf8",
+    );
+    const repoDir = join(workDir, "repo");
+    await mkdir(repoDir, { recursive: true });
+    createGenericNodeFixture(repoDir);
+    const reportPath = await writeInspectReport(
+      workDir,
+      minimalInspectReport("http://127.0.0.1:1", [{ path: "/" }]),
+    );
+    const code = await runCli([
+      "init",
+      "--inspect-report",
+      reportPath,
+      "--repo",
+      repoDir,
+      "--output-dir",
+      outDir,
+      "--force",
+    ]);
+    expect(code).toBe(1);
+  });
+});
+
+describe("engawa version classification", () => {
+  it("does not treat 0.1.10 as TESTED_SET", () => {
+    const metadata = extractRepoMetadata("test", new Map(), []);
+    metadata.dependencies = {
+      "@thierry-gilgen-ict/engawa-core": "0.1.10",
+      "@thierry-gilgen-ict/engawa-discovery": "0.1.10",
+      "@thierry-gilgen-ict/engawa-mcp": "0.1.10",
+    };
+    const info = detectExistingEngawa(metadata, new Map(), []);
+    expect(info.status).toBe("VERSION_MISMATCH_REVIEW_REQUIRED");
+  });
+
+  it("treats exact 0.1.1 core trio as TESTED_SET", () => {
+    const metadata = extractRepoMetadata("test", new Map(), []);
+    metadata.dependencies = {
+      "@thierry-gilgen-ict/engawa-core": "0.1.1",
+      "@thierry-gilgen-ict/engawa-discovery": "0.1.1",
+      "@thierry-gilgen-ict/engawa-mcp": "0.1.1",
+    };
+    const info = detectExistingEngawa(metadata, new Map(), []);
+    expect(info.status).toBe("TESTED_SET");
+  });
+
+  it("requires review for caret range", () => {
+    const metadata = extractRepoMetadata("test", new Map(), []);
+    metadata.dependencies = {
+      "@thierry-gilgen-ict/engawa-core": "^0.1.1",
+      "@thierry-gilgen-ict/engawa-discovery": "0.1.1",
+      "@thierry-gilgen-ict/engawa-mcp": "0.1.1",
+    };
+    const info = detectExistingEngawa(metadata, new Map(), []);
+    expect(info.status).toBe("VERSION_MISMATCH_REVIEW_REQUIRED");
+  });
+});
+
+describe("node engine evaluation", () => {
+  it(">=20 <25 is compatible", () => {
+    const r = evaluateNodeCompatibility(">=20 <25");
+    expect(r.nodeVersionStatus).toBe("COMPATIBLE");
+    expect(r.blockers).toHaveLength(0);
+  });
+
+  it(">=18 <23 is incompatible", () => {
+    const r = evaluateNodeCompatibility(">=18 <23");
+    expect(r.nodeVersionStatus).toBe("INCOMPATIBLE");
+    expect(r.blockers).toContain("NODE_24_REQUIRED");
+  });
+
+  it(">=24 is compatible", () => {
+    const r = evaluateNodeCompatibility(">=24");
+    expect(r.nodeVersionStatus).toBe("COMPATIBLE");
+  });
+
+  it("22.x is incompatible", () => {
+    const r = evaluateNodeCompatibility("22.x");
+    expect(r.nodeVersionStatus).toBe("INCOMPATIBLE");
   });
 });
