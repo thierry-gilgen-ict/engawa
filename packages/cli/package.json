@@ -35,6 +35,7 @@
     "test": "vitest run --root ../.. --config vitest.config.ts packages/cli"
   },
   "dependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
     "node-html-parser": "^7.0.1",
     "zod": "^4.2.0"
   },
@@ -43,5 +44,12 @@
   },
   "engines": {
     "node": ">=24"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/node": "2.0.0",
+    "@modelcontextprotocol/server": "2.0.0",
+    "@thierry-gilgen-ict/engawa-core": "workspace:^",
+    "@thierry-gilgen-ict/engawa-discovery": "workspace:^",
+    "@thierry-gilgen-ict/engawa-mcp": "workspace:^"
   }
 }

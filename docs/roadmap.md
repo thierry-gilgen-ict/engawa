@@ -53,7 +53,7 @@
 
 - Optional provider handoff UX where vendors document support
 - Analytics helpers (metadata-only patterns exist in reference sites)
-- CLI for local Engawa development — **in progress:** `engawa inspect` + `engawa init` in `@thierry-gilgen-ict/engawa-cli` (source, not published); `doctor` planned
+- CLI for local Engawa development — **in progress:** `engawa inspect` + `engawa init` + `engawa doctor` in `@thierry-gilgen-ict/engawa-cli` (source, not published)
 - `engawa-nextjs` — only if duplication across consumers justifies extraction
 
 ## Package status
