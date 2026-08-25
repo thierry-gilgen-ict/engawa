@@ -249,6 +249,8 @@ export async function runDoctor(options: DoctorOptions): Promise<EngawaDoctorRep
   const hostValidation = await probeHostValidation({
     targetUrl: securityTarget,
     timeoutMs: options.timeoutMs,
+    allowLocal: options.allowLocal,
+    lockOrigin: origin,
   });
 
   let originValidation: EngawaDoctorReport["security"]["originValidation"] = "NOT_APPLICABLE";
@@ -256,6 +258,8 @@ export async function runDoctor(options: DoctorOptions): Promise<EngawaDoctorRep
     originValidation = await probeOriginValidation({
       mcpUrl: endpoint.endpoint,
       timeoutMs: options.timeoutMs,
+      allowLocal: options.allowLocal,
+      lockOrigin: origin,
     });
   }
 
@@ -263,6 +267,8 @@ export async function runDoctor(options: DoctorOptions): Promise<EngawaDoctorRep
     targetUrl: securityTarget,
     count: options.rateLimitProbe,
     timeoutMs: options.timeoutMs,
+    allowLocal: options.allowLocal,
+    lockOrigin: origin,
   });
 
   if (rateLimit === "NOT_PROBED") {

@@ -1,6 +1,7 @@
 import { request as httpRequest, type IncomingMessage } from "node:http";
 import { request as httpsRequest } from "node:https";
 import { LATEST_PROTOCOL_VERSION } from "@modelcontextprotocol/client";
+import { assertFetchTargetAllowed } from "../inspect/url.js";
 import {
   INVALID_HOST_HEADER,
   INVALID_ORIGIN,
@@ -38,11 +39,23 @@ async function rawRequest(
     headers: Record<string, string>;
     body?: string;
     timeoutMs: number;
+    allowLocal: boolean;
+    lockOrigin: string;
     overrideHost?: string;
     maxBodyBytes?: number;
   },
 ): Promise<RawProbeResult> {
   const parsed = new URL(targetUrl);
+
+  try {
+    await assertFetchTargetAllowed(parsed, {
+      allowLocal: options.allowLocal,
+      lockOrigin: options.lockOrigin,
+    });
+  } catch {
+    return { status: 0, headers: {}, body: "", error: "TARGET_BLOCKED" };
+  }
+
   const isHttps = parsed.protocol === "https:";
   const requestFn = isHttps ? httpsRequest : httpRequest;
   const body = options.body ?? "";
@@ -164,6 +177,8 @@ function looksLikeSuccessfulMcpOrContent(status: number, body: string): boolean 
 export async function probeHostValidation(options: {
   targetUrl: string;
   timeoutMs: number;
+  allowLocal: boolean;
+  lockOrigin: string;
 }): Promise<HostValidation> {
   const result = await rawRequest(options.targetUrl, {
     method: "POST",
@@ -173,6 +188,8 @@ export async function probeHostValidation(options: {
     },
     body: buildMcpInitializeBody(),
     timeoutMs: options.timeoutMs,
+    allowLocal: options.allowLocal,
+    lockOrigin: options.lockOrigin,
     overrideHost: INVALID_HOST_HEADER,
   });
 
@@ -187,6 +204,8 @@ export async function probeHostValidation(options: {
 export async function probeOriginValidation(options: {
   mcpUrl: string;
   timeoutMs: number;
+  allowLocal: boolean;
+  lockOrigin: string;
 }): Promise<OriginValidation> {
   const result = await rawRequest(options.mcpUrl, {
     method: "OPTIONS",
@@ -196,6 +215,8 @@ export async function probeOriginValidation(options: {
       "Access-Control-Request-Headers": "content-type",
     },
     timeoutMs: options.timeoutMs,
+    allowLocal: options.allowLocal,
+    lockOrigin: options.lockOrigin,
   });
 
   if (result.error) return "UNKNOWN";
@@ -217,6 +238,8 @@ export async function probeRateLimit(options: {
   targetUrl: string;
   count: number;
   timeoutMs: number;
+  allowLocal: boolean;
+  lockOrigin: string;
 }): Promise<RateLimitObservation> {
   if (options.count <= 0) return "NOT_PROBED";
 
@@ -230,6 +253,8 @@ export async function probeRateLimit(options: {
       },
       body,
       timeoutMs: options.timeoutMs,
+      allowLocal: options.allowLocal,
+      lockOrigin: options.lockOrigin,
     });
     if (result.status === 429) return "OBSERVED";
     if (result.error) return "UNKNOWN";

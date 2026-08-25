@@ -688,11 +688,14 @@ describe("engawa doctor security probe bounds", () => {
     });
     await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
     const addr = server.address() as AddressInfo;
-    const result = await __testRawRequest(`http://127.0.0.1:${addr.port}/`, {
+    const origin = `http://127.0.0.1:${addr.port}`;
+    const result = await __testRawRequest(`${origin}/`, {
       method: "GET",
       headers: {},
       timeoutMs: 2000,
       maxBodyBytes: 8 * 1024,
+      allowLocal: true,
+      lockOrigin: origin,
     });
     await new Promise<void>((resolve, reject) => server.close((e) => (e ? reject(e) : resolve())));
     expect(result.error).toBe("BODY_TOO_LARGE");
@@ -709,14 +712,86 @@ describe("engawa doctor security probe bounds", () => {
     });
     await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
     const addr = server.address() as AddressInfo;
-    const result = await __testRawRequest(`http://127.0.0.1:${addr.port}/`, {
+    const origin = `http://127.0.0.1:${addr.port}`;
+    const result = await __testRawRequest(`${origin}/`, {
       method: "GET",
       headers: {},
       timeoutMs: 200,
       maxBodyBytes: 1024 * 1024,
+      allowLocal: true,
+      lockOrigin: origin,
     });
     await new Promise<void>((resolve, reject) => server.close((e) => (e ? reject(e) : resolve())));
     expect(result.error).toBe("timeout");
+  });
+});
+
+describe("engawa doctor raw probe target policy", () => {
+  it("blocks localhost without allowLocal and opens no socket", async () => {
+    let requestCount = 0;
+    const server = createServer((_req, res) => {
+      requestCount += 1;
+      res.writeHead(200);
+      res.end("ok");
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const addr = server.address() as AddressInfo;
+    const origin = `http://127.0.0.1:${addr.port}`;
+    const result = await __testRawRequest(`${origin}/`, {
+      method: "GET",
+      headers: {},
+      timeoutMs: 1000,
+      allowLocal: false,
+      lockOrigin: origin,
+    });
+    await new Promise<void>((resolve, reject) => server.close((e) => (e ? reject(e) : resolve())));
+    expect(result.error).toBe("TARGET_BLOCKED");
+    expect(requestCount).toBe(0);
+  });
+
+  it("allows localhost with allowLocal and matching lockOrigin", async () => {
+    let requestCount = 0;
+    const server = createServer((_req, res) => {
+      requestCount += 1;
+      res.writeHead(200);
+      res.end("ok");
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const addr = server.address() as AddressInfo;
+    const origin = `http://127.0.0.1:${addr.port}`;
+    const result = await __testRawRequest(`${origin}/`, {
+      method: "GET",
+      headers: {},
+      timeoutMs: 1000,
+      allowLocal: true,
+      lockOrigin: origin,
+    });
+    await new Promise<void>((resolve, reject) => server.close((e) => (e ? reject(e) : resolve())));
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(200);
+    expect(requestCount).toBe(1);
+  });
+
+  it("blocks wrong lockOrigin before opening a socket", async () => {
+    let requestCount = 0;
+    const server = createServer((_req, res) => {
+      requestCount += 1;
+      res.writeHead(200);
+      res.end("ok");
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const addr = server.address() as AddressInfo;
+    const origin = `http://127.0.0.1:${addr.port}`;
+    const result = await __testRawRequest(`${origin}/`, {
+      method: "GET",
+      headers: {},
+      timeoutMs: 1000,
+      allowLocal: true,
+      lockOrigin: "https://example.com",
+    });
+    await new Promise<void>((resolve, reject) => server.close((e) => (e ? reject(e) : resolve())));
+    expect(result.error).toBe("TARGET_BLOCKED");
+    expect(requestCount).toBe(0);
   });
 });
 
