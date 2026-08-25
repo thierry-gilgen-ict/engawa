@@ -1,0 +1,41 @@
+{
+  "site": {
+    "name": "Static Example Co",
+    "canonicalUrl": "https://example.invalid",
+    "description": "A framework-free static HTML site proving Engawa build-time extraction.",
+    "language": "en"
+  },
+  "sourceRoot": "html/public",
+  "outputRoot": "dist",
+  "manifestPath": "generated/engawa/resources.json",
+  "resources": [
+    {
+      "id": "home",
+      "source": "index.html",
+      "canonicalPath": "/",
+      "markdownPath": "/index.md",
+      "contentSelector": "main"
+    },
+    {
+      "id": "about",
+      "source": "about.html",
+      "canonicalPath": "/about.html",
+      "markdownPath": "/about.md",
+      "contentSelector": "main"
+    },
+    {
+      "id": "services",
+      "source": "services.html",
+      "canonicalPath": "/services.html",
+      "markdownPath": "/services.md",
+      "contentSelector": "main"
+    },
+    {
+      "id": "contact",
+      "source": "contact.html",
+      "canonicalPath": "/contact.html",
+      "markdownPath": "/contact.md",
+      "contentSelector": "main"
+    }
+  ]
+}

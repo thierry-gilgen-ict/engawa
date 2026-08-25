@@ -46,9 +46,9 @@
 
 External review after `@thierry-gilgen-ict/engawa-cli@0.1.0` converged on four themes: HTML is already readable; llms.txt/Markdown autodiscovery must not be assumed; Engawa must differentiate clearly from schema.org/sitemaps/OpenAPI; static artifact-driven sites need an allowed build-time path ([ADR-0008](adr/0008-artifact-driven-content-sources.md)).
 
-Planned bounded phases (order matters; **not implemented**):
+Planned bounded phases (order matters):
 
-1. **Static/build-time integration path** — prove artifact-driven pattern on a reference site (no pre-named package)
+1. **Static/build-time pattern proof** — implemented in monorepo example [`examples/static-build-time-site`](../../examples/static-build-time-site); production reference still pending ([static-build-time-integration.md](static-build-time-integration.md))
 2. **Authorable/high-quality llms.txt output** — preamble, descriptions, optional policy, size budget (evaluate `EngawaResource.description`, `optionalResourceIds`)
 3. **Observability recipe** — operator-local server/CDN logs (`/llms.txt`, `*.md`, `/mcp`, `Accept`, User-Agent); **no runtime phone-home**; User-Agent ≠ proof of model consumption
 4. **Content-negotiation experiment** — does `Accept: text/markdown` on canonical human URLs justify same-URL negotiation?
