@@ -7,7 +7,6 @@ import type {
   FrameworkInfo,
   NextjsRoute,
   RepoScanResult,
-  RepoMetadata,
   SourceStatus,
 } from "./types.js";
 
@@ -17,7 +16,6 @@ export interface RouteMappingInput {
   appRoutes: NextjsRoute[];
   pagesRoutes: NextjsRoute[];
   scan: RepoScanResult;
-  metadata: RepoMetadata;
 }
 
 function importProvenanceEvidence(depth: number): string {

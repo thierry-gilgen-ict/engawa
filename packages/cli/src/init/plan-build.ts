@@ -47,7 +47,6 @@ export function buildEngawaPlan(
     appRoutes,
     pagesRoutes,
     scan,
-    metadata,
   });
 
   const publicSourceUnclearRoutes = collectPublicSourceUnclearRoutes(routeMappings);
