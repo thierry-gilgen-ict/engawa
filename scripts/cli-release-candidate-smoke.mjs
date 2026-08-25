@@ -58,39 +58,38 @@ function engawaBin(consumerDir) {
   throw new Error("Installed engawa binary not found under node_modules/.bin");
 }
 
+function installedCliEntry(consumerDir) {
+  const cliJs = join(consumerDir, "node_modules", scope, "dist", "cli.js");
+  if (!existsSync(cliJs)) {
+    throw new Error("Installed dist/cli.js missing from packed package");
+  }
+  return cliJs;
+}
+
 async function runEngawa(consumerDir, args, options = {}) {
-  const bin = engawaBin(consumerDir);
+  // Assert npm bin link exists, then invoke the packed entry with node for
+  // cross-platform reliability (Windows .cmd teardown can abort after success).
+  engawaBin(consumerDir);
+  const cliJs = installedCliEntry(consumerDir);
   const env = { ...process.env, npm_config_registry: "https://registry.npmjs.org" };
-  // Async required: sync exec blocks the event loop and starves in-process HTTP fixtures.
-  const run = async () => {
-    if (process.platform === "win32" && bin.endsWith(".cmd")) {
-      return execFileAsync("cmd.exe", ["/c", bin, ...args], {
-        cwd: consumerDir,
-        encoding: "utf8",
-        env,
-        maxBuffer: 10 * 1024 * 1024,
-        ...options,
-      });
-    }
-    return execFileAsync(bin, args, {
+  try {
+    const { stdout } = await execFileAsync(process.execPath, [cliJs, ...args], {
       cwd: consumerDir,
       encoding: "utf8",
       env,
       maxBuffer: 10 * 1024 * 1024,
       ...options,
     });
-  };
-  try {
-    const { stdout } = await run();
     return stdout;
   } catch (err) {
-    // On Windows, Node can abort during process teardown after a successful CLI run
-    // (libuv UV_HANDLE_CLOSING). Prefer valid stdout when present.
     const stdout = typeof err?.stdout === "string" ? err.stdout : "";
     if (stdout.trim()) {
       return stdout;
     }
-    throw err;
+    const stderr = typeof err?.stderr === "string" ? err.stderr.trim() : "";
+    throw new Error(
+      `engawa ${args.join(" ")} failed (code=${err?.code ?? "?"}): ${stderr || err?.message || err}`,
+    );
   }
 }
 
@@ -395,7 +394,16 @@ async function main() {
 
     const versionOut = (await runEngawa(consumerDir, ["--version"])).trim();
     if (versionOut !== VERSION) {
-      throw new Error(`PACKED_VERSION expected ${VERSION}, got ${versionOut}`);
+      throw new Error(`PACKED_VERSION expected ${VERSION}, got ${JSON.stringify(versionOut)}`);
+    }
+    const binPath = engawaBin(consumerDir);
+    const binText = readFileSync(binPath, "utf8");
+    if (
+      !binText.includes("engawa-cli") &&
+      !binText.includes("dist/cli.js") &&
+      !binText.includes("cli.js")
+    ) {
+      throw new Error(`PACKED_BIN_LINK unexpected shim contents at ${binPath}`);
     }
     console.log("PACKED_VERSION_SMOKE = PASS");
     console.log("PACKED_BIN_LINK = PASS");
