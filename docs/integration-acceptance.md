@@ -6,10 +6,14 @@ Full context: [integrating an existing site](integrating-an-existing-site.md), [
 
 ## DISCOVERY
 
+Published surfaces (verify they exist and are correct—not that providers automatically consume them):
+
 - [ ] `GET /llms.txt` returns `200`
 - [ ] `llms.txt` lists the correct canonical site URL
-- [ ] Expected Markdown alternate links are present
-- [ ] MCP URL is included in `llms.txt`
+- [ ] Expected Markdown alternate links are present (if you publish them)
+- [ ] MCP URL is included in `llms.txt` (if you expose MCP)
+
+Provider autodiscovery of `llms.txt` or `rel="alternate"` Markdown must **not** be assumed. Measure fetch behavior where possible ([Do you need Engawa?](do-you-need-engawa.md)).
 
 ## MARKDOWN
 

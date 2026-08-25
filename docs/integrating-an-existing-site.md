@@ -8,22 +8,26 @@ For an empty TypeScript project, see [getting started](getting-started.md). For 
 
 Inspect and record:
 
-| Area                       | What to document                              |
-| -------------------------- | --------------------------------------------- |
-| Framework                  | Next.js, Astro, custom Node, etc.             |
-| Runtime                    | Node version (Engawa requires **24+**)        |
-| Package manager            | npm, pnpm, yarn                               |
-| Public routes              | Human HTML routes agents should mirror        |
-| Locales                    | Single or multi-locale routing                |
-| Content architecture       | CMS, DB, static files, hybrid                 |
-| Canonical source per route | **Which function/file feeds each human page** |
-| Auth / session             | Middleware, cookies, admin areas              |
-| Host topology              | Reverse proxy, CDN, canonical domain          |
-| Rate limiting              | Existing limits on public routes              |
-| Analytics                  | Metadata-only vs content logging              |
-| Deployment                 | How production is built and released          |
+| Area                       | What to document                                              |
+| -------------------------- | ------------------------------------------------------------- |
+| Framework                  | Next.js, Astro, custom Node, etc.                             |
+| Runtime                    | Node version (Engawa requires **24+**)                        |
+| Package manager            | npm, pnpm, yarn                                               |
+| Public routes              | Human HTML routes agents should mirror                        |
+| Locales                    | Single or multi-locale routing                                |
+| Content architecture       | CMS, DB, static files, hybrid                                 |
+| Canonical source per route | **Loader, artifact, or build output feeding each human page** |
+| Auth / session             | Middleware, cookies, admin areas                              |
+| Host topology              | Reverse proxy, CDN, canonical domain                          |
+| Rate limiting              | Existing limits on public routes                              |
+| Analytics                  | Metadata-only vs content logging                              |
+| Deployment                 | How production is built and released                          |
 
-**Stop** if you cannot identify the canonical human-public source for each route class. See [content publication rule](content-publication.md).
+**Stop** if you cannot identify the canonical human-public source for each route class. See [content publication rule](content-publication.md) and [Do you need Engawa?](do-you-need-engawa.md).
+
+Loader-driven sites: identify the **same canonical loader** the human HTML route uses.
+
+Artifact-driven static sites: identify the **human-public HTML artifact** and a **build-time extraction** plan ([ADR-0008](adr/0008-artifact-driven-content-sources.md)). Runtime production HTML crawling is not the default Engawa corpus architecture.
 
 ```text
 HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE
@@ -40,12 +44,12 @@ Engawa surfaces are composable:
 | `@thierry-gilgen-ict/engawa-mcp`       | Usually   | Public MCP server               |
 | `@thierry-gilgen-ict/engawa-react`     | Optional  | Bring Your Agent UI             |
 
-| Surface             | What visitors get                                               |
-| ------------------- | --------------------------------------------------------------- |
-| Markdown alternates | Clean `text/markdown` at paths like `/about.md`                 |
-| `llms.txt`          | Discovery index for agents                                      |
-| MCP                 | Streamable HTTP endpoint with resources + bounded `search_site` |
-| Bring Your Agent    | Provider-neutral connection UX on your site                     |
+| Surface             | What visitors get                                                    |
+| ------------------- | -------------------------------------------------------------------- |
+| Markdown alternates | Clean `text/markdown` at paths like `/about.md`                      |
+| `llms.txt`          | Published machine-readable index / handoff (consumer support varies) |
+| MCP                 | Streamable HTTP endpoint with resources + bounded `search_site`      |
+| Bring Your Agent    | Provider-neutral connection UX on your site                          |
 
 Add only what your product needs. MCP without BYA is valid.
 
@@ -61,7 +65,7 @@ Create a table before coding:
 Rules:
 
 - **Public?** means an anonymous human visitor can see it today.
-- **Canonical source** is the function or module the human route already uses.
+- **Canonical source** is the loader, artifact, or build output the human route already uses ([loader-driven vs artifact-driven](content-publication.md)).
 - Do not register CMS rows, Git files, or DB tables that human routes do not use.
 
 ## Install
@@ -85,11 +89,16 @@ Pin exact versions in production. See [compatibility](compatibility.md).
 
 ## Implement the adapter
 
-Implement a **custom `ContentAdapter`** that reads from your site's canonical human-public loaders.
+Implement a **custom `ContentAdapter`** over your site's human-public corpus. The pattern depends on how your site sources public content ([content publication rule](content-publication.md), [ADR-0008](adr/0008-artifact-driven-content-sources.md)):
+
+**Loader-driven sites** — the `ContentAdapter` reads the **same canonical loader** used by human HTML routes (CMS query, application service, shared module).
+
+**Artifact-driven sites** — deterministic **build-time extraction** from canonical human-public HTML artifacts produces bounded Engawa inputs/resources; the adapter consumes that extraction output.
 
 - `StaticContentAdapter` is fine for demos and tests.
-- Production sites with CMS, DB, or locale-aware content need a site-specific adapter.
-- The adapter defines the public corpus—Engawa does not scrape your HTML.
+- Production sites with CMS, DB, locale-aware content, or static HTML trees need a site-specific adapter aligned to one of the paths above.
+
+Engawa v0.1 does **not** ship a runtime production HTML crawler/scraper. Build-time extraction from allowlisted human-public HTML artifacts is permitted by ADR-0008; that is not the same as request-time crawling of live production HTML.
 
 Reference pattern (conceptual):
 
@@ -102,7 +111,8 @@ export class SiteContentAdapter implements ContentAdapter {
     // Return only resources whose human routes are public
   }
   async getResource(idOrUri: string): Promise<EngawaResource | undefined> {
-    // Same source as human route + markdown builder
+    // Loader-driven: same loader as human route + markdown builder
+    // Artifact-driven: bounded output from build-time extraction
   }
   async search(query: string): Promise<EngawaResource[]> {
     // Search only the same human-public corpus; never return admin/draft/private content

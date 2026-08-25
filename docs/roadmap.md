@@ -42,6 +42,21 @@
 - DM3C — production deploy and live acceptance PASS
 - DM3D — `@thierry-gilgen-ict/engawa-map@0.1.0` on npm; production showcase live
 
+## Future — Post-CLI adopter feedback (not started)
+
+External review after `@thierry-gilgen-ict/engawa-cli@0.1.0` converged on four themes: HTML is already readable; llms.txt/Markdown autodiscovery must not be assumed; Engawa must differentiate clearly from schema.org/sitemaps/OpenAPI; static artifact-driven sites need an allowed build-time path ([ADR-0008](adr/0008-artifact-driven-content-sources.md)).
+
+Planned bounded phases (order matters; **not implemented**):
+
+1. **Static/build-time integration path** — prove artifact-driven pattern on a reference site (no pre-named package)
+2. **Authorable/high-quality llms.txt output** — preamble, descriptions, optional policy, size budget (evaluate `EngawaResource.description`, `optionalResourceIds`)
+3. **Observability recipe** — operator-local server/CDN logs (`/llms.txt`, `*.md`, `/mcp`, `Accept`, User-Agent); **no runtime phone-home**; User-Agent ≠ proof of model consumption
+4. **Content-negotiation experiment** — does `Accept: text/markdown` on canonical human URLs justify same-URL negotiation?
+5. **Multi-locale guidance / reference**
+6. **Candidate third production reference** — static SME site
+
+Do not invent package names (`engawa-html`, `engawa-static`, `engawa-analytics`) until a pattern is proven.
+
 ## Future — Authenticated capabilities (not started)
 
 - OAuth and authenticated MCP tools
@@ -67,4 +82,3 @@
 | `engawa-nextjs`    | Not shipped | Document pattern only                                                                            |
 | `engawa-cli`       | 0.1.0       | `inspect` + `init` + `doctor`; [publish record](publish-npm-cli-v0.1.0.md)                       |
 | `engawa-map`       | 0.1.0       | Production registry live; voluntary PENDING→LISTED flow; [Distribution Map](distribution-map.md) |
-| `engawa-analytics` | Planned     | Separate from Distribution Map                                                                   |

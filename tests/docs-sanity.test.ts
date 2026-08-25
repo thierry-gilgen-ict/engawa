@@ -6,6 +6,7 @@ const root = process.cwd();
 
 const requiredDocs = [
   "AGENTS.md",
+  "docs/do-you-need-engawa.md",
   "docs/integrating-an-existing-site.md",
   "docs/integration-acceptance.md",
   "docs/agent-integration-playbook.md",
@@ -26,6 +27,7 @@ describe("documentation sanity", () => {
   it("README links to key onboarding paths", () => {
     const readme = readFileSync(join(root, "README.md"), "utf8");
     expect(readme).toContain("docs/integrating-an-existing-site.md");
+    expect(readme).toContain("docs/do-you-need-engawa.md");
     expect(readme).toContain("docs/agent-integration-playbook.md");
     expect(readme).toContain("docs/upgrading.md");
     expect(readme).toContain("docs/compatibility.md");
@@ -34,6 +36,7 @@ describe("documentation sanity", () => {
 
   it("docs/README links to key paths", () => {
     const index = readFileSync(join(root, "docs/README.md"), "utf8");
+    expect(index).toContain("do-you-need-engawa.md");
     expect(index).toContain("integrating-an-existing-site.md");
     expect(index).toContain("agent-integration-playbook.md");
     expect(index).toContain("upgrading.md");
@@ -143,6 +146,73 @@ describe("documentation sanity", () => {
     const contentful = readFileSync(join(root, "docs/integrations/contentful.md"), "utf8");
     expect(contentful).toMatch(/switch Engawa to Preview API credentials/i);
     expect(contentful).toMatch(/Never use preview loader for public Engawa/i);
+  });
+
+  it("ADR-0008 artifact-driven sources exists and is Accepted", () => {
+    const adr = readFileSync(
+      join(root, "docs/adr/0008-artifact-driven-content-sources.md"),
+      "utf8",
+    );
+    expect(adr).toContain("Accepted");
+    expect(adr).toContain("HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE");
+    expect(adr).toMatch(/build-time|build time/i);
+    expect(adr).toMatch(/runtime crawling|request-time/i);
+  });
+
+  it("do-you-need-engawa documents discovery uncertainty and comparisons", () => {
+    const guide = readFileSync(join(root, "docs/do-you-need-engawa.md"), "utf8");
+    expect(guide).toMatch(/You may not need Engawa/i);
+    expect(guide).toContain("SURFACE EXISTS");
+    expect(guide).toContain("schema.org");
+    expect(guide).toContain("sitemap.xml");
+    expect(guide).toContain("OpenAPI");
+  });
+
+  it("content-publication documents loader and artifact-driven patterns", () => {
+    const rule = readFileSync(join(root, "docs/content-publication.md"), "utf8");
+    expect(rule).toContain("HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE");
+    expect(rule).toMatch(/Loader-driven|loader-driven/i);
+    expect(rule).toMatch(/Artifact-driven|artifact-driven/i);
+    expect(rule).toContain("0008-artifact-driven-content-sources");
+  });
+
+  it("README does not claim automatic llms.txt discovery by agents", () => {
+    const readme = readFileSync(join(root, "README.md"), "utf8");
+    expect(readme).not.toMatch(/Be discovered by agents/i);
+    expect(readme).toMatch(/does not assume automatic discovery|Consumer support varies/i);
+    expect(readme).toMatch(/Agents can read HTML/i);
+    const surfacesSection = readme.match(/## Agent surfaces[\s\S]*?(?=\n## |\n```mermaid)/);
+    expect(surfacesSection).not.toBeNull();
+    expect(surfacesSection![0]).not.toMatch(/Discovery index/i);
+    expect(surfacesSection![0]).toMatch(/handoff artifact|Published index/i);
+  });
+
+  it("README status lists engawa-cli@0.1.0 and roadmap omits engawa-analytics package row", () => {
+    const readme = readFileSync(join(root, "README.md"), "utf8");
+    expect(readme).toContain("engawa-cli@0.1.0");
+    expect(readme).not.toMatch(/Not shipped:.*engawa-analytics/i);
+
+    const roadmap = readFileSync(join(root, "docs/roadmap.md"), "utf8");
+    const packageSection = roadmap.match(/## Package status[\s\S]*/);
+    expect(packageSection).not.toBeNull();
+    expect(packageSection![0]).not.toMatch(/\| `engawa-analytics`/);
+  });
+
+  it("integrating guide distinguishes loader-driven and artifact-driven adapters", () => {
+    const guide = readFileSync(join(root, "docs/integrating-an-existing-site.md"), "utf8");
+    expect(guide).toMatch(/Loader-driven/i);
+    expect(guide).toMatch(/Artifact-driven/i);
+    expect(guide).toMatch(/build-time extraction/i);
+    expect(guide).toMatch(/runtime production HTML crawler/i);
+  });
+
+  it("architecture planned boundaries do not list shipped react or predecided analytics packages", () => {
+    const arch = readFileSync(join(root, "docs/architecture.md"), "utf8");
+    const planned = arch.match(/## Planned boundaries[\s\S]*?(?=\n## |\n$)/);
+    expect(planned).not.toBeNull();
+    expect(planned![0]).not.toMatch(/engawa-react/);
+    expect(planned![0]).not.toMatch(/CLI analytics packages/i);
+    expect(planned![0]).toMatch(/observability helpers|Build-time HTML extraction/i);
   });
 
   it("distribution map policy exists with opt-in and security boundaries", () => {

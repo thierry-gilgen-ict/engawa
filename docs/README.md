@@ -7,6 +7,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 ### For humans — add Engawa to an existing site
 
 - [Integrating an existing site](integrating-an-existing-site.md) — primary workflow for live websites
+- [Do you need Engawa?](do-you-need-engawa.md) — when Engawa is (and isn't) the right fit
 - [Integration acceptance contract](integration-acceptance.md) — done-when checklist
 - [Content publication rule](content-publication.md) — `HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE`
 - [Getting started](getting-started.md) — empty external project quick start
@@ -36,6 +37,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 
 - [Vision](vision.md)
 - [Architecture](architecture.md)
+- [Do you need Engawa?](do-you-need-engawa.md)
 - [Implementation profile v0.1](implementation-profile-v0.1.md)
 - [Security model](security-model.md)
 - [Distribution Map](distribution-map.md) — optional showcase; opt-in policy

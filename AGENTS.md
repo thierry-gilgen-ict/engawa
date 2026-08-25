@@ -4,7 +4,7 @@ Orientation for coding agents working in or with the Engawa repository.
 
 ## What Engawa is
 
-Open toolkit for **agent-native websites**: human HTML plus structured agent surfaces (`llms.txt`, markdown alternates, read-only MCP, optional Bring Your Agent UI).
+Open toolkit for **agent-native websites**: human HTML plus structured agent surfaces (`llms.txt`, markdown alternates, read-only MCP, optional Bring Your Agent UI). Agents can read HTML; Engawa exposes the **same human-public content** through cleaner bounded representations—see [do-you-need-engawa.md](docs/do-you-need-engawa.md) and [ADR-0008](docs/adr/0008-artifact-driven-content-sources.md).
 
 ## Current published packages (npm)
 

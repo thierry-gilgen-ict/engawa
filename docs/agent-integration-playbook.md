@@ -43,7 +43,9 @@ Record findings:
 HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE
 ```
 
-For every Engawa resource, identify the **same canonical loader** the human HTML route uses.
+For every Engawa resource, identify the **same canonical human-public source** the human HTML route uses—typically the **same canonical loader** in loader-driven sites.
+
+Artifact-driven static sites: the canonical source may be a **human-public HTML artifact** with **build-time extraction** ([ADR-0008](adr/0008-artifact-driven-content-sources.md)). Production runtime HTML crawling is not the default Engawa corpus architecture.
 
 If canonical source is unclear for a route class:
 
