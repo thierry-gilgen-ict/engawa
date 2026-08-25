@@ -44,6 +44,7 @@ pnpm format
   ```
 
 - Do not synchronize all package versions for aesthetics. Bump only packages that changed.
+- Future CLI package tag (after publication): `engawa-cli-v0.1.0` — do not create until npm publish is authorized.
 
 ## Monorepo dependency note
 
@@ -116,6 +117,61 @@ node scripts/v011-release-candidate-smoke.mjs
 
 Expect `ENGAWA_V011_RELEASE_CANDIDATE_SMOKE = PASS`.
 
+## engawa-cli (standalone pack)
+
+`@thierry-gilgen-ict/engawa-cli` does **not** declare workspace Engawa packages as runtime dependencies. Published CLI tarballs need no `stage-npm-tarballs.mjs` rewrite — pack the built package directory directly.
+
+**Release model**
+
+```text
+clean reviewed main
+↓
+pnpm build
+↓
+npm pack (exact CLI artifact)
+↓
+inspect tarball (allowlist + secret/path scan)
+↓
+pnpm smoke:cli-rc   # packed external consumer: bin + inspect/init/doctor
+↓
+WAIT_FOR_USER
+↓
+maintainer explicitly authorizes npm publish
+↓
+npm publish <exact-cli-tarball> --access public
+↓
+verify registry
+↓
+git tag engawa-cli-v0.1.0   # points at reviewed release source SHA
+```
+
+Preflight (expect E404 before first publish):
+
+```bash
+npm view @thierry-gilgen-ict/engawa-cli@0.1.0 version
+```
+
+Pack and smoke locally after `pnpm build`:
+
+```bash
+cd packages/cli
+npm pack --dry-run --json
+# create a disposable tarball for smoke (do not commit *.tgz)
+pnpm smoke:cli-rc
+```
+
+Expect `ENGAWA_CLI_RELEASE_CANDIDATE_SMOKE = PASS`.
+
+**Future publish** (maintainer only — do not run without explicit authorization):
+
+```bash
+npm publish thierry-gilgen-ict-engawa-cli-0.1.0.tgz --access public
+git tag engawa-cli-v0.1.0
+git push origin engawa-cli-v0.1.0
+```
+
+Do not move `v0.1.0`, `engawa-core-v0.1.1`, `engawa-discovery-v0.1.1`, `engawa-mcp-v0.1.1`, `engawa-react-v0.1.0`, or `engawa-map-v0.1.0`.
+
 ## Publish (interactive — maintainer only)
 
 **STOP:** Publication requires interactive npm login / WebAuthn. Agents must not publish without explicit user authorization.
@@ -181,6 +237,8 @@ Until that closeout merge, public documentation correctly targets the **currentl
 - PR CI does **not** publish to npm.
 - PR CI runs external consumer smoke against **currently published** registry versions (`0.1.1` for core/discovery/mcp; react pinned to `0.1.0` in smoke script).
 - PR CI runs v0.1.1 release-candidate smoke against local staged tarballs (`scripts/v011-release-candidate-smoke.mjs`).
+- PR CI runs engawa-cli release-candidate pack smoke (`scripts/cli-release-candidate-smoke.mjs`).
+- PR CI runs engawa-map release-candidate pack smoke (`scripts/map-release-candidate-smoke.mjs`).
 
 ## Related
 
