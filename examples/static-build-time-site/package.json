@@ -1,0 +1,19 @@
+{
+  "name": "static-build-time-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "extract": "node .build/build.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@thierry-gilgen-ict/engawa-core": "workspace:*",
+    "@thierry-gilgen-ict/engawa-discovery": "workspace:*",
+    "node-html-parser": "^7.0.1"
+  }
+}

@@ -1,0 +1,5 @@
+.build/
+dist/
+generated/
+node_modules/
+*.tsbuildinfo

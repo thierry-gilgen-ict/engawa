@@ -86,6 +86,18 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp
 
+  examples/static-build-time-site:
+    dependencies:
+      "@thierry-gilgen-ict/engawa-core":
+        specifier: workspace:*
+        version: link:../../packages/core
+      "@thierry-gilgen-ict/engawa-discovery":
+        specifier: workspace:*
+        version: link:../../packages/discovery
+      node-html-parser:
+        specifier: ^7.0.1
+        version: 7.1.0
+
   packages/cli:
     dependencies:
       "@modelcontextprotocol/client":

@@ -10,7 +10,7 @@
   },
   "packageManager": "pnpm@9.15.9",
   "scripts": {
-    "build": "pnpm --filter @thierry-gilgen-ict/engawa-core build && pnpm --filter @thierry-gilgen-ict/engawa-discovery build && pnpm --filter @thierry-gilgen-ict/engawa-mcp build && pnpm --filter @thierry-gilgen-ict/engawa-react build && pnpm --filter @thierry-gilgen-ict/engawa-map build && pnpm --filter @thierry-gilgen-ict/engawa-cli build && pnpm --filter minimal-site build",
+    "build": "pnpm --filter @thierry-gilgen-ict/engawa-core build && pnpm --filter @thierry-gilgen-ict/engawa-discovery build && pnpm --filter @thierry-gilgen-ict/engawa-mcp build && pnpm --filter @thierry-gilgen-ict/engawa-react build && pnpm --filter @thierry-gilgen-ict/engawa-map build && pnpm --filter @thierry-gilgen-ict/engawa-cli build && pnpm --filter minimal-site build && pnpm --filter static-build-time-site build",
     "typecheck": "pnpm -r run typecheck",
     "test": "vitest run",
     "smoke:external": "node scripts/external-consumer-smoke.mjs",
@@ -19,6 +19,7 @@
     "smoke:v011-rc": "node scripts/v011-release-candidate-smoke.mjs",
     "smoke:map-rc": "node scripts/map-release-candidate-smoke.mjs",
     "smoke:cli-rc": "node scripts/cli-release-candidate-smoke.mjs",
+    "smoke:static-build-time": "node scripts/static-build-time-smoke.mjs",
     "lint": "eslint .",
     "format": "prettier --check .",
     "format:write": "prettier --write ."
