@@ -27,6 +27,6 @@ export function buildRecommendation(
 
   return {
     engawaIntegration,
-    plannedNextStep: `engawa init --url ${targetUrl} --repo . (planned — not yet implemented)`,
+    plannedNextStep: `engawa init --url ${targetUrl} --repo .`,
   };
 }
