@@ -96,23 +96,32 @@ export function resolveWriteTargetUnderBoundedRoot(
   assertRelativeSafe(relPath, label);
   const realBounded = realpathExisting(boundedRoot);
   const absTarget = resolve(realBounded, relPath);
-  const parent = resolve(absTarget, "..");
-  const realParent = existsSync(parent) ? realpathExisting(parent) : realBounded;
-  if (!isPathInside(realBounded, realParent)) {
-    throw new Error(`${label} write parent escapes bounded root: ${relPath}`);
-  }
-  if (existsSync(absTarget)) {
-    const realTarget = realpathExisting(absTarget);
-    if (!isPathInside(realBounded, realTarget)) {
-      throw new Error(`${label} write target escapes bounded root via symlink: ${relPath}`);
-    }
-    return realTarget;
-  }
+  assertWritePathWithinBoundedRoot(realBounded, absTarget, label, relPath);
+  return absTarget;
+}
+
+function assertWritePathWithinBoundedRoot(
+  realBounded: string,
+  absTarget: string,
+  label: string,
+  relPath: string,
+): void {
   const rel = relative(realBounded, absTarget);
   if (rel.startsWith("..") || isAbsolute(rel)) {
     throw new Error(`${label} escapes bounded root: ${relPath}`);
   }
-  return absTarget;
+
+  let probe = realBounded;
+  const parts = rel.split(/[/\\]/).filter(Boolean);
+  for (const part of parts) {
+    probe = join(probe, part);
+    if (existsSync(probe)) {
+      const realProbe = realpathExisting(probe);
+      if (!isPathInside(realBounded, realProbe)) {
+        throw new Error(`${label} write path escapes bounded root via symlink: ${relPath}`);
+      }
+    }
+  }
 }
 
 export function outputRelativePath(outputRoot: string, relPath: string, label: string): string {
@@ -130,25 +139,23 @@ export function walkMarkdownFiles(
 ): void {
   if (!existsSync(rootDir)) return;
   const realRoot = realpathExisting(rootDir);
-  for (const absPath of collectMarkdownFiles(realRoot)) {
+  for (const absPath of collectMarkdownFiles(realRoot, "outputRoot")) {
     const relPath = relative(realRoot, absPath).replace(/\\/g, "/");
     onFile(absPath, relPath);
   }
 }
 
-function collectMarkdownFiles(dir: string): string[] {
+function collectMarkdownFiles(dir: string, outputRootLabel: string): string[] {
   const files: string[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const absPath = join(dir, entry.name);
+    if (entry.isSymbolicLink()) {
+      throw new Error(`${outputRootLabel} contains a symlink during stale cleanup: ${entry.name}`);
+    }
     if (entry.isDirectory()) {
-      files.push(...collectMarkdownFiles(absPath));
+      files.push(...collectMarkdownFiles(absPath, outputRootLabel));
     } else if (entry.isFile() && entry.name.endsWith(".md")) {
       files.push(absPath);
-    } else if (entry.isSymbolicLink()) {
-      const realTarget = realpathExisting(absPath);
-      if (realTarget.endsWith(".md")) {
-        files.push(realTarget);
-      }
     }
   }
   return files;

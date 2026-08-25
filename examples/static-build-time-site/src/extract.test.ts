@@ -1,5 +1,13 @@
 import { createHash } from "node:crypto";
-import { cpSync, existsSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -314,6 +322,47 @@ describe("static build-time extraction", () => {
       return;
     }
     await expect(runExtractAsync(tempDir)).rejects.toThrow(/escapes project root/i);
+  });
+
+  it("does not delete external targets during stale cleanup via output symlinks", async () => {
+    tempDir = copyFixtureToTemp();
+    const outsideFile = join(tempDir, "outside-important.md");
+    const outsideContent = "OUTSIDE_IMPORTANT_SENTINEL_CONTENT";
+    writeFileSync(outsideFile, outsideContent, "utf8");
+    mkdirSync(join(tempDir, "dist"), { recursive: true });
+    try {
+      symlinkSync(outsideFile, join(tempDir, "dist/stale.md"));
+    } catch {
+      return;
+    }
+
+    await expect(runExtractAsync(tempDir)).rejects.toThrow(/symlink/i);
+    expect(existsSync(outsideFile)).toBe(true);
+    expect(readFileSync(outsideFile, "utf8")).toBe(outsideContent);
+  });
+
+  it("blocks nested write paths through symlink ancestors inside outputRoot", async () => {
+    tempDir = copyFixtureToTemp();
+    const outsideDir = mkdtempSync(join(tmpdir(), "static-out-escape-"));
+    mkdirSync(join(tempDir, "dist"), { recursive: true });
+    try {
+      symlinkSync(outsideDir, join(tempDir, "dist/escape"));
+    } catch {
+      return;
+    }
+
+    const manifest = loadManifest(join(tempDir, "engawa.manifest.json"));
+    manifest.resources.push({
+      id: "escape-page",
+      source: "index.html",
+      canonicalPath: "/escape/new/page.html",
+      markdownPath: "/escape/new/page.md",
+      contentSelector: "main",
+    });
+    writeFileSync(join(tempDir, "engawa.manifest.json"), JSON.stringify(manifest, null, 2));
+
+    await expect(runExtractAsync(tempDir)).rejects.toThrow(/escapes bounded root/i);
+    expect(existsSync(join(outsideDir, "new/page.md"))).toBe(false);
   });
 
   it("does not use network during extraction", async () => {
