@@ -8,28 +8,34 @@
 
 In traditional Japanese architecture, an **engawa (縁側)** is the narrow transitional space running between the interior of a building and the outside — often between rooms and a garden. It is neither fully inside nor fully outside: it is a threshold that connects the two.
 
-**Engawa brings that idea to the web.** It creates a deliberate interface between your website and AI agents — giving machines a clean, structured way to discover and understand the public information your site already exposes to people.
+**Engawa brings that idea to the web.** It exposes the **same human-public information** your site already shows people through clean, bounded agent-facing representations—and optional read-only retrieval interfaces.
 
-Websites were built for people browsing HTML. AI agents increasingly need to understand those same websites, but scraping pages is noisy, inconsistent, and gives site owners little control over what the machine interface actually is.
+**Agents can read HTML.** Browser pages are optimized for people: layout, navigation, scripts, cookie banners, and presentation markup often surround the public prose an agent actually needs. Engawa does not claim HTML is unreadable. It offers a **cleaner, smaller, more deterministic** representation of the **same** public content, with explicit corpus boundaries you control.
 
-**Engawa makes your website agent-ready.** It adds intentional machine-readable surfaces alongside your existing human website — structured public content, discovery, Markdown, MCP, and Bring Your Agent UX — while you keep control of what is exposed.
+**Agent-ready** means an agent can retrieve the site's intended public content through deterministic machine-readable representations—without relying only on reverse-engineering browser presentation.
 
-**One website. Two first-class interfaces:** HTML for people, structured interfaces for agents.
+**Engawa makes your website agent-ready.** It adds intentional machine-readable surfaces alongside your existing human website—structured public content, Markdown, MCP, and Bring Your Agent UX—while you keep control of what is exposed.
 
-Engawa does not replace your website. Engawa does not replace your CMS. Engawa does not add another proprietary chatbot. Engawa gives the existing website a deliberate agent interface.
+**One website. Two first-class interfaces:** HTML for people, structured interfaces for agents—not because HTML is unreadable, but because both audiences deserve an appropriate surface.
+
+Engawa does not replace your website. Engawa does not replace your CMS. Engawa does not add another proprietary chatbot. Engawa does not replace schema.org, sitemaps, robots.txt, or OpenAPI where those already solve your problem. Engawa gives the existing website a deliberate agent interface.
 
 ## What Engawa does
 
 With Engawa, your website can:
 
-- **Be understood by agents** through clean, intentional public content instead of raw HTML scraping.
-- **Be discovered by agents** through `llms.txt` and machine-readable metadata.
-- **Expose structured content** as deterministic Markdown resources.
-- **Offer a safe public MCP interface** for resource discovery, reading, and bounded search.
+- **Expose the same public content** through clean, intentional agent-facing documents instead of relying only on full browser HTML retrieval.
+- **Publish explicit machine-readable entry points** such as `llms.txt` and Markdown metadata. Consumer support varies; Engawa does **not** assume automatic discovery.
+- **Expose structured content** as deterministic Markdown resources (additive to HTML, not a replacement).
+- **Offer a safe public MCP interface** for resource listing, reading, and bounded `search_site` when agents are explicitly connected.
 - **Support Bring Your Agent** so visitors can use the AI tool they already trust.
 - **Stay under your control** — your adapter defines the public corpus and Engawa is read-only by default.
 
+**Discovery note:** Publishing an agent surface does not guarantee a particular AI provider will automatically discover, fetch, or use it. `SURFACE EXISTS ≠ SURFACE FETCHED ≠ SURFACE USED ≠ OUTPUT IMPROVED`. Measure provider behavior rather than assuming it.
+
 No runtime phone-home. Joining the public Engawa Distribution Map is optional and operator-initiated.
+
+See [Do you need Engawa?](docs/do-you-need-engawa.md) if you are deciding whether to adopt Engawa at all.
 
 ## Agent surfaces
 

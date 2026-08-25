@@ -85,7 +85,7 @@ Doctor MCP transport uses a guarded custom `fetch`: same-origin lock, private/re
 - Does not verify MCP protocol (use `engawa doctor`)
 - Does not assess security (`SECURITY_ASSESSMENT = NOT_PERFORMED`)
 - Does not auto-approve routes for Engawa publication
-- Does not scrape HTML as the production Engawa corpus (`HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE` still applies)
+- Does not use inspected HTML as your **production Engawa corpus** — inspect is a **readiness probe** only; production Engawa still requires `HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE` via loaders or build-time extraction ([content-publication.md](../../docs/content-publication.md), [ADR-0008](../../docs/adr/0008-artifact-driven-content-sources.md))
 - No telemetry, no Distribution Map calls, no LLM calls
 
 ## CLI flow

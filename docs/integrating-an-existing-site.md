@@ -8,22 +8,26 @@ For an empty TypeScript project, see [getting started](getting-started.md). For 
 
 Inspect and record:
 
-| Area                       | What to document                              |
-| -------------------------- | --------------------------------------------- |
-| Framework                  | Next.js, Astro, custom Node, etc.             |
-| Runtime                    | Node version (Engawa requires **24+**)        |
-| Package manager            | npm, pnpm, yarn                               |
-| Public routes              | Human HTML routes agents should mirror        |
-| Locales                    | Single or multi-locale routing                |
-| Content architecture       | CMS, DB, static files, hybrid                 |
-| Canonical source per route | **Which function/file feeds each human page** |
-| Auth / session             | Middleware, cookies, admin areas              |
-| Host topology              | Reverse proxy, CDN, canonical domain          |
-| Rate limiting              | Existing limits on public routes              |
-| Analytics                  | Metadata-only vs content logging              |
-| Deployment                 | How production is built and released          |
+| Area                       | What to document                                              |
+| -------------------------- | ------------------------------------------------------------- |
+| Framework                  | Next.js, Astro, custom Node, etc.                             |
+| Runtime                    | Node version (Engawa requires **24+**)                        |
+| Package manager            | npm, pnpm, yarn                                               |
+| Public routes              | Human HTML routes agents should mirror                        |
+| Locales                    | Single or multi-locale routing                                |
+| Content architecture       | CMS, DB, static files, hybrid                                 |
+| Canonical source per route | **Loader, artifact, or build output feeding each human page** |
+| Auth / session             | Middleware, cookies, admin areas                              |
+| Host topology              | Reverse proxy, CDN, canonical domain                          |
+| Rate limiting              | Existing limits on public routes                              |
+| Analytics                  | Metadata-only vs content logging                              |
+| Deployment                 | How production is built and released                          |
 
-**Stop** if you cannot identify the canonical human-public source for each route class. See [content publication rule](content-publication.md).
+**Stop** if you cannot identify the canonical human-public source for each route class. See [content publication rule](content-publication.md) and [Do you need Engawa?](do-you-need-engawa.md).
+
+Loader-driven sites: identify the **same canonical loader** the human HTML route uses.
+
+Artifact-driven static sites: identify the **human-public HTML artifact** and a **build-time extraction** plan ([ADR-0008](adr/0008-artifact-driven-content-sources.md)). Runtime production HTML crawling is not the default Engawa corpus architecture.
 
 ```text
 HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE
@@ -40,12 +44,12 @@ Engawa surfaces are composable:
 | `@thierry-gilgen-ict/engawa-mcp`       | Usually   | Public MCP server               |
 | `@thierry-gilgen-ict/engawa-react`     | Optional  | Bring Your Agent UI             |
 
-| Surface             | What visitors get                                               |
-| ------------------- | --------------------------------------------------------------- |
-| Markdown alternates | Clean `text/markdown` at paths like `/about.md`                 |
-| `llms.txt`          | Discovery index for agents                                      |
-| MCP                 | Streamable HTTP endpoint with resources + bounded `search_site` |
-| Bring Your Agent    | Provider-neutral connection UX on your site                     |
+| Surface             | What visitors get                                                    |
+| ------------------- | -------------------------------------------------------------------- |
+| Markdown alternates | Clean `text/markdown` at paths like `/about.md`                      |
+| `llms.txt`          | Published machine-readable index / handoff (consumer support varies) |
+| MCP                 | Streamable HTTP endpoint with resources + bounded `search_site`      |
+| Bring Your Agent    | Provider-neutral connection UX on your site                          |
 
 Add only what your product needs. MCP without BYA is valid.
 
@@ -61,7 +65,7 @@ Create a table before coding:
 Rules:
 
 - **Public?** means an anonymous human visitor can see it today.
-- **Canonical source** is the function or module the human route already uses.
+- **Canonical source** is the loader, artifact, or build output the human route already uses ([loader-driven vs artifact-driven](content-publication.md)).
 - Do not register CMS rows, Git files, or DB tables that human routes do not use.
 
 ## Install

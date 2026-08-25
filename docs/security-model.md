@@ -40,7 +40,7 @@ Phase 0 established defaults and boundaries for the public read-only surface. Pr
 
 Before enabling public MCP and machine markdown on a production domain:
 
-- [ ] **Human-public corpus only** — adapter matches anonymous HTML routes ([content-publication.md](content-publication.md))
+- [ ] **Human-public corpus only** — adapter matches anonymous HTML routes ([content-publication.md](content-publication.md)); no production runtime HTML crawling as corpus source
 - [ ] **Read-only public tools** — v0.1: `search_site` only; no custom mutating tools on public handler
 - [ ] **Host validation** — reject requests with unexpected `Host` in production
 - [ ] **Origin validation** — where browser clients call MCP, validate `Origin`

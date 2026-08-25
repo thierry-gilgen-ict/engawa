@@ -4,9 +4,11 @@ This guide starts from an **empty external TypeScript project**, not the Engawa 
 
 **Already have a website?** Use [integrating an existing site](integrating-an-existing-site.md) instead.
 
+**Deciding whether Engawa fits?** Read [Do you need Engawa?](do-you-need-engawa.md) first.
+
 ## Prerequisites
 
-- **Node.js 24+** (LTS)
+- **Node.js 24+** (LTS) — required by published package `engines` metadata; lowering the floor requires a separate compatibility decision with tests
 - npm, pnpm, or yarn
 - TypeScript (recommended)
 
