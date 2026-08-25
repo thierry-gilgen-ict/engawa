@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { InspectError, isInspectError } from "./errors.js";
+import { InspectError, isCliError } from "./errors.js";
 import { formatHumanReport } from "./inspect/format-human.js";
 import { formatMarkdownReport } from "./inspect/format-markdown.js";
 import { runInspect } from "./inspect/run-inspect.js";
 import { DEFAULT_MAX_PAGES, DEFAULT_TIMEOUT_MS, HARD_MAX_PAGES } from "./inspect/types.js";
+import { formatInitHumanReport } from "./init/format-human.js";
+import { runInit } from "./init/run-init.js";
+import { DEFAULT_OUTPUT_DIR } from "./init/types.js";
 import { sanitizeTerminalText } from "./sanitize.js";
 
 const PACKAGE_VERSION = JSON.parse(
@@ -18,9 +22,9 @@ function printRootUsage(): void {
 
 Commands:
   inspect     Inspect a public website and produce an Agent Readiness Report
+  init        Plan Engawa integration from inspection report and local repository
 
 Planned (not yet implemented):
-  init        Scaffold Engawa integration from an inspection report
   doctor      Verify agent surfaces and security on a live site
 
 Options:
@@ -44,13 +48,35 @@ Options:
 `);
 }
 
+function printInitUsage(): void {
+  process.stdout.write(`Usage: engawa init (--url <url> | --inspect-report <file>) [options]
+
+Plan Engawa integration from an inspection report and local repository.
+Creates a planning bundle in the output directory (default .engawa).
+Does not modify application source code.
+
+Options:
+  --url <url>              Live URL to inspect (mutually exclusive with --inspect-report)
+  --inspect-report <file>  Saved engawa.inspect.v1 JSON report
+  --repo <path>            Repository root to analyze (default .)
+  --output-dir <path>      Output directory for plan bundle (default ${DEFAULT_OUTPUT_DIR})
+  --dry-run                Print plan without writing files
+  --json                   Output engawa.plan.v1 JSON to stdout
+  --force                  Overwrite known Engawa-generated bundle files
+  --max-pages <n>          Crawl budget for --url mode (default ${DEFAULT_MAX_PAGES}, max ${HARD_MAX_PAGES})
+  --timeout-ms <n>         Per-request timeout for --url mode (default ${DEFAULT_TIMEOUT_MS})
+  --allow-local            Allow localhost targets in --url mode
+  --help, -h               Show this help
+`);
+}
+
 function parsePositiveInt(value: string, flag: string, max?: number): number {
   const n = Number(value);
   if (!Number.isInteger(n) || n < 1) {
     throw new InspectError(`Invalid value for ${flag}: ${value}`);
   }
   if (max !== undefined && n > max) {
-    throw new InspectError(`${flag} must be <= ${max}`);
+    throw new Error(`${flag} must be <= ${max}`);
   }
   return n;
 }
@@ -128,6 +154,71 @@ async function runInspectCommand(args: string[]): Promise<number> {
   return 0;
 }
 
+async function runInitCommand(args: string[]): Promise<number> {
+  if (hasFlag(args, "--help") || hasFlag(args, "-h")) {
+    printInitUsage();
+    return 0;
+  }
+
+  const url = getFlagValue(args, "--url");
+  const inspectReport = getFlagValue(args, "--inspect-report");
+  const repoPath = getFlagValue(args, "--repo") ?? ".";
+  const outputDir = getFlagValue(args, "--output-dir") ?? DEFAULT_OUTPUT_DIR;
+  const dryRun = hasFlag(args, "--dry-run");
+  const json = hasFlag(args, "--json");
+  const force = hasFlag(args, "--force");
+  const allowLocal = hasFlag(args, "--allow-local");
+
+  const maxPagesRaw = getFlagValue(args, "--max-pages");
+  const timeoutRaw = getFlagValue(args, "--timeout-ms");
+  const maxPages = maxPagesRaw
+    ? parsePositiveInt(maxPagesRaw, "--max-pages", HARD_MAX_PAGES)
+    : DEFAULT_MAX_PAGES;
+  const timeoutMs = timeoutRaw ? parsePositiveInt(timeoutRaw, "--timeout-ms") : DEFAULT_TIMEOUT_MS;
+
+  const knownFlags = [
+    "--url",
+    "--inspect-report",
+    "--repo",
+    "--output-dir",
+    "--dry-run",
+    "--json",
+    "--force",
+    "--max-pages",
+    "--timeout-ms",
+    "--allow-local",
+    "--help",
+    "-h",
+  ];
+  const unknown = args.filter(
+    (a) => a.startsWith("--") && !knownFlags.some((f) => a === f || a.startsWith(`${f}=`)),
+  );
+  if (unknown.length > 0) {
+    throw new InspectError(`Unknown option: ${unknown[0]}`);
+  }
+
+  const result = await runInit({
+    url,
+    inspectReportPath: inspectReport,
+    repoPath: resolve(repoPath),
+    outputDir: resolve(outputDir),
+    dryRun,
+    json,
+    force,
+    maxPages,
+    timeoutMs,
+    allowLocal,
+  });
+
+  if (json) {
+    process.stdout.write(result.planJson);
+  } else {
+    process.stdout.write(`${formatInitHumanReport(result.plan)}\n`);
+  }
+
+  return 0;
+}
+
 export async function runCli(argv: string[]): Promise<number> {
   const args = [...argv];
   if (args.length === 0 || args[0] === "--help" || args[0] === "-h") {
@@ -144,13 +235,19 @@ export async function runCli(argv: string[]): Promise<number> {
     switch (command) {
       case "inspect":
         return await runInspectCommand(args);
+      case "init":
+        return await runInitCommand(args);
       default:
         process.stderr.write(`Unknown command: ${command}\n`);
         printRootUsage();
         return 1;
     }
   } catch (error) {
-    if (isInspectError(error)) {
+    if (isCliError(error)) {
+      process.stderr.write(`${sanitizeTerminalText(error.message)}\n`);
+      return 1;
+    }
+    if (error instanceof Error) {
       process.stderr.write(`${sanitizeTerminalText(error.message)}\n`);
       return 1;
     }

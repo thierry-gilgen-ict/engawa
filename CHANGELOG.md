@@ -2,6 +2,15 @@
 
 All notable changes to Engawa are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## Unreleased (source only)
+
+### `@thierry-gilgen-ict/engawa-cli@0.1.0` (not published)
+
+- Add `engawa init` — repository-aware integration planner (`engawa.plan.v1` bundle from `engawa.inspect.v1` + read-only repo scan).
+- Bounded repository inspection with secret/symlink/cache exclusions; Next.js App/Pages router route and source-candidate discovery.
+- Generates `ENGAWA_INTEGRATION_PLAN.md` and provider-neutral `AGENT_PROMPT.md` without modifying application source.
+- No LLM calls, no telemetry, no Distribution Map registration.
+
 ## [0.1.1] — 2026-08-23
 
 ### Packages published to npm

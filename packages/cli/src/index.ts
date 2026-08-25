@@ -1,5 +1,8 @@
 export { runCli } from "./cli.js";
 export { runInspect } from "./inspect/run-inspect.js";
 export { inspectReportSchema } from "./inspect/schema.js";
+export { runInit } from "./init/run-init.js";
+export { engawaPlanSchema } from "./init/schema.js";
 export { sanitizeTerminalText } from "./sanitize.js";
 export type { InspectReport } from "./inspect/types.js";
+export type { EngawaPlan } from "./init/types.js";
