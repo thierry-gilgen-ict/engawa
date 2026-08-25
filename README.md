@@ -142,7 +142,7 @@ See [@thierry-gilgen-ict/engawa-react](packages/react/README.md).
 | `@thierry-gilgen-ict/engawa-discovery` | `llms.txt`, discovery link metadata         | You build discovery files entirely by hand              |
 | `@thierry-gilgen-ict/engawa-mcp`       | Public MCP server / handler, `search_site`  | You don't expose MCP                                    |
 | `@thierry-gilgen-ict/engawa-react`     | Bring Your Agent dialog and provider picker | Headless/agent-only sites with no BYA button            |
-| `@thierry-gilgen-ict/engawa-cli`       | `inspect`, `init`, `doctor` for sites/repos | You only integrate Engawa into a site (not develop it) |
+| `@thierry-gilgen-ict/engawa-cli`       | `inspect`, `init`, `doctor` for sites/repos | You only integrate Engawa into a site (not develop it)  |
 
 **Not shipped:** `engawa-nextjs`, `engawa-analytics`. Next.js sites integrate via documented patterns—see [docs/integrations/nextjs.md](docs/integrations/nextjs.md).
 

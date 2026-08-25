@@ -20,11 +20,11 @@ Do **not** move global tag `v0.1.0` or other Engawa package tags.
 
 Reviewed tarball published from merged `main`:
 
-| Field     | Value                                                                                            |
-| --------- | ------------------------------------------------------------------------------------------------ |
-| SHA256    | `237b3288d57e562ff98cc9255ea2c84d20e3853f5c9f7b281836814dc9f48aaa`                               |
-| npm shasum | `74cfa835531b74f07c0dafc9ed007f5afa815f91`                                                       |
-| integrity | `sha512-pPFWMH3d2qreaxaXhk1MHg5pw9kP8pVZLAgXrCY0lM9zfo/1lcsSY2ZSlGJcoZghL80ywRA2wF3U1574A6YQnw==` |
+| Field      | Value                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------- |
+| SHA256     | `237b3288d57e562ff98cc9255ea2c84d20e3853f5c9f7b281836814dc9f48aaa`                                |
+| npm shasum | `74cfa835531b74f07c0dafc9ed007f5afa815f91`                                                        |
+| integrity  | `sha512-pPFWMH3d2qreaxaXhk1MHg5pw9kP8pVZLAgXrCY0lM9zfo/1lcsSY2ZSlGJcoZghL80ywRA2wF3U1574A6YQnw==` |
 
 ## Consumption
 

@@ -58,13 +58,13 @@
 
 ## Package status
 
-| Package            | npm status                              | Notes                                                                                            |
-| ------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `engawa-core`      | 0.1.1                                   | engines metadata in 0.1.1                                                                        |
-| `engawa-discovery` | 0.1.1                                   | depends on core 0.1.1                                                                            |
-| `engawa-mcp`       | 0.1.1                                   | depends on core 0.1.1                                                                            |
-| `engawa-react`     | 0.1.0                                   | engines already present                                                                          |
-| `engawa-nextjs`    | Not shipped                             | Document pattern only                                                                            |
-| `engawa-cli`       | 0.1.0                                   | `inspect` + `init` + `doctor`; [publish record](publish-npm-cli-v0.1.0.md)                       |
-| `engawa-map`       | 0.1.0                                   | Production registry live; voluntary PENDING→LISTED flow; [Distribution Map](distribution-map.md) |
-| `engawa-analytics` | Planned                                 | Separate from Distribution Map                                                                   |
+| Package            | npm status  | Notes                                                                                            |
+| ------------------ | ----------- | ------------------------------------------------------------------------------------------------ |
+| `engawa-core`      | 0.1.1       | engines metadata in 0.1.1                                                                        |
+| `engawa-discovery` | 0.1.1       | depends on core 0.1.1                                                                            |
+| `engawa-mcp`       | 0.1.1       | depends on core 0.1.1                                                                            |
+| `engawa-react`     | 0.1.0       | engines already present                                                                          |
+| `engawa-nextjs`    | Not shipped | Document pattern only                                                                            |
+| `engawa-cli`       | 0.1.0       | `inspect` + `init` + `doctor`; [publish record](publish-npm-cli-v0.1.0.md)                       |
+| `engawa-map`       | 0.1.0       | Production registry live; voluntary PENDING→LISTED flow; [Distribution Map](distribution-map.md) |
+| `engawa-analytics` | Planned     | Separate from Distribution Map                                                                   |
