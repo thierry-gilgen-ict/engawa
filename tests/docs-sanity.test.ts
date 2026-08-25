@@ -181,6 +181,38 @@ describe("documentation sanity", () => {
     expect(readme).not.toMatch(/Be discovered by agents/i);
     expect(readme).toMatch(/does not assume automatic discovery|Consumer support varies/i);
     expect(readme).toMatch(/Agents can read HTML/i);
+    const surfacesSection = readme.match(/## Agent surfaces[\s\S]*?(?=\n## |\n```mermaid)/);
+    expect(surfacesSection).not.toBeNull();
+    expect(surfacesSection![0]).not.toMatch(/Discovery index/i);
+    expect(surfacesSection![0]).toMatch(/handoff artifact|Published index/i);
+  });
+
+  it("README status lists engawa-cli@0.1.0 and roadmap omits engawa-analytics package row", () => {
+    const readme = readFileSync(join(root, "README.md"), "utf8");
+    expect(readme).toContain("engawa-cli@0.1.0");
+    expect(readme).not.toMatch(/Not shipped:.*engawa-analytics/i);
+
+    const roadmap = readFileSync(join(root, "docs/roadmap.md"), "utf8");
+    const packageSection = roadmap.match(/## Package status[\s\S]*/);
+    expect(packageSection).not.toBeNull();
+    expect(packageSection![0]).not.toMatch(/\| `engawa-analytics`/);
+  });
+
+  it("integrating guide distinguishes loader-driven and artifact-driven adapters", () => {
+    const guide = readFileSync(join(root, "docs/integrating-an-existing-site.md"), "utf8");
+    expect(guide).toMatch(/Loader-driven/i);
+    expect(guide).toMatch(/Artifact-driven/i);
+    expect(guide).toMatch(/build-time extraction/i);
+    expect(guide).toMatch(/runtime production HTML crawler/i);
+  });
+
+  it("architecture planned boundaries do not list shipped react or predecided analytics packages", () => {
+    const arch = readFileSync(join(root, "docs/architecture.md"), "utf8");
+    const planned = arch.match(/## Planned boundaries[\s\S]*?(?=\n## |\n$)/);
+    expect(planned).not.toBeNull();
+    expect(planned![0]).not.toMatch(/engawa-react/);
+    expect(planned![0]).not.toMatch(/CLI analytics packages/i);
+    expect(planned![0]).toMatch(/observability helpers|Build-time HTML extraction/i);
   });
 
   it("distribution map policy exists with opt-in and security boundaries", () => {

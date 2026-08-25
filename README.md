@@ -39,13 +39,13 @@ See [Do you need Engawa?](docs/do-you-need-engawa.md) if you are deciding whethe
 
 ## Agent surfaces
 
-| Surface                  | Purpose                                                         |
-| ------------------------ | --------------------------------------------------------------- |
-| HTML / UI                | Your existing human interface                                   |
-| Markdown alternates      | Clean `text/markdown` pages for agents (`/about.md`, etc.)      |
-| `llms.txt`               | Discovery index ([llms.txt v2](https://llmstxt.org/))           |
-| MCP                      | Streamable HTTP endpoint with resources + bounded `search_site` |
-| Bring Your Agent (React) | Provider-neutral UX so visitors connect their own agent         |
+| Surface                  | Purpose                                                                  |
+| ------------------------ | ------------------------------------------------------------------------ |
+| HTML / UI                | Your existing human interface                                            |
+| Markdown alternates      | Clean `text/markdown` pages for agents (`/about.md`, etc.)               |
+| `llms.txt`               | Published index / handoff artifact ([llms.txt v2](https://llmstxt.org/)) |
+| MCP                      | Streamable HTTP endpoint with resources + bounded `search_site`          |
+| Bring Your Agent (React) | Provider-neutral UX so visitors connect their own agent                  |
 
 ```mermaid
 flowchart TB
@@ -150,7 +150,7 @@ See [@thierry-gilgen-ict/engawa-react](packages/react/README.md).
 | `@thierry-gilgen-ict/engawa-react`     | Bring Your Agent dialog and provider picker | Headless/agent-only sites with no BYA button            |
 | `@thierry-gilgen-ict/engawa-cli`       | `inspect`, `init`, `doctor` for sites/repos | You only integrate Engawa into a site (not develop it)  |
 
-**Not shipped:** `engawa-nextjs`, `engawa-analytics`. Next.js sites integrate via documented patterns—see [docs/integrations/nextjs.md](docs/integrations/nextjs.md).
+**Not shipped:** `engawa-nextjs`. Next.js sites integrate via documented patterns—see [docs/integrations/nextjs.md](docs/integrations/nextjs.md). Operator-local observability guidance is a future capability/recipe on the [roadmap](docs/roadmap.md)—not a predetermined npm package.
 
 ```bash
 npm install @thierry-gilgen-ict/engawa-cli@0.1.0
@@ -197,7 +197,7 @@ Full model: [docs/security-model.md](docs/security-model.md).
 
 ## Status
 
-- Current npm registry: `@thierry-gilgen-ict/engawa-core@0.1.1`, `@thierry-gilgen-ict/engawa-discovery@0.1.1`, `@thierry-gilgen-ict/engawa-mcp@0.1.1`, `@thierry-gilgen-ict/engawa-react@0.1.0`, `@thierry-gilgen-ict/engawa-map@0.1.0`.
+- Current npm registry: `@thierry-gilgen-ict/engawa-core@0.1.1`, `@thierry-gilgen-ict/engawa-discovery@0.1.1`, `@thierry-gilgen-ict/engawa-mcp@0.1.1`, `@thierry-gilgen-ict/engawa-react@0.1.0`, `@thierry-gilgen-ict/engawa-map@0.1.0`, `@thierry-gilgen-ict/engawa-cli@0.1.0`.
 - Early **v0.x** foundation on npm; packages may diverge by semver; **API may change before 1.0**.
 - **Node.js 24+** required for published packages.
 - **Two production reference integrations** on Next.js (see above).

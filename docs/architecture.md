@@ -92,12 +92,11 @@ Agent endpoints can report:
 
 Via the `engawa://meta/interface` resource and health endpoints—not invented protocol fields.
 
-## Planned boundaries (not in v0.1)
+## Planned boundaries (deferred — not shipped as packages in v0.1)
 
-- `@thierry-gilgen-ict/engawa-react` — Ask Your Agent UI
-- Framework adapters (Next.js, etc.)
-- Build-time HTML extraction tooling (pattern proof deferred; see roadmap)
-- CLI analytics packages
+- Framework-specific adapters (Next.js, etc.) only if repeated consumer duplication justifies extraction
+- Build-time HTML extraction tooling only after pattern proof ([roadmap](roadmap.md))
+- Operator-local observability helpers and recipes only if later justified—not a predetermined npm package
 
 See [roadmap](roadmap.md).
 

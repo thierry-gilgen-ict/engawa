@@ -89,11 +89,16 @@ Pin exact versions in production. See [compatibility](compatibility.md).
 
 ## Implement the adapter
 
-Implement a **custom `ContentAdapter`** that reads from your site's canonical human-public loaders.
+Implement a **custom `ContentAdapter`** over your site's human-public corpus. The pattern depends on how your site sources public content ([content publication rule](content-publication.md), [ADR-0008](adr/0008-artifact-driven-content-sources.md)):
+
+**Loader-driven sites** — the `ContentAdapter` reads the **same canonical loader** used by human HTML routes (CMS query, application service, shared module).
+
+**Artifact-driven sites** — deterministic **build-time extraction** from canonical human-public HTML artifacts produces bounded Engawa inputs/resources; the adapter consumes that extraction output.
 
 - `StaticContentAdapter` is fine for demos and tests.
-- Production sites with CMS, DB, or locale-aware content need a site-specific adapter.
-- The adapter defines the public corpus—Engawa does not scrape your HTML.
+- Production sites with CMS, DB, locale-aware content, or static HTML trees need a site-specific adapter aligned to one of the paths above.
+
+Engawa v0.1 does **not** ship a runtime production HTML crawler/scraper. Build-time extraction from allowlisted human-public HTML artifacts is permitted by ADR-0008; that is not the same as request-time crawling of live production HTML.
 
 Reference pattern (conceptual):
 
@@ -106,7 +111,8 @@ export class SiteContentAdapter implements ContentAdapter {
     // Return only resources whose human routes are public
   }
   async getResource(idOrUri: string): Promise<EngawaResource | undefined> {
-    // Same source as human route + markdown builder
+    // Loader-driven: same loader as human route + markdown builder
+    // Artifact-driven: bounded output from build-time extraction
   }
   async search(query: string): Promise<EngawaResource[]> {
     // Search only the same human-public corpus; never return admin/draft/private content

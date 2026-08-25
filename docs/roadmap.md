@@ -82,4 +82,3 @@ Do not invent package names (`engawa-html`, `engawa-static`, `engawa-analytics`)
 | `engawa-nextjs`    | Not shipped | Document pattern only                                                                            |
 | `engawa-cli`       | 0.1.0       | `inspect` + `init` + `doctor`; [publish record](publish-npm-cli-v0.1.0.md)                       |
 | `engawa-map`       | 0.1.0       | Production registry live; voluntary PENDING→LISTED flow; [Distribution Map](distribution-map.md) |
-| `engawa-analytics` | Planned     | Separate from Distribution Map                                                                   |
