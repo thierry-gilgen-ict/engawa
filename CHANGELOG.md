@@ -4,9 +4,11 @@ All notable changes to Engawa are documented here. Versions follow [Semantic Ver
 
 ## Unreleased (source only)
 
-### `@thierry-gilgen-ict/engawa-cli@0.1.0` (not published)
+## [0.1.0-cli] — 2026-08-25
 
-First public CLI release candidate (`inspect` → `init` → `doctor`):
+### `@thierry-gilgen-ict/engawa-cli@0.1.0` (published)
+
+First public CLI release (`inspect` → `init` → `doctor`):
 
 - Add `engawa inspect` — bounded same-origin website inspector producing `engawa.inspect.v1` Agent Readiness Reports (route discovery, surface inventory, deterministic readiness score).
 - Add `engawa init` — repository-aware integration planner producing `engawa.plan.v1` and `engawa.init.bundle.v1` from an inspect report + read-only repo scan.
