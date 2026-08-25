@@ -53,7 +53,7 @@
 
 - Optional provider handoff UX where vendors document support
 - Analytics helpers (metadata-only patterns exist in reference sites)
-- CLI for local Engawa development — `engawa inspect` + `engawa init` + `engawa doctor` in `@thierry-gilgen-ict/engawa-cli` (**0.1.0 release candidate**, publication pending)
+- CLI for local Engawa development — `engawa inspect` + `engawa init` + `engawa doctor` in `@thierry-gilgen-ict/engawa-cli` (**0.1.0** published on npm)
 - `engawa-nextjs` — only if duplication across consumers justifies extraction
 
 ## Package status
@@ -65,6 +65,6 @@
 | `engawa-mcp`       | 0.1.1                                   | depends on core 0.1.1                                                                            |
 | `engawa-react`     | 0.1.0                                   | engines already present                                                                          |
 | `engawa-nextjs`    | Not shipped                             | Document pattern only                                                                            |
-| `engawa-cli`       | 0.1.0 release candidate (not published) | `inspect` + `init` + `doctor` implemented; publication pending                                   |
+| `engawa-cli`       | 0.1.0                                   | `inspect` + `init` + `doctor`; [publish record](publish-npm-cli-v0.1.0.md)                       |
 | `engawa-map`       | 0.1.0                                   | Production registry live; voluntary PENDING→LISTED flow; [Distribution Map](distribution-map.md) |
 | `engawa-analytics` | Planned                                 | Separate from Distribution Map                                                                   |

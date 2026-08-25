@@ -44,7 +44,7 @@ pnpm format
   ```
 
 - Do not synchronize all package versions for aesthetics. Bump only packages that changed.
-- Future CLI package tag (after publication): `engawa-cli-v0.1.0` — do not create until npm publish is authorized.
+- CLI package tag `engawa-cli-v0.1.0` published 2026-08-25 — see [publish-npm-cli-v0.1.0.md](publish-npm-cli-v0.1.0.md).
 
 ## Monorepo dependency note
 
@@ -144,6 +144,8 @@ verify registry
 ↓
 git tag engawa-cli-v0.1.0   # points at reviewed release source SHA
 ```
+
+Published 2026-08-25 — see [publish-npm-cli-v0.1.0.md](publish-npm-cli-v0.1.0.md).
 
 Preflight (expect E404 before first publish):
 

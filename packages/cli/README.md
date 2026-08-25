@@ -2,7 +2,7 @@
 
 Deterministic Engawa CLI for inspecting public websites, planning integrations, and verifying deployed agent surfaces.
 
-**0.1.0 release candidate** — publication pending. Not available on npm yet.
+**Published on npm** at `0.1.0`. Install with `npm install @thierry-gilgen-ict/engawa-cli@0.1.0` or run via `npx @thierry-gilgen-ict/engawa-cli`.
 
 ## Commands
 
