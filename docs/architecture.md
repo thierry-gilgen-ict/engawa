@@ -100,6 +100,8 @@ Via the `engawa://meta/interface` resource and health endpoints—not invented p
 
 See [roadmap](roadmap.md).
 
-## llms.txt generator (future authoring improvements — not implemented)
+## llms.txt authoring
 
-Current `engawa-discovery` exposes `EngawaResource.description` and `LlmsTxtOptions.optionalResourceIds`. A future phase may evaluate curated preamble, description quality warnings, optional-resource policy, size budgets, and locale grouping—without changing v0.1 generator behavior in this documentation phase.
+`engawa-discovery` provides `generateLlmsTxt()` (string) and `buildLlmsTxt()` (structured result with diagnostics). Authoring options include curated `preamble`, `optionalResourceIds`, description quality warnings, `requireDescriptions`, UTF-8 `maxBytes` with `overflowPolicy`, and `mcpPath: false` for sites without MCP.
+
+See [llms-txt-authoring.md](llms-txt-authoring.md). New authoring APIs are on main but **not yet published to npm** until a separate release phase.

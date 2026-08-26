@@ -49,7 +49,7 @@ External review after `@thierry-gilgen-ict/engawa-cli@0.1.0` converged on four t
 Planned bounded phases (order matters):
 
 1. **Static/build-time pattern proof** — implemented in monorepo example [`examples/static-build-time-site`](../../examples/static-build-time-site); production reference still pending ([static-build-time-integration.md](static-build-time-integration.md))
-2. **Authorable/high-quality llms.txt output** — preamble, descriptions, optional policy, size budget (evaluate `EngawaResource.description`, `optionalResourceIds`)
+2. **Authorable/high-quality llms.txt** — implemented on main (branch `feat/authorable-llms-txt` pending merge): curated preamble, quality diagnostics, primary/optional policy, explicit UTF-8 size budget via `buildLlmsTxt()`; **npm publication pending** (registry remains `@thierry-gilgen-ict/engawa-discovery@0.1.1`)
 3. **Observability recipe** — operator-local server/CDN logs (`/llms.txt`, `*.md`, `/mcp`, `Accept`, User-Agent); **no runtime phone-home**; User-Agent ≠ proof of model consumption
 4. **Content-negotiation experiment** — does `Accept: text/markdown` on canonical human URLs justify same-URL negotiation?
 5. **Multi-locale guidance / reference**
