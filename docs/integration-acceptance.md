@@ -32,6 +32,18 @@ Provider autodiscovery of `llms.txt` or `rel="alternate"` Markdown must **not** 
 - [ ] `search_site` returns expected public results for a known query
 - [ ] `search_site` does not return private or admin-only content
 
+## MULTI-LOCALE (when applicable)
+
+See [multi-locale guidance](multi-locale.md).
+
+- [ ] Locale resource IDs are unique (`de-*`, `en-*`, or host convention)
+- [ ] Each resource `canonicalUrl` matches the localized human-public URL
+- [ ] `metadata.locale` is set explicitly where practical
+- [ ] Machine routes (`/llms.txt`, `/mcp`, `*.md`) skip cookie / `Accept-Language` redirects
+- [ ] Draft/unpublished locale variants are excluded from the public corpus
+- [ ] No automatic or agent-only translation fallback
+- [ ] Markdown per locale derives from the same localized human-public source as HTML
+
 ## SECURITY
 
 Content corpus (adapter-level):

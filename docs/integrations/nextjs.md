@@ -131,9 +131,11 @@ Each `app/foo.md/route.ts` calls your markdown builder for that page key.
 
 ## Locale handling
 
+See [multi-locale guidance](../multi-locale.md) for canonical patterns.
+
 - HTML routes: your existing i18n (`next-intl`, cookie prefix, etc.).
 - Machine routes: **exclude** from locale redirect middleware.
-- Resource IDs: stable per locale (`de-ankauf`, `en-ankauf`) in a single Engawa corpus.
+- Resource IDs: stable per locale (`de-ankauf`, `en-selling`) in a single Engawa corpus.
 
 ## Analytics bridge
 
