@@ -1,9 +1,11 @@
 /**
- * engawa-discovery release-candidate smoke (0.2.0).
- * Stages discovery-only tarball, inspects contents, registry preflight,
- * and verifies packed API in an isolated npm consumer. No npm publish.
+ * engawa-discovery persistent packed-artifact smoke.
+ * Stages discovery-only tarball, inspects contents, and verifies packed API
+ * in an isolated npm consumer (registry core + file tarball). Post-publish safe:
+ * does not assert registry absence of the source discovery version. No npm publish.
  *
  * Usage: node scripts/discovery-release-candidate-smoke.mjs
+ *        pnpm smoke:discovery-rc
  */
 import { createHash } from "node:crypto";
 import { mkdtemp, rm, readFile, writeFile } from "node:fs/promises";
@@ -16,7 +18,9 @@ const root = process.cwd();
 const scope = "@thierry-gilgen-ict";
 const scopeCore = `${scope}/engawa-core`;
 const scopeDiscovery = `${scope}/engawa-discovery`;
-const expectedDiscoveryVersion = "0.2.0";
+const expectedDiscoveryVersion = JSON.parse(
+  readFileSync(join(root, "packages/discovery/package.json"), "utf8"),
+).version;
 const expectedCoreVersion = JSON.parse(
   readFileSync(join(root, "packages/core/package.json"), "utf8"),
 ).version;
@@ -107,33 +111,6 @@ function scanTarballTextForAbsolutePaths(tarballPath, entries) {
   }
 }
 
-function expectRegistryMissing(packageSpec) {
-  try {
-    const out = execSync(`npm view ${packageSpec} version`, {
-      encoding: "utf8",
-      env: { ...process.env, npm_config_registry: "https://registry.npmjs.org" },
-    }).trim();
-    throw new Error(`Expected E404 for ${packageSpec}, found version ${out}`);
-  } catch (err) {
-    const combined = `${err.stderr ?? ""}${err.message ?? ""}`;
-    if (!/E404|404 Not Found|is not in this registry/i.test(combined)) {
-      throw new Error(`Expected E404 for ${packageSpec}: ${combined}`);
-    }
-  }
-}
-
-function expectRegistryVersion(packageSpec, version) {
-  const out = execSync(`npm view ${packageSpec} version`, {
-    encoding: "utf8",
-    env: { ...process.env, npm_config_registry: "https://registry.npmjs.org" },
-  }).trim();
-  if (out !== version) {
-    throw new Error(
-      `Registry version mismatch for ${packageSpec}: expected ${version}, got ${out}`,
-    );
-  }
-}
-
 async function main() {
   if (!existsSync(join(root, "packages/discovery/dist/index.js"))) {
     console.error("Run pnpm build first");
@@ -180,10 +157,6 @@ async function main() {
 
   const stagedDir = join(root, ".npm-staging/discovery");
   execSync("npm pack --dry-run --json", { cwd: stagedDir, stdio: "inherit" });
-
-  expectRegistryMissing(`${scopeDiscovery}@${expectedDiscoveryVersion}`);
-  expectRegistryVersion(`${scopeCore}@${expectedCoreVersion}`, expectedCoreVersion);
-  console.log("DISCOVERY_RC_REGISTRY_PREFLIGHT = PASS");
 
   const smokeDir = await mkdtemp(join(tmpdir(), "engawa-discovery-rc-smoke-"));
   try {
