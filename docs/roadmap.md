@@ -42,14 +42,14 @@
 - DM3C — production deploy and live acceptance PASS
 - DM3D — `@thierry-gilgen-ict/engawa-map@0.1.0` on npm; production showcase live
 
-## Future — Post-CLI adopter feedback (not started)
+## Post-CLI adopter feedback track
 
 External review after `@thierry-gilgen-ict/engawa-cli@0.1.0` converged on four themes: HTML is already readable; llms.txt/Markdown autodiscovery must not be assumed; Engawa must differentiate clearly from schema.org/sitemaps/OpenAPI; static artifact-driven sites need an allowed build-time path ([ADR-0008](adr/0008-artifact-driven-content-sources.md)).
 
 Planned bounded phases (order matters):
 
-1. **Static/build-time pattern proof** — implemented in monorepo example [`examples/static-build-time-site`](../../examples/static-build-time-site); production reference still pending ([static-build-time-integration.md](static-build-time-integration.md))
-2. **Authorable/high-quality llms.txt output** — preamble, descriptions, optional policy, size budget (evaluate `EngawaResource.description`, `optionalResourceIds`)
+1. **Static/build-time pattern proof** — closed on main ([`examples/static-build-time-site`](../../examples/static-build-time-site), [static-build-time-integration.md](static-build-time-integration.md)); production reference still pending
+2. **Authorable/high-quality llms.txt** — implemented by PR #33; available on main after merge; npm publication remains separate (registry `@thierry-gilgen-ict/engawa-discovery@0.1.1`)
 3. **Observability recipe** — operator-local server/CDN logs (`/llms.txt`, `*.md`, `/mcp`, `Accept`, User-Agent); **no runtime phone-home**; User-Agent ≠ proof of model consumption
 4. **Content-negotiation experiment** — does `Accept: text/markdown` on canonical human URLs justify same-URL negotiation?
 5. **Multi-locale guidance / reference**

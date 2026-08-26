@@ -12,6 +12,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 - [Content publication rule](content-publication.md) — `HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE`
 - [Static build-time integration](static-build-time-integration.md) — artifact-driven HTML extraction pattern (monorepo example)
 - [Getting started](getting-started.md) — empty external project quick start
+- [llms.txt authoring](llms-txt-authoring.md) — curated preamble, budgets, diagnostics
 
 ### For coding agents
 
