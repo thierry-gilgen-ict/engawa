@@ -16,6 +16,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 - [Observability (operator-local)](observability.md) — measure agent-surface requests from your own logs
 - [Content negotiation experiment](content-negotiation-experiment.md) — dedicated `.md` vs same-URL `Accept` evaluation (experiment only)
 - [Multi-locale guidance](multi-locale.md) — bilingual resource identity, llms.txt, MCP corpus patterns
+- [Third reference qualification (static SME)](third-reference-static-sme.md) — candidate criteria; integration not started
 
 ### For coding agents
 
@@ -53,6 +54,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 - [Roadmap](roadmap.md)
 - [Content negotiation experiment](content-negotiation-experiment.md) — bounded Accept evaluation; dedicated `.md` remains default
 - [Multi-locale guidance](multi-locale.md) — locale-aware resources and machine routes
+- [Third reference qualification (static SME)](third-reference-static-sme.md) — `NEEDS_CANDIDATE`; no production Reference 3 yet
 - [Engawa Inspector CLI (source)](../../packages/cli/README.md) — `engawa inspect` readiness reports
 - [Releasing](releasing.md) — maintainer npm publish
 - [Provider capability matrix](providers/provider-capability-matrix.md)

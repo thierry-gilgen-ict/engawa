@@ -37,6 +37,8 @@ See [integrating an existing site](integrating-an-existing-site.md) for both pat
 
 Reference implementation: [`examples/static-build-time-site`](../../examples/static-build-time-site).
 
+This example is **pattern proof**, not a production Reference 3. Production static SME qualification status: [third-reference-static-sme.md](third-reference-static-sme.md).
+
 ```text
 html/public/*.html          ← canonical authored HTML (no hand-written .md sources)
 engawa.manifest.json        ← explicit public route allowlist

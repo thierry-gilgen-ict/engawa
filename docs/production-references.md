@@ -70,4 +70,6 @@ Engawa v0.1 packages are consumed from the public npm registry by two live produ
 - Unpublished CMS workflows
 - Operator credentials or deployment keys
 
+A third production reference (static / artifact-driven SME, non-Next.js) is **not** established yet — see [third-reference-static-sme.md](third-reference-static-sme.md) (`DECISION = NEEDS_CANDIDATE`).
+
 For integration patterns without site-specific code, see [Next.js integration](integrations/nextjs.md) and [getting started](getting-started.md).
