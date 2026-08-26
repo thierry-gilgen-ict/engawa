@@ -42,8 +42,8 @@ jobs:
       - name: Static build-time smoke
         run: pnpm smoke:static-build-time
 
-      - name: v0.1.1 release-candidate smoke
-        run: node scripts/v011-release-candidate-smoke.mjs
+      - name: engawa-discovery release-candidate smoke
+        run: pnpm smoke:discovery-rc
 
       - name: engawa-map release-candidate pack smoke
         run: node scripts/map-release-candidate-smoke.mjs

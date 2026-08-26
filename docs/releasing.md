@@ -117,6 +117,64 @@ node scripts/v011-release-candidate-smoke.mjs
 
 Expect `ENGAWA_V011_RELEASE_CANDIDATE_SMOKE = PASS`.
 
+## engawa-discovery (discovery-only minor release)
+
+`@thierry-gilgen-ict/engawa-discovery` may version independently when only discovery changes (e.g. `0.2.0` while core/mcp remain `0.1.1`). Do not synchronize all package versions for aesthetics.
+
+**Release model (discovery-only)**
+
+```text
+clean reviewed main (runtime already merged)
+↓
+bump packages/discovery/package.json only
+↓
+CHANGELOG pending entry
+↓
+pnpm build
+↓
+node scripts/stage-npm-tarballs.mjs --discovery-only
+↓
+inspect discovery tarball (allowlist + secret/path scan)
+↓
+node scripts/discovery-release-candidate-smoke.mjs
+   # or: pnpm smoke:discovery-rc
+↓
+WAIT_FOR_USER
+↓
+maintainer explicitly authorizes npm publish (discovery tarball only)
+↓
+npm publish <exact-discovery-tarball> --access public
+↓
+verify registry
+↓
+git tag engawa-discovery-v0.2.0   # after successful publish, not before
+```
+
+Staged discovery tarball depends on published `@thierry-gilgen-ict/engawa-core@0.1.1` (exact semver in tarball metadata — never `workspace:*`). Consumers install core from the registry; the RC smoke installs registry core plus the packed discovery artifact.
+
+**Discovery-only staging**
+
+```bash
+node scripts/stage-npm-tarballs.mjs --discovery-only
+```
+
+Produces only `.npm-staging/discovery/thierry-gilgen-ict-engawa-discovery-<version>.tgz` (clears prior discovery staging, does not pack core or mcp). Default `stage-npm-tarballs.mjs` (no flag) unchanged: core + discovery + mcp.
+
+**Preflight (before first publish of target version)**
+
+```bash
+npm view @thierry-gilgen-ict/engawa-discovery@0.2.0 version   # expect E404
+npm view @thierry-gilgen-ict/engawa-core@0.1.1 version        # expect 0.1.1
+```
+
+**RC smoke**
+
+```bash
+pnpm smoke:discovery-rc
+```
+
+Expect `ENGAWA_DISCOVERY_RELEASE_CANDIDATE_SMOKE = PASS`.
+
 ## engawa-cli (standalone pack)
 
 `@thierry-gilgen-ict/engawa-cli` does **not** declare workspace Engawa packages as runtime dependencies. Published CLI tarballs need no `stage-npm-tarballs.mjs` rewrite — pack the built package directory directly.

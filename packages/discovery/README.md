@@ -4,6 +4,8 @@ Generates deterministic [llms.txt v2](https://llmstxt.org/) files and HTML disco
 
 **Stability:** Early v0.x. API may change before 1.0.
 
+**Versions:** Monorepo source is `0.2.0` (release candidate). Current npm registry version is `0.1.1` until publication completes.
+
 ## When you need this package
 
 Expose `GET /llms.txt` or add `rel="describedby"` links on HTML pages.
@@ -35,17 +37,17 @@ const llmsUrl = getLlmsTxtUrl(engawa.config); // https://site/llms.txt
 
 ## Key exports
 
-| Export              | Purpose                                                           |
-| ------------------- | ----------------------------------------------------------------- |
-| `generateLlmsTxt`   | Build llms.txt body from config + resources                       |
-| `buildLlmsTxt`      | Authorable build with diagnostics and budgets (unreleased on npm) |
-| `getLlmsTxtUrl`     | Canonical llms.txt URL                                            |
-| `getDiscoveryLinks` | `rel` link objects for HTML headers                               |
-| `formatLinkHeader`  | HTTP `Link` header string                                         |
+| Export              | Purpose                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------- |
+| `generateLlmsTxt`   | Build llms.txt body from config + resources                                           |
+| `buildLlmsTxt`      | Authorable build with diagnostics and budgets (source 0.2.0; npm 0.1.1 until publish) |
+| `getLlmsTxtUrl`     | Canonical llms.txt URL                                                                |
+| `getDiscoveryLinks` | `rel` link objects for HTML headers                                                   |
+| `formatLinkHeader`  | HTTP `Link` header string                                                             |
 
-## Authorable llms.txt (unreleased on npm)
+## Authorable llms.txt (source 0.2.0; npm 0.1.1 until publish)
 
-`buildLlmsTxt()` is in the monorepo source on `main` after merge of the authorable llms.txt phase. It is **not** in `@thierry-gilgen-ict/engawa-discovery@0.1.1` on the npm registry until a separate publication phase.
+`buildLlmsTxt()` ships in monorepo source `0.2.0`. It is **not** yet on the npm registry (`@thierry-gilgen-ict/engawa-discovery@0.1.1` remains the latest published version until the 0.2.0 publication phase completes).
 
 ```typescript
 import { buildLlmsTxt } from "@thierry-gilgen-ict/engawa-discovery";
