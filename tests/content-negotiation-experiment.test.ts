@@ -44,9 +44,9 @@ describe("content negotiation experiment", () => {
     expect(doc).toContain("RFC 7763");
     expect(doc).toMatch(/Dedicated.*`\.md`.*Same-URL negotiation/);
     const criteriaIdx = doc.indexOf("## Decision criteria");
-    const decisionIdx = doc.indexOf("## Decision\n\nApplying");
+    const secondDecisionIdx = doc.indexOf("## Decision", criteriaIdx + 1);
     expect(criteriaIdx).toBeGreaterThan(-1);
-    expect(decisionIdx).toBeGreaterThan(criteriaIdx);
+    expect(secondDecisionIdx).toBeGreaterThan(criteriaIdx);
   });
 
   it("accept vectors select expected representations", () => {

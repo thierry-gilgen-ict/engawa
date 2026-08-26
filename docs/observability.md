@@ -55,17 +55,18 @@ A User-Agent can indicate a crawler, bot, browser, tool, assistant integration, 
 
 Document a small conceptual event (your log pipeline may use different field names):
 
-| Field         | Meaning                                           |
-| ------------- | ------------------------------------------------- |
-| `timestamp`   | Request time (UTC preferred)                      |
-| `surface`     | Bounded classification (below)                    |
-| `method`      | HTTP method                                       |
-| `path`        | Normalized path only (no query string by default) |
-| `status`      | Response status code                              |
-| `bytes`       | Response size if available                        |
-| `duration_ms` | Request duration if available                     |
-| `accept`      | `Accept` header value (or truncated form)         |
-| `user_agent`  | Declared `User-Agent` (or truncated form)         |
+| Field         | Meaning                                                                                                    |
+| ------------- | ---------------------------------------------------------------------------------------------------------- |
+| `timestamp`   | Request time (UTC preferred)                                                                               |
+| `surface`     | Bounded classification (below)                                                                             |
+| `method`      | HTTP method                                                                                                |
+| `path`        | Normalized path only (no query string by default)                                                          |
+| `status`      | Response status code                                                                                       |
+| `bytes`       | Response size if available                                                                                 |
+| `duration_ms` | Request duration if available                                                                              |
+| `accept`      | `Accept` header value (or truncated form)                                                                  |
+| `user_agent`  | Declared `User-Agent` (or truncated form)                                                                  |
+| `locale`      | Optional — only if host has deterministic route/resource locale identity ([multi-locale](multi-locale.md)) |
 
 ```text
 surface ∈ { LLMS_TXT, MARKDOWN, MCP, CANONICAL_HTML, OTHER }

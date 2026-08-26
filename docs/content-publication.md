@@ -113,6 +113,8 @@ Publishing Markdown does **not** mean all AI crawlers automatically fetch altern
 
 Same-URL `Accept` negotiation was evaluated separately ([content negotiation experiment](content-negotiation-experiment.md)). A hybrid BOTH model would still require negotiated Markdown to use the **same builder** as dedicated `*.md` routes.
 
+Multilingual sites follow the same parity rule per locale — see [multi-locale guidance](multi-locale.md).
+
 ## Related docs
 
 - [ADR-0008: Artifact-driven content sources](adr/0008-artifact-driven-content-sources.md)

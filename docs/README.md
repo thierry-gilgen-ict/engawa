@@ -15,6 +15,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 - [llms.txt authoring](llms-txt-authoring.md) — curated preamble, budgets, diagnostics
 - [Observability (operator-local)](observability.md) — measure agent-surface requests from your own logs
 - [Content negotiation experiment](content-negotiation-experiment.md) — dedicated `.md` vs same-URL `Accept` evaluation (experiment only)
+- [Multi-locale guidance](multi-locale.md) — bilingual resource identity, llms.txt, MCP corpus patterns
 
 ### For coding agents
 
@@ -51,6 +52,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 - [Distribution Map threat model](distribution-map-threat-model.md) — CLI and registry threats (DM1A)
 - [Roadmap](roadmap.md)
 - [Content negotiation experiment](content-negotiation-experiment.md) — bounded Accept evaluation; dedicated `.md` remains default
+- [Multi-locale guidance](multi-locale.md) — locale-aware resources and machine routes
 - [Engawa Inspector CLI (source)](../../packages/cli/README.md) — `engawa inspect` readiness reports
 - [Releasing](releasing.md) — maintainer npm publish
 - [Provider capability matrix](providers/provider-capability-matrix.md)

@@ -52,7 +52,7 @@ Planned bounded phases (order matters):
 2. **Authorable/high-quality llms.txt** — implemented by PR #33; published as `@thierry-gilgen-ict/engawa-discovery@0.2.0` (see [publish-npm-discovery-v0.2.0.md](publish-npm-discovery-v0.2.0.md))
 3. **Observability recipe** — implemented: [observability.md](observability.md) + [`examples/observability/`](../../examples/observability/); operator-local server/CDN or app logs (`/llms.txt`, markdown, `/mcp`, `Accept`, User-Agent); **no runtime phone-home**; User-Agent ≠ proof of model consumption
 4. **Content-negotiation experiment** — implemented: [content-negotiation-experiment.md](content-negotiation-experiment.md) + [`examples/content-negotiation/`](../../examples/content-negotiation/); evaluates `Accept: text/markdown` on canonical human URLs vs dedicated `.md` routes; **no runtime package changes**
-5. **Multi-locale guidance / reference**
+5. **Multi-locale guidance / reference** — implemented: [multi-locale.md](multi-locale.md) + [`examples/multi-locale-site/`](../../examples/multi-locale-site/); locale-aware resource IDs, metadata.locale, llms.txt strategy, MCP corpus guidance; **no runtime package changes**
 6. **Candidate third production reference** — static SME site
 
 Do not invent package names (`engawa-html`, `engawa-static`, `engawa-analytics`) until a pattern is proven.
