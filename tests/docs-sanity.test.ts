@@ -52,13 +52,13 @@ describe("documentation sanity", () => {
     expect(compat).toContain("| 0.1.0");
   });
 
-  it("README quick start pins core/discovery/mcp to 0.1.1 not 0.1.0", () => {
+  it("README quick start pins core/mcp to 0.1.1 and discovery to 0.2.0", () => {
     const readme = readFileSync(join(root, "README.md"), "utf8");
     const installBlock = readme.match(/npm install[\s\S]*?engawa-mcp@[\d.]+/);
     expect(installBlock).not.toBeNull();
     const block = installBlock![0];
     expect(block).toContain("engawa-core@0.1.1");
-    expect(block).toContain("engawa-discovery@0.1.1");
+    expect(block).toContain("engawa-discovery@0.2.0");
     expect(block).toContain("engawa-mcp@0.1.1");
     expect(block).not.toMatch(/engawa-core@0\.1\.0/);
     expect(block).not.toMatch(/engawa-discovery@0\.1\.0/);

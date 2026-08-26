@@ -98,7 +98,7 @@ If the user did not explicitly request joining: `JOIN_MAP = NOT_REQUESTED`
 See [compatibility.md](compatibility.md). As of `ENGAWA_RELEASE_SET = 2026-08-v0.1.1`:
 
 - `@thierry-gilgen-ict/engawa-core@0.1.1`
-- `@thierry-gilgen-ict/engawa-discovery@0.1.1`
+- `@thierry-gilgen-ict/engawa-discovery@0.2.0`
 - `@thierry-gilgen-ict/engawa-mcp@0.1.1`
 - `@thierry-gilgen-ict/engawa-react@0.1.0` (optional)
 

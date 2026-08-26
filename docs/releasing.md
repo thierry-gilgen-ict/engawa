@@ -188,6 +188,8 @@ npm view @thierry-gilgen-ict/engawa-discovery@<discovery-version> version   # ex
 npm view @thierry-gilgen-ict/engawa-core@<core-version> version             # expect <core-version>
 ```
 
+Published 2026-08-26 — see [publish-npm-discovery-v0.2.0.md](publish-npm-discovery-v0.2.0.md). Tag `engawa-discovery-v0.2.0` points at release source `c1c4cce`.
+
 ## engawa-cli (standalone pack)
 
 `@thierry-gilgen-ict/engawa-cli` does **not** declare workspace Engawa packages as runtime dependencies. Published CLI tarballs need no `stage-npm-tarballs.mjs` rewrite — pack the built package directory directly.

@@ -4,7 +4,7 @@ Generates deterministic [llms.txt v2](https://llmstxt.org/) files and HTML disco
 
 **Stability:** Early v0.x. API may change before 1.0.
 
-**Versions:** Monorepo source is `0.2.0` (release candidate). Current npm registry version is `0.1.1` until publication completes.
+**Current published version:** `@thierry-gilgen-ict/engawa-discovery@0.2.0` on the npm registry.
 
 ## When you need this package
 
@@ -17,7 +17,7 @@ You hand-author discovery files with no Engawa resource model (unusual).
 ## Install
 
 ```bash
-npm install @thierry-gilgen-ict/engawa-discovery@0.1.1
+npm install @thierry-gilgen-ict/engawa-discovery@0.2.0
 ```
 
 Requires **Node.js 24+** (with engawa-core 0.1.1+). Depends on `@thierry-gilgen-ict/engawa-core`.
@@ -37,17 +37,17 @@ const llmsUrl = getLlmsTxtUrl(engawa.config); // https://site/llms.txt
 
 ## Key exports
 
-| Export              | Purpose                                                                               |
-| ------------------- | ------------------------------------------------------------------------------------- |
-| `generateLlmsTxt`   | Build llms.txt body from config + resources                                           |
-| `buildLlmsTxt`      | Authorable build with diagnostics and budgets (source 0.2.0; npm 0.1.1 until publish) |
-| `getLlmsTxtUrl`     | Canonical llms.txt URL                                                                |
-| `getDiscoveryLinks` | `rel` link objects for HTML headers                                                   |
-| `formatLinkHeader`  | HTTP `Link` header string                                                             |
+| Export              | Purpose                                       |
+| ------------------- | --------------------------------------------- |
+| `generateLlmsTxt`   | Build llms.txt body from config + resources   |
+| `buildLlmsTxt`      | Authorable build with diagnostics and budgets |
+| `getLlmsTxtUrl`     | Canonical llms.txt URL                        |
+| `getDiscoveryLinks` | `rel` link objects for HTML headers           |
+| `formatLinkHeader`  | HTTP `Link` header string                     |
 
-## Authorable llms.txt (source 0.2.0; npm 0.1.1 until publish)
+## Authorable llms.txt
 
-`buildLlmsTxt()` ships in monorepo source `0.2.0`. It is **not** yet on the npm registry (`@thierry-gilgen-ict/engawa-discovery@0.1.1` remains the latest published version until the 0.2.0 publication phase completes).
+`buildLlmsTxt()` is available in `@thierry-gilgen-ict/engawa-discovery@0.2.0`.
 
 ```typescript
 import { buildLlmsTxt } from "@thierry-gilgen-ict/engawa-discovery";
