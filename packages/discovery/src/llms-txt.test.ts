@@ -1,6 +1,6 @@
 import type { EngawaConfig, EngawaResource } from "@thierry-gilgen-ict/engawa-core";
 import { describe, expect, it } from "vitest";
-import { buildLlmsTxt, generateLlmsTxt } from "./llms-txt.js";
+import { buildLlmsTxt, generateLlmsTxt, type LlmsTxtOverflowPolicy } from "./llms-txt.js";
 
 const baseConfig: EngawaConfig = {
   site: {
@@ -117,6 +117,24 @@ describe("buildLlmsTxt / generateLlmsTxt", () => {
     const preamble = "Line one.\n\nLine two with  extra   spaces.";
     const result = buildLlmsTxt(baseConfig, [exampleResources[0]], { preamble });
     expect(result.text).toContain("Line one.\n\nLine two with  extra   spaces.");
+  });
+
+  it("PREAMBLE_LEADING_INDENTATION_PRESERVED", () => {
+    const preamble = "    indented code";
+    const result = buildLlmsTxt(baseConfig, [exampleResources[0]], {
+      preamble,
+      mcpPath: false,
+    });
+    expect(result.text).toContain("    indented code");
+  });
+
+  it("PREAMBLE_INTERNAL_WHITESPACE", () => {
+    const preamble = "  leading on line\n    indented second";
+    const result = buildLlmsTxt(baseConfig, [exampleResources[0]], {
+      preamble,
+      mcpPath: false,
+    });
+    expect(result.text).toContain("  leading on line\n    indented second");
   });
 
   it("MCP_DEFAULT_PATH_PRESENT", () => {
@@ -237,6 +255,23 @@ describe("buildLlmsTxt / generateLlmsTxt", () => {
     expect(result.omittedOptionalResourceIds).toEqual(["opt-b"]);
   });
 
+  it("TRIM_OPTIONAL_STOPS_AT_FIRST_NONFIT", () => {
+    const resources = [
+      resource("primary", "Primary", "Primary page"),
+      resource("opt-a", "Optional A", "Small"),
+      resource("opt-b", "Optional B", "x".repeat(80)),
+      resource("opt-c", "Optional C", "Tiny"),
+    ];
+    const result = buildLlmsTxt(minimalConfig, resources, {
+      optionalResourceIds: ["opt-a", "opt-b", "opt-c"],
+      mcpPath: false,
+      maxBytes: 360,
+      overflowPolicy: "trim-optional",
+    });
+    expect(result.includedOptionalResourceIds).toEqual(["opt-a"]);
+    expect(result.omittedOptionalResourceIds).toEqual(["opt-b", "opt-c"]);
+  });
+
   it("TRIM_OPTIONAL_NEVER_DROPS_PRIMARY", () => {
     const resources = [
       resource("primary", "Primary", "Primary page"),
@@ -283,6 +318,15 @@ describe("buildLlmsTxt / generateLlmsTxt", () => {
     expect(() => buildLlmsTxt(baseConfig, exampleResources, { overflowPolicy: "error" })).toThrow(
       /overflowPolicy requires maxBytes/i,
     );
+  });
+
+  it("INVALID_OVERFLOW_POLICY_REJECTED", () => {
+    expect(() =>
+      buildLlmsTxt(baseConfig, exampleResources, {
+        maxBytes: 5000,
+        overflowPolicy: "trim-optionl" as LlmsTxtOverflowPolicy,
+      }),
+    ).toThrow(/invalid llms.txt overflowPolicy/i);
   });
 
   it("rejects duplicate resource ids", () => {

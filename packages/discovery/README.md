@@ -43,9 +43,9 @@ const llmsUrl = getLlmsTxtUrl(engawa.config); // https://site/llms.txt
 | `getDiscoveryLinks` | `rel` link objects for HTML headers                               |
 | `formatLinkHeader`  | HTTP `Link` header string                                         |
 
-## Authorable llms.txt (unreleased on main)
+## Authorable llms.txt (unreleased on npm)
 
-`buildLlmsTxt()` is available in the monorepo on `main` after merge of the authorable llms.txt phase. It is **not** in `@thierry-gilgen-ict/engawa-discovery@0.1.1` on npm until a separate publication phase.
+`buildLlmsTxt()` is in the monorepo source on `main` after merge of the authorable llms.txt phase. It is **not** in `@thierry-gilgen-ict/engawa-discovery@0.1.1` on the npm registry until a separate publication phase.
 
 ```typescript
 import { buildLlmsTxt } from "@thierry-gilgen-ict/engawa-discovery";

@@ -115,6 +115,14 @@ function validateInputs(resources: EngawaResource[], options: LlmsTxtOptions): S
     throw new Error("llms.txt overflowPolicy requires maxBytes");
   }
 
+  if (
+    options.overflowPolicy !== undefined &&
+    options.overflowPolicy !== "error" &&
+    options.overflowPolicy !== "trim-optional"
+  ) {
+    throw new Error(`invalid llms.txt overflowPolicy: ${options.overflowPolicy}`);
+  }
+
   if (options.maxBytes !== undefined) {
     validatePositiveIntegerMaxBytes(options.maxBytes);
   }
@@ -133,6 +141,15 @@ function buildMcpLines(config: EngawaConfig, mcpPath: string | false | undefined
   ];
 }
 
+function normalizePreambleSurroundingLines(preamble: string): string {
+  const lines = preamble.split("\n");
+  let start = 0;
+  let end = lines.length;
+  while (start < end && lines[start].trim() === "") start++;
+  while (end > start && lines[end - 1].trim() === "") end--;
+  return lines.slice(start, end).join("\n");
+}
+
 function buildBodyLines(
   config: EngawaConfig,
   options: LlmsTxtOptions,
@@ -140,7 +157,7 @@ function buildBodyLines(
 ): string[] {
   const mcpLines = buildMcpLines(config, mcpPath);
   if (options.preamble !== undefined) {
-    const preamble = options.preamble.trim();
+    const preamble = normalizePreambleSurroundingLines(options.preamble);
     if (preamble.length === 0) {
       return mcpLines.length > 0 ? ["", ...mcpLines] : [];
     }
@@ -225,13 +242,18 @@ export function buildLlmsTxt(
       assertWithinMaxBytes(fullText, maxBytes);
       includedOptional = optionalCandidates;
     } else {
-      for (const resource of optionalCandidates) {
+      for (let i = 0; i < optionalCandidates.length; i++) {
+        const resource = optionalCandidates[i];
         const candidateOptional = [...includedOptional, resource];
         const candidateText = assembleDocument(config, bodyLines, primary, candidateOptional);
         if (utf8ByteLength(candidateText) <= maxBytes) {
           includedOptional = candidateOptional;
         } else {
           omittedOptionalResourceIds.push(resource.id);
+          for (let j = i + 1; j < optionalCandidates.length; j++) {
+            omittedOptionalResourceIds.push(optionalCandidates[j].id);
+          }
+          break;
         }
       }
     }
