@@ -59,6 +59,25 @@ Do not silently infer locale from body text. Path-based inference may help **hos
 
 ```text
 METADATA_LOCALE_EXPLICIT = PASS
+RESOURCE_METADATA_LOCALE = AVAILABLE_IN_CORE
+```
+
+### Core/host vs public MCP wire
+
+`metadata.locale` is valid on `EngawaResource` and useful for host adapters, discovery/build logic, and tests. **Current public MCP does not expose it on the wire.**
+
+| Layer                               | What exists today                                                                                         |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Core / host**                     | `metadata.locale` on resources; adapters; filter by locale before `buildLlmsTxt`; tests and local tooling |
+| **Public MCP `search_site`**        | Input: `query`, `limit` only — no locale argument                                                         |
+| **Public MCP `search_site` result** | `uri`, `title`, `description`, `canonicalUrl` — no `metadata.locale` field                                |
+| **Public MCP `resources/list`**     | `title`, `description`, `mimeType` — not arbitrary `EngawaResource.metadata`                              |
+
+Observable locale identity on MCP today: locale-aware resource IDs and localized `canonicalUrl` when the host uses the `{locale}-{slug}` convention.
+
+```text
+MCP_SEARCH_LOCALE_INPUT = NONE
+MCP_SEARCH_RESULT_LOCALE_FIELD = NONE
 ```
 
 ## C. Canonical human URL
@@ -136,11 +155,11 @@ Engawa does **not** replace or redefine those standards. Locale-specific Engawa 
 
 ## llms.txt multi-locale strategy
 
-| Model                    | Pattern                               | Notes                                                          |
-| ------------------------ | ------------------------------------- | -------------------------------------------------------------- |
-| **A — Combined root**    | `/llms.txt` lists all locales         | Proven by Reference 2; locale visible via URL, title, preamble |
-| **B — Per-locale files** | `/de/llms.txt`, `/en/llms.txt`        | Explicit handoff only — **not autodiscovered**                 |
-| **C — Hybrid**           | Root overview + optional locale files | Large sites; locale files are host-generated handoffs          |
+| Model                    | Pattern                               | Notes                                                                                                    |
+| ------------------------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **A — Combined root**    | `/llms.txt` lists all locales         | Reference 2 demonstrates bilingual site + root `/llms.txt`; local example proves combined `buildLlmsTxt` |
+| **B — Per-locale files** | `/de/llms.txt`, `/en/llms.txt`        | Explicit handoff only — **not autodiscovered**                                                           |
+| **C — Hybrid**           | Root overview + optional locale files | Large sites; locale files are host-generated handoffs                                                    |
 
 ### Recommendation
 
@@ -149,6 +168,16 @@ Engawa does **not** replace or redefine those standards. Locale-specific Engawa 
 - Use current `buildLlmsTxt(config, resources)` with the full public corpus
 - Locale visible from resource URLs, titles/descriptions, optional host preamble mentioning locales
 - Deterministic ordering from adapter
+
+**Evidence distinction:**
+
+- **Production pattern** ([Reference 2](production-references.md)): bilingual DE/EN site, single root `/llms.txt`, deterministic multilingual machine routes — recorded in repository evidence; do not claim the repo proves the root file lists every locale resource unless explicitly recorded
+- **Local reference proof** ([`examples/multi-locale-site/`](../examples/multi-locale-site/)): combined DE+EN `buildLlmsTxt` input/output is proven by the example and tests
+
+```text
+PRODUCTION_PATTERN_EVIDENCE = bilingual site + root llms.txt + deterministic machine routes
+LOCAL_COMBINED_LLMS_PROOF = PASS
+```
 
 **Optional: Model B** for large multilingual sites — host filters resources by `metadata.locale` before calling `buildLlmsTxt`, serves result at an explicit URL (e.g. `/de/llms.txt`). Agents must be **told** that URL; do not assume autodiscovery.
 
@@ -162,25 +191,44 @@ PER_LOCALE_LLMS_AUTODISCOVERY = NO
 
 ## MCP multi-locale behavior
 
-**Current behavior (documented, not changed):**
+**Current public API (documented, not changed):**
 
-- One public MCP corpus may contain all locale resources
+- One public MCP corpus may contain resources from all public locales
 - `listResources` returns all public resources across locales
 - `getResource` uses stable locale-aware IDs
-- `search_site` has **no locale filter parameter** — search spans the corpus unless the host adapter implements filtering
+- `search_site` calls `engawa.search(query)` — input is `query` and `limit` only; **no locale argument**
+- Engawa does **not** inject caller locale into `search()`; does **not** detect query language
+- Results **may span locales**; callers must **not** assume locale-filtered results
+- **No standard per-request locale filtering** exists in current public MCP
+
+Public contract today:
+
+```text
+ContentAdapter.search(query: string)
+search_site input: query, limit
+```
 
 ```text
 MCP_CORPUS_STRATEGY = SINGLE_PUBLIC_CORPUS
 MCP_LOCALE_FILTER_API = FUTURE_API_CANDIDATE
+MCP_SEARCH_LOCALE_INPUT = NONE
+MCP_SEARCH_RESULT_LOCALE_FIELD = NONE
 NO_MODEL_LANGUAGE_DETECTION = YES
 ```
 
-Recommended host adapter strategy:
+`MCP_LOCALE_FILTER_API = FUTURE_API_CANDIDATE` — a future API could add an explicit locale filter; **current public MCP does not provide one**.
+
+Recommended host adapter strategy (corpus hygiene):
 
 - Include only human-public locale variants in the corpus
-- Set `metadata.locale` explicitly on each resource
-- Optionally filter search results in a site-specific wrapper when integration knows locale context
-- Do not assume Engawa core detects query language
+- Set `metadata.locale` explicitly on each resource (core/host layer; see [Core/host vs public MCP wire](#corehost-vs-public-mcp-wire))
+
+**Custom / out-of-band alternatives only** (not standard current Engawa MCP behavior):
+
+- A host could run **separate locale-specific Engawa instances or endpoints**, each with its own corpus and MCP handler
+- A **future API** could add an explicit locale filter parameter to `search_site` / `ContentAdapter.search()`
+
+Do not assume a normal site-specific wrapper receives locale context from MCP — the API provides none.
 
 ## Fallback policy
 
@@ -237,6 +285,26 @@ If operators log agent-surface requests, an optional normalized `locale` field i
 Do not infer language from User-Agent or model identity.
 
 See [observability.md](observability.md).
+
+## site.language vs resource locale
+
+Current `EngawaConfig` has a single site-level value: `site.language: string`.
+
+For a multilingual site:
+
+- Use `site.language` for the site's **primary/default human language** according to the host's own site model
+- Do **not** treat it as the complete set of available locales
+- Do **not** use it as an automatic MCP or search filter
+- Per-resource locale identity belongs in `metadata.locale`
+- Localized `canonicalUrl` / path remains authoritative for that localized resource
+
+The [multi-locale example](../examples/multi-locale-site/) sets `language: "de"` as the primary-language default — not as a locale list or search filter.
+
+```text
+SITE_LANGUAGE_IS_LOCALE_LIST = NO
+SITE_LANGUAGE_FILTERS_RESOURCES = NO
+RESOURCE_LOCALE_METADATA = metadata.locale
+```
 
 ## Recommended Engawa default
 

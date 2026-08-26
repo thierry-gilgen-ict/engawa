@@ -48,9 +48,17 @@ describe("multi-locale guidance", () => {
     expect(doc).toContain("NO_MODEL_LANGUAGE_DETECTION = YES");
     expect(doc).toContain("PUBLIC_IN_ONE_LOCALE_DOES_NOT_IMPLY_PUBLIC_IN_ALL_LOCALES = YES");
     expect(doc).toContain("MCP_LOCALE_FILTER_API = FUTURE_API_CANDIDATE");
+    expect(doc).toContain("MCP_SEARCH_LOCALE_INPUT = NONE");
+    expect(doc).toContain("MCP_SEARCH_RESULT_LOCALE_FIELD = NONE");
+    expect(doc).toContain("RESOURCE_METADATA_LOCALE = AVAILABLE_IN_CORE");
+    expect(doc).toContain("SITE_LANGUAGE_IS_LOCALE_LIST = NO");
+    expect(doc).toContain("SITE_LANGUAGE_FILTERS_RESOURCES = NO");
     expect(doc).toContain("MULTI_LOCALE_REQUIRES_RUNTIME = NO");
     expect(doc).toContain("MACHINE_ROUTES_DETERMINISTIC = PASS");
+    expect(doc).toContain("LOCAL_COMBINED_LLMS_PROOF = PASS");
     expect(doc).not.toMatch(/npm install.*engawa-i18n/i);
+    expect(doc).not.toMatch(/filter search results in a site-specific wrapper/i);
+    expect(doc).not.toMatch(/when integration knows locale context/i);
   });
 
   it("locale resource IDs are unique and stable", async () => {
