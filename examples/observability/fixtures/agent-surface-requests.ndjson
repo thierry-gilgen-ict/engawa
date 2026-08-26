@@ -1,0 +1,10 @@
+{"timestamp":"2026-08-26T12:00:00Z","surface":"LLMS_TXT","method":"GET","path":"/llms.txt","status":200,"bytes":8421,"duration_ms":18,"accept":"text/plain,*/*","user_agent":"example-client/1.0"}
+{"timestamp":"2026-08-26T12:00:30Z","surface":"LLMS_TXT","method":"GET","path":"/llms.txt","status":200,"bytes":8421,"duration_ms":22,"accept":"*/*","user_agent":"example-bot/2.0"}
+{"timestamp":"2026-08-26T12:01:00Z","surface":"MARKDOWN","method":"GET","path":"/about.md","status":200,"bytes":1204,"duration_ms":12,"accept":"text/markdown,*/*","user_agent":"example-bot/2.0"}
+{"timestamp":"2026-08-26T12:01:15Z","surface":"MARKDOWN","method":"GET","path":"/services.md","status":200,"bytes":980,"duration_ms":9,"accept":"text/markdown","user_agent":"example-client/1.0"}
+{"timestamp":"2026-08-26T12:01:45Z","surface":"MARKDOWN","method":"GET","path":"/about.md","status":404,"bytes":0,"duration_ms":3,"accept":"*/*","user_agent":"UNKNOWN_CLIENT"}
+{"timestamp":"2026-08-26T12:02:00Z","surface":"MCP","method":"POST","path":"/mcp","status":200,"bytes":512,"duration_ms":45,"accept":"application/json, text/event-stream","user_agent":"example-mcp-client/1.0"}
+{"timestamp":"2026-08-26T12:02:30Z","surface":"MCP","method":"POST","path":"/mcp","status":200,"bytes":480,"duration_ms":38,"accept":"application/json, text/event-stream","user_agent":"example-mcp-client/1.0"}
+{"timestamp":"2026-08-26T12:03:00Z","surface":"CANONICAL_HTML","method":"GET","path":"/about","status":200,"bytes":15200,"duration_ms":28,"accept":"text/html","user_agent":"Mozilla/5.0 (compatible; ExampleBrowser/1.0)"}
+{"timestamp":"2026-08-26T12:04:00Z","surface":"OTHER","method":"GET","path":"/favicon.ico","status":200,"bytes":1150,"duration_ms":2,"accept":"*/*","user_agent":"example-client/1.0"}
+{"timestamp":"2026-08-26T13:00:00Z","surface":"LLMS_TXT","method":"GET","path":"/llms.txt","status":200,"bytes":8421,"duration_ms":15,"accept":"text/plain","user_agent":"example-bot/2.0"}

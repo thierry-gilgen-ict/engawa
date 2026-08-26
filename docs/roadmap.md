@@ -50,7 +50,7 @@ Planned bounded phases (order matters):
 
 1. **Static/build-time pattern proof** — closed on main ([`examples/static-build-time-site`](../../examples/static-build-time-site), [static-build-time-integration.md](static-build-time-integration.md)); production reference still pending
 2. **Authorable/high-quality llms.txt** — implemented by PR #33; published as `@thierry-gilgen-ict/engawa-discovery@0.2.0` (see [publish-npm-discovery-v0.2.0.md](publish-npm-discovery-v0.2.0.md))
-3. **Observability recipe** — operator-local server/CDN logs (`/llms.txt`, `*.md`, `/mcp`, `Accept`, User-Agent); **no runtime phone-home**; User-Agent ≠ proof of model consumption
+3. **Observability recipe** — implemented: [observability.md](observability.md) + [`examples/observability/`](../../examples/observability/); operator-local server/CDN or app logs (`/llms.txt`, markdown, `/mcp`, `Accept`, User-Agent); **no runtime phone-home**; User-Agent ≠ proof of model consumption
 4. **Content-negotiation experiment** — does `Accept: text/markdown` on canonical human URLs justify same-URL negotiation?
 5. **Multi-locale guidance / reference**
 6. **Candidate third production reference** — static SME site

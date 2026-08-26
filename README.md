@@ -150,7 +150,7 @@ See [@thierry-gilgen-ict/engawa-react](packages/react/README.md).
 | `@thierry-gilgen-ict/engawa-react`     | Bring Your Agent dialog and provider picker | Headless/agent-only sites with no BYA button            |
 | `@thierry-gilgen-ict/engawa-cli`       | `inspect`, `init`, `doctor` for sites/repos | You only integrate Engawa into a site (not develop it)  |
 
-**Not shipped:** `engawa-nextjs`. Next.js sites integrate via documented patterns—see [docs/integrations/nextjs.md](docs/integrations/nextjs.md). Operator-local observability guidance is a future capability/recipe on the [roadmap](docs/roadmap.md)—not a predetermined npm package.
+**Not shipped:** `engawa-nextjs`. Next.js sites integrate via documented patterns—see [docs/integrations/nextjs.md](docs/integrations/nextjs.md). Operator-local observability is a recipe (not an npm package)—see [docs/observability.md](docs/observability.md).
 
 ```bash
 npm install @thierry-gilgen-ict/engawa-cli@0.1.0

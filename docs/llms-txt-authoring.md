@@ -18,7 +18,7 @@ Do not assume:
 - Publishing it improves model output or “AI visibility”
 - All agents read `llms.txt`
 
-Measure fetch behavior where you can; treat User-Agent and access logs as operational signals, not proof of model consumption.
+Measure fetch behavior where you can; treat User-Agent and access logs as operational signals, not proof of model consumption. See [operator-local observability](observability.md).
 
 ## APIs
 
