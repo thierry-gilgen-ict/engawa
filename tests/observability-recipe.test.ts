@@ -80,6 +80,15 @@ describe("observability recipe", () => {
     }
   });
 
+  it("nginx example preserves native duration unit and documents ms conversion", () => {
+    const doc = readFileSync(docPath, "utf8");
+    expect(doc).toContain("duration_ms");
+    expect(doc).not.toContain('"duration_ms":$request_time');
+    expect(doc).toContain('"duration_seconds":$request_time');
+    expect(doc).toMatch(/\$request_time.*seconds|seconds.*\$request_time/i);
+    expect(doc).toMatch(/duration_seconds\s*\*\s*1000|1000.*duration_ms/i);
+  });
+
   it("analyze.mjs is local-only and aggregates fixture surfaces", () => {
     const source = readFileSync(analyzePath, "utf8");
     expect(source).not.toMatch(/\bfetch\s*\(/);

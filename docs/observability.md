@@ -162,6 +162,8 @@ access_log exclude =
 
 There is **no single canonical** Engawa hosting stack. Production reference sites document package pins and surfaces, not a required proxy vendor. Treat the following as **non-canonical examples** only.
 
+> Provider-native timing units vary. Preserve the native unit in raw logs and explicitly convert to canonical `duration_ms` during normalization.
+
 ### Example (non-canonical): nginx-style log format
 
 ```nginx
@@ -172,12 +174,14 @@ log_format engawa_obs escape=json
   '"path":"$uri",'
   '"status":$status,'
   '"bytes":$body_bytes_sent,'
-  '"duration_ms":$request_time,'
+  '"duration_seconds":$request_time,'
   '"accept":"$http_accept",'
   '"user_agent":"$http_user_agent"}';
 
 access_log /var/log/nginx/engawa-obs.log engawa_obs;
 ```
+
+nginx `$request_time` is measured in **seconds with millisecond resolution** (for example, `0.125` means 125 ms). In your local log pipeline or analysis step, normalize `duration_seconds * 1000` into canonical `duration_ms`. Do not rename raw provider fields to `duration_ms` without conversion.
 
 ### Example (non-canonical): Caddy-style log fields
 
