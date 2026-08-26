@@ -10,7 +10,11 @@
     "expected": "markdown"
   },
   { "name": "html preferred", "accept": "text/html, text/markdown;q=0.8", "expected": "html" },
-  { "name": "markdown q=0", "accept": "text/markdown;q=0", "expected": "html" },
+  {
+    "name": "markdown q=0 only",
+    "accept": "text/markdown;q=0",
+    "expected": "not-acceptable"
+  },
   {
     "name": "markdown q=0 with html",
     "accept": "text/markdown;q=0, text/html",
@@ -26,6 +30,21 @@
     "name": "markdown explicit beats wildcard",
     "accept": "text/markdown;q=1, */*;q=0.1",
     "expected": "markdown"
+  },
+  {
+    "name": "text star html q=0",
+    "accept": "text/*;q=1, text/html;q=0",
+    "expected": "markdown"
+  },
+  {
+    "name": "text star html low",
+    "accept": "text/*;q=0.8, text/html;q=0.1",
+    "expected": "markdown"
+  },
+  {
+    "name": "wildcard markdown low",
+    "accept": "*/*;q=0.8, text/markdown;q=0.1",
+    "expected": "html"
   },
   { "name": "equal weight", "accept": "text/html;q=1, text/markdown;q=1", "expected": "html" },
   {

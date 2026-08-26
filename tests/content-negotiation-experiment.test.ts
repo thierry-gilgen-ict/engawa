@@ -32,6 +32,11 @@ describe("content negotiation experiment", () => {
     expect(doc).toContain("HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE");
     expect(doc).toContain("DEDICATED_MD_STILL_SUPPORTED = YES");
     expect(doc).toContain("REFERENCE_SITE_ACCEPT_EVIDENCE = NOT_YET_MEASURED");
+    expect(doc).toContain("VENDOR_SUPPORT = ESTABLISHED_EXAMPLE");
+    expect(doc).toContain("BROAD_CLIENT_ADOPTION = NOT_ESTABLISHED");
+    expect(doc).toContain("NEXTJS_PAGE_ROUTE_COLOCATION = INVALID");
+    expect(doc).toContain("NEXTJS_NEGOTIATION_PATTERN = EXPERIMENTAL_ONLY");
+    expect(doc).toMatch(/does \*\*not\*\* allow `page\.tsx` and `route\.ts` to coexist/i);
     expect(doc).toContain("CONTENT_NEGOTIATION_EXPERIMENT = COMPLETE");
     expect(doc).toMatch(/DECISION = (ADOPT|DEFER|REJECT)/);
     expect(doc).not.toMatch(/npm install.*engawa-nextjs/i);
@@ -59,6 +64,13 @@ describe("content negotiation experiment", () => {
     expect(selectRepresentation("text/html;q=0, text/markdown;q=0")).toBe("not-acceptable");
   });
 
+  it("most-specific Accept range overrides broader wildcards", () => {
+    expect(selectRepresentation("text/*;q=1, text/html;q=0")).toBe("markdown");
+    expect(selectRepresentation("text/*;q=0.8, text/html;q=0.1")).toBe("markdown");
+    expect(selectRepresentation("*/*;q=0.8, text/markdown;q=0.1")).toBe("html");
+    expect(selectRepresentation("text/markdown;q=0")).toBe("not-acceptable");
+  });
+
   it("negotiated responses set Content-Type and Vary on both branches", () => {
     const html = negotiateAbout("text/html");
     const md = negotiateAbout("text/markdown");
@@ -69,9 +81,11 @@ describe("content negotiation experiment", () => {
   });
 
   it("406 when no representation is acceptable", () => {
-    const response = negotiateAbout("text/html;q=0, text/markdown;q=0");
-    expect(response.status).toBe(406);
-    expect(response.headers.vary).toBe("Accept");
+    const bothZero = negotiateAbout("text/html;q=0, text/markdown;q=0");
+    expect(bothZero.status).toBe(406);
+    expect(bothZero.headers.vary).toBe("Accept");
+    const markdownZeroOnly = negotiateAbout("text/markdown;q=0");
+    expect(markdownZeroOnly.status).toBe(406);
   });
 
   it("negotiated markdown matches dedicated .md body", () => {

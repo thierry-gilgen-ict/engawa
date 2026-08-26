@@ -109,16 +109,22 @@ EXPERIMENT_ONLY = YES
 PRODUCTION_READY_ACCEPT_PARSER = NO
 ```
 
-| Input                                    | Result                                      |
-| ---------------------------------------- | ------------------------------------------- |
-| No `Accept`                              | HTML                                        |
-| `Accept: text/markdown, text/html;q=0.8` | Markdown                                    |
-| `Accept: text/html, text/markdown;q=0.8` | HTML                                        |
-| Equal preference (`q=1` for both)        | HTML                                        |
-| `Accept: */*`                            | HTML — wildcard ≠ specific Markdown request |
-| `Accept: text/markdown;q=0, text/html`   | HTML                                        |
-| `Accept: text/markdown` only             | Markdown                                    |
-| Both representations `q=0`               | `406 Not Acceptable` (experimental policy)  |
+Effective quality for each available representation follows RFC 9110 Accept precedence: among matching media ranges, the **most specific** range wins (`type/subtype` > `type/*` > `*/*`), and that range's `q` is used. Do **not** multiply `q` by a specificity weight.
+
+| Input                                    | Result                                                       |
+| ---------------------------------------- | ------------------------------------------------------------ |
+| No `Accept`                              | HTML                                                         |
+| `Accept: text/markdown, text/html;q=0.8` | Markdown                                                     |
+| `Accept: text/html, text/markdown;q=0.8` | HTML                                                         |
+| Equal preference (`q=1` for both)        | HTML                                                         |
+| `Accept: */*`                            | HTML — wildcard ≠ specific Markdown request                  |
+| `Accept: text/*;q=1, text/html;q=0`      | Markdown — exact `text/html;q=0` overrides `text/*` for HTML |
+| `Accept: text/markdown;q=0`              | `406 Not Acceptable` (no acceptable representation)          |
+| `Accept: text/markdown;q=0, text/html`   | HTML                                                         |
+| `Accept: text/markdown` only             | Markdown                                                     |
+| Both representations effective `q=0`     | `406 Not Acceptable` (experimental policy)                   |
+
+**406 policy (experimental):** when an `Accept` header is present and both HTML and Markdown have effective quality `0`, this experiment returns `406 Not Acceptable`. RFC 9110 permits an origin to send `406` or, in some cases, disregard `Accept` — this is **not** a universal Engawa rule.
 
 Negotiated responses:
 
@@ -133,7 +139,7 @@ Both HTML and Markdown branches emit `Vary: Accept` (tested).
 
 ## Accept test vectors
 
-See [`fixtures/accept-vectors.json`](../examples/content-negotiation/fixtures/accept-vectors.json) — 15 focused cases including mixed case / whitespace.
+See [`fixtures/accept-vectors.json`](../examples/content-negotiation/fixtures/accept-vectors.json) — focused cases including specificity/q interactions and mixed case / whitespace.
 
 ## Cache experiment
 
@@ -165,13 +171,27 @@ Same-URL negotiation typically requires CDN rules, reverse proxy, edge function,
 ```text
 EXPERIMENTAL_PATTERN
 NOT_ENGAWA_RUNTIME_API
+NEXTJS_PAGE_ROUTE_COLOCATION = INVALID
+NEXTJS_NEGOTIATION_PATTERN = EXPERIMENTAL_ONLY
 ```
 
-Conceptual App Router sketch (not shipped):
+Next.js App Router does **not** allow `page.tsx` and `route.ts` to coexist at the same route segment. Do not sketch `app/about/page.tsx` together with `app/about/route.ts`.
 
-- `app/about/page.tsx` — human HTML
-- `app/about/route.ts` — optional negotiation branch on `request.headers.get("accept")`
-- `app/about.md/route.ts` — dedicated Markdown (Model A / BOTH)
+Dedicated `.md` remains the **current proven** Next.js Engawa pattern (`app/about.md/route.ts` + human HTML page).
+
+Conceptual approaches only (not shipped):
+
+**OPTION A — request-routing layer**
+
+- `app/about/page.tsx` → normal HTML
+- `app/about.md/route.ts` → dedicated Markdown
+- An experimental Next.js request-routing layer / Proxy / Middleware / edge rewrite (depending on Next.js version and hosting) could inspect `Accept` and route a Markdown-preferring request internally to the Markdown representation
+
+**OPTION B — Route Handler owns `/about` entirely**
+
+- If `app/about/route.ts` owns `/about`, it could negotiate representations itself
+- Then `app/about/page.tsx` **cannot** also own that same route
+- This is **not** the preferred Engawa architecture
 
 Locale middleware must not break machine routes ([integrations/nextjs.md](integrations/nextjs.md)). Same-URL negotiation on localized human routes adds further complexity — out of scope for this experiment.
 
@@ -205,15 +225,21 @@ Never use negotiation to expose agent-only claims, private CMS fields, or conten
 
 ## Ecosystem evidence
 
-| Category                          | Status                                                                                                                |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `STANDARD_SUPPORT`                | RFC 7763 registers `text/markdown`; RFC 9110 defines negotiation mechanics                                            |
-| `VENDOR_SUPPORT`                  | Mixed — some HTTP clients and proxies handle `Accept`; broad `Accept: text/markdown` adoption not established as norm |
-| `OBSERVED_REFERENCE_SITE_TRAFFIC` | Not measured in this repository                                                                                       |
+| Category                          | Status                                                                                                                                                                                                                                                                                                   |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `STANDARD_SUPPORT`                | YES — RFC 7763 registers `text/markdown`; RFC 9110 defines negotiation mechanics                                                                                                                                                                                                                         |
+| `VENDOR_SUPPORT`                  | `ESTABLISHED_EXAMPLE` — Cloudflare [Markdown for Agents](https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/) documents same-URL `Accept: text/markdown` → `text/markdown` with `Vary: Accept`, HTML as normal/default, and explicit Markdown URL access in the docs ecosystem |
+| `BROAD_CLIENT_ADOPTION`           | `NOT_ESTABLISHED` — one vendor deployable pattern ≠ proven agent-wide header usage                                                                                                                                                                                                                       |
+| `OBSERVED_REFERENCE_SITE_TRAFFIC` | Not measured in this repository                                                                                                                                                                                                                                                                          |
 
 ```text
+STANDARD_SUPPORT = YES
+VENDOR_SUPPORT = ESTABLISHED_EXAMPLE
+BROAD_CLIENT_ADOPTION = NOT_ESTABLISHED
 REFERENCE_SITE_ACCEPT_EVIDENCE = NOT_YET_MEASURED
 ```
+
+Cloudflare strengthens the case that same-URL negotiation is **real and deployable**. It does **not** by itself prove Engawa should recommend the pattern, and it does **not** populate reference-site Accept evidence.
 
 Operators can measure `Accept` on canonical HTML using [observability.md](observability.md). **Do not invent traffic evidence.**
 
@@ -248,14 +274,15 @@ Local proof: Accept vectors pass; `Vary: Accept` on both branches; Markdown pari
 
 Gaps:
 
-- No production `Accept: text/markdown` traffic measured on reference sites
+- No production `Accept: text/markdown` traffic measured on Engawa reference sites
 - Static/build-time Engawa path does not benefit without new runtime/edge layer
 - Production references use Model A only
-- BOTH hybrid adds complexity without demonstrated demand
+- Vendor example (Cloudflare) shows deployability, not Engawa reference demand or broad client adoption
+- BOTH hybrid adds complexity without demonstrated Engawa-site demand
 
 ## Decision
 
-Applying the criteria above:
+Applying the criteria above (re-evaluated after RFC Accept precedence fix and Cloudflare primary-source citation):
 
 ```text
 CONTENT_NEGOTIATION_EXPERIMENT = COMPLETE
@@ -264,10 +291,13 @@ SAME_URL_NEGOTIATION_PROTOCOL_VALID = YES
 VARY_ACCEPT_REQUIRED = YES
 DEDICATED_MD_STILL_SUPPORTED = YES
 STATIC_SITE_RUNTIME_REQUIRED = YES_FOR_MODEL_B
+STANDARD_SUPPORT = YES
+VENDOR_SUPPORT = ESTABLISHED_EXAMPLE
+BROAD_CLIENT_ADOPTION = NOT_ESTABLISHED
 REFERENCE_SITE_ACCEPT_EVIDENCE = NOT_YET_MEASURED
 
 DECISION = DEFER
-RATIONALE = Same-URL negotiation is protocol-valid and locally testable, but current Engawa evidence favors dedicated .md URLs: production references use Model A, static/build-time sites need no runtime, cache semantics are simpler, and no measured Accept: text/markdown demand exists yet. Operator-local observability can quantify demand before committing Engawa to a recommendation.
+RATIONALE = Same-URL negotiation is protocol-valid, locally testable, and exemplified by at least one major CDN vendor (Cloudflare Markdown for Agents). Engawa evidence still favors dedicated .md URLs as the default: production references use Model A, static/build-time sites need no runtime, cache semantics are simpler, and REFERENCE_SITE_ACCEPT_EVIDENCE remains NOT_YET_MEASURED. Vendor deployability alone does not prove broad agent adoption or Engawa-site demand.
 NEXT_ACTION = Reference-site operators may log Accept on canonical HTML (observability recipe). Revisit if REFERENCE_SITE_ACCEPT_EVIDENCE shows sustained Accept: text/markdown on human URLs without path-based .md fetches. Any future ADOPT phase would document BOTH hybrid (keep /about.md), require Vary: Accept, and remain optional — not a replacement for dedicated machine URLs.
 ```
 

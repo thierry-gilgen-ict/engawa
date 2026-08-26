@@ -58,9 +58,10 @@ curl -sI http://127.0.0.1:3848/about.md
 See the canonical doc for full policy and standards context. Summary:
 
 - missing `Accept` → HTML
-- higher `q` wins; equal `q` → HTML
+- most-specific matching media range supplies the effective `q` (exact > `type/*` > `*/*`)
+- higher effective `q` wins; equal `q` → HTML
 - `*/*` does not specifically request Markdown
-- `text/markdown;q=0` → never Markdown
-- both representations `q=0` → `406 Not Acceptable`
+- `text/markdown;q=0` alone → `406 Not Acceptable` (experimental policy)
+- both representations effective `q=0` → `406 Not Acceptable`
 
 Negotiated responses emit `Vary: Accept` on both HTML and Markdown branches.
