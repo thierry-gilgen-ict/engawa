@@ -45,11 +45,22 @@ describe("documentation sanity", () => {
 
   it("compatibility.md documents current tested package set", () => {
     const compat = readFileSync(join(root, "docs/compatibility.md"), "utf8");
-    expect(compat).toContain("ENGAWA_RELEASE_SET = 2026-08-v0.1.1");
+    expect(compat).toContain("ENGAWA_RELEASE_SET = 2026-08-discovery-v0.2.0");
     expect(compat).toContain("@thierry-gilgen-ict/engawa-core");
-    expect(compat).toContain("| 0.1.1");
+    expect(compat).toContain("@thierry-gilgen-ict/engawa-discovery");
     expect(compat).toContain("@thierry-gilgen-ict/engawa-react");
     expect(compat).toContain("| 0.1.0");
+
+    const currentSection = compat.split("## Previous tested release set")[0];
+    expect(currentSection).toContain("ENGAWA_RELEASE_SET = 2026-08-discovery-v0.2.0");
+    expect(currentSection).toMatch(
+      /@thierry-gilgen-ict\/engawa-discovery`\s+\|\s+0\.2\.0/,
+    );
+    expect(currentSection).not.toMatch(
+      /@thierry-gilgen-ict\/engawa-discovery`\s+\|\s+0\.1\.1/,
+    );
+
+    expect(compat).toContain("ENGAWA_RELEASE_SET = 2026-08-v0.1.1");
   });
 
   it("README quick start pins core/mcp to 0.1.1 and discovery to 0.2.0", () => {

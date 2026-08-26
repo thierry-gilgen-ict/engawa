@@ -76,7 +76,7 @@ Do not invent package names (`engawa-html`, `engawa-static`, `engawa-analytics`)
 | Package            | npm status  | Notes                                                                                            |
 | ------------------ | ----------- | ------------------------------------------------------------------------------------------------ |
 | `engawa-core`      | 0.1.1       | engines metadata in 0.1.1                                                                        |
-| `engawa-discovery` | 0.1.1       | depends on core 0.1.1                                                                            |
+| `engawa-discovery` | 0.2.0       | depends on core 0.1.1; [publish record](publish-npm-discovery-v0.2.0.md)                         |
 | `engawa-mcp`       | 0.1.1       | depends on core 0.1.1                                                                            |
 | `engawa-react`     | 0.1.0       | engines already present                                                                          |
 | `engawa-nextjs`    | Not shipped | Document pattern only                                                                            |

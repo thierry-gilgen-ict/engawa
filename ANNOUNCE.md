@@ -9,7 +9,7 @@ Engawa v0.1 is on npm. A website gets two first-class interfaces: HTML for human
 | Package                                | Version                               |
 | -------------------------------------- | ------------------------------------- |
 | `@thierry-gilgen-ict/engawa-core`      | 0.1.1                                 |
-| `@thierry-gilgen-ict/engawa-discovery` | 0.1.1                                 |
+| `@thierry-gilgen-ict/engawa-discovery` | 0.2.0                                 |
 | `@thierry-gilgen-ict/engawa-mcp`       | 0.1.1                                 |
 | `@thierry-gilgen-ict/engawa-react`     | 0.1.0 (optional BYA UI)               |
 | `@thierry-gilgen-ict/engawa-map`       | 0.1.0 (optional Distribution Map CLI) |

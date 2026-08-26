@@ -8,7 +8,7 @@ Engawa v0.1 packages are published to the public npm registry under the `@thierr
 {
   "dependencies": {
     "@thierry-gilgen-ict/engawa-core": "0.1.1",
-    "@thierry-gilgen-ict/engawa-discovery": "0.1.1",
+    "@thierry-gilgen-ict/engawa-discovery": "0.2.0",
     "@thierry-gilgen-ict/engawa-mcp": "0.1.1"
   }
 }
