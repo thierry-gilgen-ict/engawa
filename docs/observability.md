@@ -108,7 +108,7 @@ Prefer **configured / known Engawa surfaces**, not every path that happens to en
 | Ordinary human HTML URL                             | `CANONICAL_HTML` |
 | Everything else                                     | `OTHER`          |
 
-Optional: if you later observe canonical HTML with `Accept: text/markdown`, you may note that in `accept` without implementing content negotiation in Engawa (negotiation is a separate roadmap experiment).
+Optional: if you observe canonical HTML with `Accept: text/markdown`, note it in `accept` for operator-local analysis. Same-URL negotiation was evaluated in the [content negotiation experiment](content-negotiation-experiment.md); dedicated `.md` routes remain the Engawa default.
 
 ## Minimal metrics
 

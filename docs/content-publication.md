@@ -111,6 +111,8 @@ For artifact-driven sites, the adapter (or build step feeding it) must reflect *
 
 Publishing Markdown does **not** mean all AI crawlers automatically fetch alternates. See [Do you need Engawa?](do-you-need-engawa.md) (discovery note).
 
+Same-URL `Accept` negotiation was evaluated separately ([content negotiation experiment](content-negotiation-experiment.md)). A hybrid BOTH model would still require negotiated Markdown to use the **same builder** as dedicated `*.md` routes.
+
 ## Related docs
 
 - [ADR-0008: Artifact-driven content sources](adr/0008-artifact-driven-content-sources.md)

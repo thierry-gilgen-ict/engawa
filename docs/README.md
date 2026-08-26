@@ -14,6 +14,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 - [Getting started](getting-started.md) — empty external project quick start
 - [llms.txt authoring](llms-txt-authoring.md) — curated preamble, budgets, diagnostics
 - [Observability (operator-local)](observability.md) — measure agent-surface requests from your own logs
+- [Content negotiation experiment](content-negotiation-experiment.md) — dedicated `.md` vs same-URL `Accept` evaluation (experiment only)
 
 ### For coding agents
 
@@ -49,6 +50,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 - [Distribution Map API contract](distribution-map-api.md) — frozen v1 registry/CLI contract (DM1A)
 - [Distribution Map threat model](distribution-map-threat-model.md) — CLI and registry threats (DM1A)
 - [Roadmap](roadmap.md)
+- [Content negotiation experiment](content-negotiation-experiment.md) — bounded Accept evaluation; dedicated `.md` remains default
 - [Engawa Inspector CLI (source)](../../packages/cli/README.md) — `engawa inspect` readiness reports
 - [Releasing](releasing.md) — maintainer npm publish
 - [Provider capability matrix](providers/provider-capability-matrix.md)
