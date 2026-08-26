@@ -56,6 +56,7 @@ Before enabling public MCP and machine markdown on a production domain:
 - [ ] **No unauthenticated mutation** — writes belong in authenticated future surface
 - [ ] **Markdown `noindex`** — if alternates should not compete with HTML in search indexes
 - [ ] **Analytics metadata only** — BYA `onEvent`: no prompt, context, or MCP query body logging
+- [ ] **Operator-local agent-surface logs (optional)** — if you measure `/llms.txt`, markdown, or `/mcp` traffic, use [operator-local observability](observability.md): no Engawa phone-home, no MCP request-body logging, User-Agent is not proof of model consumption
 
 ## Distribution Map (opt-in only)
 

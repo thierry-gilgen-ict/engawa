@@ -13,6 +13,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 - [Static build-time integration](static-build-time-integration.md) — artifact-driven HTML extraction pattern (monorepo example)
 - [Getting started](getting-started.md) — empty external project quick start
 - [llms.txt authoring](llms-txt-authoring.md) — curated preamble, budgets, diagnostics
+- [Observability (operator-local)](observability.md) — measure agent-surface requests from your own logs
 
 ### For coding agents
 
@@ -42,6 +43,7 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 - [Do you need Engawa?](do-you-need-engawa.md)
 - [Implementation profile v0.1](implementation-profile-v0.1.md)
 - [Security model](security-model.md)
+- [Observability (operator-local)](observability.md) — access-log / structured-log recipe; no phone-home
 - [Distribution Map](distribution-map.md) — optional showcase; opt-in policy
 - [Distribution Map production launch (DM3A)](distribution-map-production-launch.md)
 - [Distribution Map API contract](distribution-map-api.md) — frozen v1 registry/CLI contract (DM1A)
