@@ -117,6 +117,77 @@ node scripts/v011-release-candidate-smoke.mjs
 
 Expect `ENGAWA_V011_RELEASE_CANDIDATE_SMOKE = PASS`.
 
+## engawa-discovery (discovery-only minor release)
+
+`@thierry-gilgen-ict/engawa-discovery` may version independently when only discovery changes (e.g. `0.2.0` while core/mcp remain `0.1.1`). Do not synchronize all package versions for aesthetics.
+
+**Release model (discovery-only)**
+
+```text
+clean reviewed main (runtime already merged)
+↓
+bump packages/discovery/package.json only
+↓
+CHANGELOG pending entry
+↓
+pnpm build
+↓
+node scripts/stage-npm-tarballs.mjs --discovery-only
+↓
+inspect discovery tarball (allowlist + secret/path scan)
+↓
+pnpm smoke:discovery-rc   # persistent packed-artifact smoke; safe before and after publish
+↓
+WAIT_FOR_USER
+↓
+pnpm smoke:discovery-publish-preflight   # immediately before npm publish only
+↓
+maintainer explicitly authorizes npm publish (discovery tarball only)
+↓
+npm publish <exact-discovery-tarball> --access public
+↓
+verify registry
+↓
+git tag engawa-discovery-v<version>   # after successful publish, not before
+```
+
+Staged discovery tarball depends on published `@thierry-gilgen-ict/engawa-core` at the exact semver from `packages/core/package.json` (never `workspace:*` in the tarball). Consumers install core from the registry; the packed-artifact smoke installs registry core plus the packed discovery artifact.
+
+**Discovery-only staging**
+
+```bash
+node scripts/stage-npm-tarballs.mjs --discovery-only
+```
+
+Produces only `.npm-staging/discovery/thierry-gilgen-ict-engawa-discovery-<version>.tgz` (clears prior discovery staging, does not pack core or mcp). Default `stage-npm-tarballs.mjs` (no flag) unchanged: core + discovery + mcp.
+
+**Packed-artifact smoke (CI + post-publish safe)**
+
+```bash
+pnpm smoke:discovery-rc
+```
+
+Stages the discovery tarball, inspects allowlist/secret/path artifacts, installs registry core plus the packed discovery artifact, and exercises `generateLlmsTxt` / `buildLlmsTxt`. Does **not** assert that the source discovery version is absent from npm — safe to run in normal CI before and after publication.
+
+Expect `ENGAWA_DISCOVERY_RELEASE_CANDIDATE_SMOKE = PASS`.
+
+**Pre-publication registry gate (maintainer only — not CI)**
+
+Run **immediately before** `npm publish`. Versions are read from `packages/discovery/package.json` and `packages/core/package.json`:
+
+```bash
+pnpm smoke:discovery-publish-preflight
+```
+
+Expect `ENGAWA_DISCOVERY_PUBLISH_PREFLIGHT = PASS` (target discovery version E404 on npm; required core version present). Fails if the target discovery version is already published.
+
+Manual equivalent:
+
+```bash
+npm view @thierry-gilgen-ict/engawa-discovery@<discovery-version> version   # expect E404
+npm view @thierry-gilgen-ict/engawa-core@<core-version> version             # expect <core-version>
+```
+
 ## engawa-cli (standalone pack)
 
 `@thierry-gilgen-ict/engawa-cli` does **not** declare workspace Engawa packages as runtime dependencies. Published CLI tarballs need no `stage-npm-tarballs.mjs` rewrite — pack the built package directory directly.

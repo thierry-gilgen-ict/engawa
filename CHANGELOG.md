@@ -4,6 +4,20 @@ All notable changes to Engawa are documented here. Versions follow [Semantic Ver
 
 ## Unreleased (source only)
 
+## [0.2.0] — pending publication
+
+### `@thierry-gilgen-ict/engawa-discovery@0.2.0`
+
+- `buildLlmsTxt()` and `LlmsTxtBuildResult` for authorable llms.txt output with diagnostics
+- Curated `preamble` replaces generic prose when supplied
+- `mcpPath: false` omits MCP guidance for document-only sites
+- Description quality warnings (`MISSING_DESCRIPTION`, `DESCRIPTION_EQUALS_TITLE`) and optional `requireDescriptions`
+- Primary / Optional tier policy via `optionalResourceIds`
+- UTF-8 `maxBytes` budget with `error` and `trim-optional` overflow policies
+- Deterministic optional prefix omission when budget trims optional resources
+
+`BREAKING_CHANGE = NO` · `MIGRATION_REQUIRED = NO` · `LEGACY_GENERATE_API = PRESERVED` · `CORE_REQUIRED = 0.1.1` · `MIN_NODE = 24`
+
 ## [0.1.0-cli] — 2026-08-25
 
 ### `@thierry-gilgen-ict/engawa-cli@0.1.0` (published)

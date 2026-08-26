@@ -17,6 +17,8 @@
     "smoke:stranger-path": "node scripts/stranger-path-smoke.mjs",
     "smoke:live-references": "node scripts/live-reference-acceptance.mjs",
     "smoke:v011-rc": "node scripts/v011-release-candidate-smoke.mjs",
+    "smoke:discovery-rc": "node scripts/discovery-release-candidate-smoke.mjs",
+    "smoke:discovery-publish-preflight": "node scripts/discovery-publish-preflight.mjs",
     "smoke:map-rc": "node scripts/map-release-candidate-smoke.mjs",
     "smoke:cli-rc": "node scripts/cli-release-candidate-smoke.mjs",
     "smoke:static-build-time": "node scripts/static-build-time-smoke.mjs",
