@@ -19,7 +19,7 @@ Engawa packages ship prebuilt `dist/` output. You do not need to compile Engawa 
 ```bash
 npm install \
   @thierry-gilgen-ict/engawa-core@0.1.1 \
-  @thierry-gilgen-ict/engawa-discovery@0.1.1 \
+  @thierry-gilgen-ict/engawa-discovery@0.2.0 \
   @thierry-gilgen-ict/engawa-mcp@0.1.1
 ```
 

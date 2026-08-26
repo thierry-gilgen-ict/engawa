@@ -49,7 +49,7 @@ External review after `@thierry-gilgen-ict/engawa-cli@0.1.0` converged on four t
 Planned bounded phases (order matters):
 
 1. **Static/build-time pattern proof** — closed on main ([`examples/static-build-time-site`](../../examples/static-build-time-site), [static-build-time-integration.md](static-build-time-integration.md)); production reference still pending
-2. **Authorable/high-quality llms.txt** — implemented by PR #33; available on main after merge; npm publication remains separate (registry `@thierry-gilgen-ict/engawa-discovery@0.1.1`)
+2. **Authorable/high-quality llms.txt** — implemented by PR #33; published as `@thierry-gilgen-ict/engawa-discovery@0.2.0` (see [publish-npm-discovery-v0.2.0.md](publish-npm-discovery-v0.2.0.md))
 3. **Observability recipe** — operator-local server/CDN logs (`/llms.txt`, `*.md`, `/mcp`, `Accept`, User-Agent); **no runtime phone-home**; User-Agent ≠ proof of model consumption
 4. **Content-negotiation experiment** — does `Accept: text/markdown` on canonical human URLs justify same-URL negotiation?
 5. **Multi-locale guidance / reference**
@@ -76,7 +76,7 @@ Do not invent package names (`engawa-html`, `engawa-static`, `engawa-analytics`)
 | Package            | npm status  | Notes                                                                                            |
 | ------------------ | ----------- | ------------------------------------------------------------------------------------------------ |
 | `engawa-core`      | 0.1.1       | engines metadata in 0.1.1                                                                        |
-| `engawa-discovery` | 0.1.1       | depends on core 0.1.1                                                                            |
+| `engawa-discovery` | 0.2.0       | depends on core 0.1.1; [publish record](publish-npm-discovery-v0.2.0.md)                         |
 | `engawa-mcp`       | 0.1.1       | depends on core 0.1.1                                                                            |
 | `engawa-react`     | 0.1.0       | engines already present                                                                          |
 | `engawa-nextjs`    | Not shipped | Document pattern only                                                                            |

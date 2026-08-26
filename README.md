@@ -79,7 +79,7 @@ This uses **published packages** from the public npm registry—not a clone of t
 ```bash
 npm install \
   @thierry-gilgen-ict/engawa-core@0.1.1 \
-  @thierry-gilgen-ict/engawa-discovery@0.1.1 \
+  @thierry-gilgen-ict/engawa-discovery@0.2.0 \
   @thierry-gilgen-ict/engawa-mcp@0.1.1
 ```
 
@@ -197,7 +197,7 @@ Full model: [docs/security-model.md](docs/security-model.md).
 
 ## Status
 
-- Current npm registry: `@thierry-gilgen-ict/engawa-core@0.1.1`, `@thierry-gilgen-ict/engawa-discovery@0.1.1`, `@thierry-gilgen-ict/engawa-mcp@0.1.1`, `@thierry-gilgen-ict/engawa-react@0.1.0`, `@thierry-gilgen-ict/engawa-map@0.1.0`, `@thierry-gilgen-ict/engawa-cli@0.1.0`.
+- Current npm registry: `@thierry-gilgen-ict/engawa-core@0.1.1`, `@thierry-gilgen-ict/engawa-discovery@0.2.0`, `@thierry-gilgen-ict/engawa-mcp@0.1.1`, `@thierry-gilgen-ict/engawa-react@0.1.0`, `@thierry-gilgen-ict/engawa-map@0.1.0`, `@thierry-gilgen-ict/engawa-cli@0.1.0`.
 - Early **v0.x** foundation on npm; packages may diverge by semver; **API may change before 1.0**.
 - **Node.js 24+** required for published packages.
 - **Two production reference integrations** on Next.js (see above).

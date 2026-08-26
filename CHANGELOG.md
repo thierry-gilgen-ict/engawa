@@ -4,7 +4,7 @@ All notable changes to Engawa are documented here. Versions follow [Semantic Ver
 
 ## Unreleased (source only)
 
-## [0.2.0] — pending publication
+## [0.2.0] — 2026-08-26
 
 ### `@thierry-gilgen-ict/engawa-discovery@0.2.0`
 

@@ -45,20 +45,27 @@ describe("documentation sanity", () => {
 
   it("compatibility.md documents current tested package set", () => {
     const compat = readFileSync(join(root, "docs/compatibility.md"), "utf8");
-    expect(compat).toContain("ENGAWA_RELEASE_SET = 2026-08-v0.1.1");
+    expect(compat).toContain("ENGAWA_RELEASE_SET = 2026-08-discovery-v0.2.0");
     expect(compat).toContain("@thierry-gilgen-ict/engawa-core");
-    expect(compat).toContain("| 0.1.1");
+    expect(compat).toContain("@thierry-gilgen-ict/engawa-discovery");
     expect(compat).toContain("@thierry-gilgen-ict/engawa-react");
     expect(compat).toContain("| 0.1.0");
+
+    const currentSection = compat.split("## Previous tested release set")[0];
+    expect(currentSection).toContain("ENGAWA_RELEASE_SET = 2026-08-discovery-v0.2.0");
+    expect(currentSection).toMatch(/@thierry-gilgen-ict\/engawa-discovery`\s+\|\s+0\.2\.0/);
+    expect(currentSection).not.toMatch(/@thierry-gilgen-ict\/engawa-discovery`\s+\|\s+0\.1\.1/);
+
+    expect(compat).toContain("ENGAWA_RELEASE_SET = 2026-08-v0.1.1");
   });
 
-  it("README quick start pins core/discovery/mcp to 0.1.1 not 0.1.0", () => {
+  it("README quick start pins core/mcp to 0.1.1 and discovery to 0.2.0", () => {
     const readme = readFileSync(join(root, "README.md"), "utf8");
     const installBlock = readme.match(/npm install[\s\S]*?engawa-mcp@[\d.]+/);
     expect(installBlock).not.toBeNull();
     const block = installBlock![0];
     expect(block).toContain("engawa-core@0.1.1");
-    expect(block).toContain("engawa-discovery@0.1.1");
+    expect(block).toContain("engawa-discovery@0.2.0");
     expect(block).toContain("engawa-mcp@0.1.1");
     expect(block).not.toMatch(/engawa-core@0\.1\.0/);
     expect(block).not.toMatch(/engawa-discovery@0\.1\.0/);
