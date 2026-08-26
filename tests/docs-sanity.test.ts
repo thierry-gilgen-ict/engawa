@@ -53,12 +53,8 @@ describe("documentation sanity", () => {
 
     const currentSection = compat.split("## Previous tested release set")[0];
     expect(currentSection).toContain("ENGAWA_RELEASE_SET = 2026-08-discovery-v0.2.0");
-    expect(currentSection).toMatch(
-      /@thierry-gilgen-ict\/engawa-discovery`\s+\|\s+0\.2\.0/,
-    );
-    expect(currentSection).not.toMatch(
-      /@thierry-gilgen-ict\/engawa-discovery`\s+\|\s+0\.1\.1/,
-    );
+    expect(currentSection).toMatch(/@thierry-gilgen-ict\/engawa-discovery`\s+\|\s+0\.2\.0/);
+    expect(currentSection).not.toMatch(/@thierry-gilgen-ict\/engawa-discovery`\s+\|\s+0\.1\.1/);
 
     expect(compat).toContain("ENGAWA_RELEASE_SET = 2026-08-v0.1.1");
   });
