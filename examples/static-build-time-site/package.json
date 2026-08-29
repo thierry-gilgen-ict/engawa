@@ -14,6 +14,6 @@
   "dependencies": {
     "@thierry-gilgen-ict/engawa-core": "workspace:*",
     "@thierry-gilgen-ict/engawa-discovery": "workspace:*",
-    "node-html-parser": "^7.0.1"
+    "node-html-parser": "^9.0.1"
   }
 }
