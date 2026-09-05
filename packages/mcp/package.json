@@ -33,7 +33,7 @@
   "dependencies": {
     "@modelcontextprotocol/server": "2.0.0",
     "@thierry-gilgen-ict/engawa-core": "workspace:*",
-    "zod": "^4.2.0"
+    "zod": "^4.5.4"
   },
   "publishConfig": {
     "access": "public"
