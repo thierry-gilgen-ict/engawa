@@ -35,7 +35,7 @@
     "test": "vitest run --root ../.. --config vitest.config.ts packages/map"
   },
   "dependencies": {
-    "zod": "^4.2.0"
+    "zod": "^4.5.4"
   },
   "publishConfig": {
     "access": "public"
