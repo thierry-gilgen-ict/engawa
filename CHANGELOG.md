@@ -4,6 +4,13 @@ All notable changes to Engawa are documented here. Versions follow [Semantic Ver
 
 ## Unreleased (source only)
 
+### Distribution Map discontinued
+
+- Removed `@thierry-gilgen-ict/engawa-map` from the monorepo and CI
+- Registry shut down (offline); npm package deprecated
+- Public docs and agent guidance updated: do not install or register
+- Historical policy retained under [docs/distribution-map.md](docs/distribution-map.md)
+
 ## [0.2.0] — 2026-08-26
 
 ### `@thierry-gilgen-ict/engawa-discovery@0.2.0`

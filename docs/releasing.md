@@ -245,7 +245,7 @@ git tag engawa-cli-v0.1.0
 git push origin engawa-cli-v0.1.0
 ```
 
-Do not move `v0.1.0`, `engawa-core-v0.1.1`, `engawa-discovery-v0.1.1`, `engawa-mcp-v0.1.1`, `engawa-react-v0.1.0`, or `engawa-map-v0.1.0`.
+Do not move `v0.1.0`, `engawa-core-v0.1.1`, `engawa-discovery-v0.1.1`, `engawa-mcp-v0.1.1`, or `engawa-react-v0.1.0`.
 
 ## Publish (interactive — maintainer only)
 
@@ -313,7 +313,6 @@ Until that closeout merge, public documentation correctly targets the **currentl
 - PR CI runs external consumer smoke against **currently published** registry versions (`0.1.1` for core/discovery/mcp; react pinned to `0.1.0` in smoke script).
 - PR CI runs v0.1.1 release-candidate smoke against local staged tarballs (`scripts/v011-release-candidate-smoke.mjs`).
 - PR CI runs engawa-cli release-candidate pack smoke (`scripts/cli-release-candidate-smoke.mjs`).
-- PR CI runs engawa-map release-candidate pack smoke (`scripts/map-release-candidate-smoke.mjs`).
 
 ## Related
 

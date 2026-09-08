@@ -1,22 +1,24 @@
 # Distribution Map API and CLI contract (v1)
 
-This document freezes the **registry API** and **engawa-map CLI** behavior. Contract and implementation exist; staging is live (DM2B PASS). Production registry not deployed. See [DM3A production launch contract](distribution-map-production-launch.md).
+> **DISCONTINUED / HISTORICAL.** Not a supported public service. `DISTRIBUTION_MAP_STATUS = DISCONTINUED`. `PRODUCTION_REGISTRY = OFFLINE`. `ENGAWA_MAP_NPM = DEPRECATED`. Do not implement clients against these endpoints.
 
-| Field                    | Value                                                     |
-| ------------------------ | --------------------------------------------------------- |
-| Package                  | `@thierry-gilgen-ict/engawa-map@0.1.0` (npm)              |
-| CLI                      | Public npm CLI; defaults to production registry           |
-| Staging registry         | `https://staging-engawa-map.thierry-gilgen-ict.ch` (live) |
-| Production registry host | `https://engawa-map.thierry-gilgen-ict.ch` (live)         |
-| API version              | `/api/v1`                                                 |
+This document freezes the **historical registry API** and **engawa-map CLI** behavior (as shipped for DM2B/DM3). See [distribution-map.md](distribution-map.md) for current discontinuation status.
+
+| Field                    | Value                                                       |
+| ------------------------ | ----------------------------------------------------------- |
+| Package                  | `@thierry-gilgen-ict/engawa-map@0.1.0` (npm **deprecated**) |
+| CLI                      | Removed from monorepo                                       |
+| Staging registry         | Offline (former `staging-engawa-map.thierry-gilgen-ict.ch`) |
+| Production registry host | Offline (former `engawa-map.thierry-gilgen-ict.ch`)         |
+| API version              | `/api/v1` (historical)                                      |
 
 Canonical policy remains in [distribution-map.md](distribution-map.md). Threat analysis is in [distribution-map-threat-model.md](distribution-map-threat-model.md).
 
-DM0 invariants are authoritative. This contract **tightens** where noted and does not weaken them.
+DM0 invariants are authoritative for historical review. This contract **tightens** where noted and does not weaken them.
 
 ## Base endpoint
 
-Production registry host is frozen at `engawa-map.thierry-gilgen-ict.ch` (DM3A) but **not deployed**. Staging: `staging-engawa-map.thierry-gilgen-ict.ch`. Do not invent other endpoints (e.g. `map.engawa.dev`).
+Former production host: `engawa-map.thierry-gilgen-ict.ch`. Former staging: `staging-engawa-map.thierry-gilgen-ict.ch`. Both are **offline**. Do not invent other endpoints (e.g. `map.engawa.dev`).
 
 Paths are frozen independently of host:
 

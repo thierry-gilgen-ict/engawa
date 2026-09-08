@@ -1,17 +1,20 @@
 # Engawa Distribution Map
 
-The Engawa Distribution Map is an **optional public showcase** for sites built with Engawa. Joining is a deliberate one-time action by the site operator. Engawa does **not** phone home, track visitors, or send adoption data from normal application runtime.
+> **DISCONTINUED.** The Distribution Map product is shut down. The registry is offline (`PRODUCTION_REGISTRY = OFFLINE`). `@thierry-gilgen-ict/engawa-map` is deprecated on npm and removed from this monorepo. Do not install or register. This document is retained as historical policy.
 
-This document is the canonical policy and security contract for the Distribution Map registry. It is **not** [`engawa-analytics`](roadmap.md) and not telemetry.
+The Engawa Distribution Map was an **optional public showcase** for sites built with Engawa. Joining was a deliberate one-time action by the site operator. Engawa does **not** phone home, track visitors, or send adoption data from normal application runtime.
 
-| Field            | Value                                                                                    |
-| ---------------- | ---------------------------------------------------------------------------------------- |
-| Package          | `@thierry-gilgen-ict/engawa-map@0.1.0` (npm)                                             |
-| Public name      | Engawa Distribution Map                                                                  |
-| CTA              | Join the map                                                                             |
-| CLI              | Published npm CLI; defaults to production registry                                       |
-| Registry backend | Production live at `https://engawa-map.thierry-gilgen-ict.ch`; staging remains for tests |
-| Default state    | `NOT_REGISTERED`                                                                         |
+This document is the canonical (historical) policy and security contract for the Distribution Map registry. It is **not** [`engawa-analytics`](roadmap.md) and not telemetry.
+
+| Field            | Value                                                       |
+| ---------------- | ----------------------------------------------------------- |
+| Status           | `DISTRIBUTION_MAP_STATUS = DISCONTINUED`                    |
+| Package          | `@thierry-gilgen-ict/engawa-map@0.1.0` (npm **deprecated**) |
+| Public name      | Engawa Distribution Map                                     |
+| CTA              | None — do not join                                          |
+| CLI              | Removed from monorepo; deprecated on npm                    |
+| Registry backend | Offline (former production/staging hosts shut down)         |
+| Default state    | `NOT_REGISTERED`                                            |
 
 There is no `distributionMap` field in `EngawaConfig` or `engawaConfigSchema`. Installing Engawa packages does not register a site.
 
@@ -41,24 +44,19 @@ The registry must be a **separate service and security boundary** from consumer 
 www.example.com
     -> normal website / public Engawa surfaces (/mcp, /llms.txt, BYA, HTML)
 
-staging Engawa registry host (STAGING_REGISTRY_HOST)
-    -> https://staging-engawa-map.thierry-gilgen-ict.ch (live, DM2B PASS)
+former staging Engawa registry host (OFFLINE)
+    -> https://staging-engawa-map.thierry-gilgen-ict.ch
 
-production Engawa registry host (PRODUCTION_REGISTRY_HOST — live)
-    -> https://engawa-map.thierry-gilgen-ict.ch (frozen in DM3A)
-
-Each host:
-    -> Distribution Map API
-    -> public showcase (production v1)
-    -> isolated registry persistence
+former production Engawa registry host (OFFLINE)
+    -> https://engawa-map.thierry-gilgen-ict.ch
 ```
 
-| Invariant                            | Value                                             |
-| ------------------------------------ | ------------------------------------------------- |
-| `DEDICATED_REGISTRY_SERVICE`         | REQUIRED                                          |
-| `STAGING_REGISTRY_HOST`              | `staging-engawa-map.thierry-gilgen-ict.ch` (live) |
-| `PRODUCTION_REGISTRY_HOST`           | `engawa-map.thierry-gilgen-ict.ch` (live)         |
-| Registry write API on main `www` app | FORBIDDEN                                         |
+| Invariant                            | Value                                                |
+| ------------------------------------ | ---------------------------------------------------- |
+| `DEDICATED_REGISTRY_SERVICE`         | REQUIRED (historical)                                |
+| `STAGING_REGISTRY_HOST`              | `staging-engawa-map.thierry-gilgen-ict.ch` (offline) |
+| `PRODUCTION_REGISTRY_HOST`           | `engawa-map.thierry-gilgen-ict.ch` (offline)         |
+| Registry write API on main `www` app | FORBIDDEN                                            |
 
 `REGISTRY_COMPROMISE_BLAST_RADIUS != MAIN_WEBSITE` — design for independent service boundaries. This does not claim perfect isolation, but the registry must not be a normal route inside the main website application.
 
@@ -70,13 +68,13 @@ MAP_REGISTRATION_FROM_RUNTIME = FORBIDDEN
 NORMAL_BUILD_DEPLOY_DOES_NOT_IMPLY_REGISTRATION
 ```
 
-**Allowed path (implemented):**
+**Historical allowed path (no longer supported):**
 
 ```text
 developer machine
 or explicitly configured dedicated CI registration job
-    -> engawa-map CLI (@thierry-gilgen-ict/engawa-map@0.1.0 on npm)
-    -> registry API (ENGAWA_MAP_ENDPOINT)
+    -> engawa-map CLI (@thierry-gilgen-ict/engawa-map@0.1.0 — deprecated)
+    -> registry API (ENGAWA_MAP_ENDPOINT) — offline
 ```
 
 **Forbidden paths** — these must never call the registry API:
@@ -319,17 +317,17 @@ Full contract: [distribution-map-api.md](distribution-map-api.md). Threat model:
 ## Release status
 
 ```text
-PRODUCTION_REGISTRY = LIVE
-PRODUCTION_ACCEPTANCE = PASS
+DISTRIBUTION_MAP_STATUS = DISCONTINUED
+PRODUCTION_REGISTRY = OFFLINE
+ENGAWA_MAP_NPM = DEPRECATED
 ENGAWA_MAP_NPM_PUBLICATION = @thierry-gilgen-ict/engawa-map@0.1.0
-DM3C = CLOSED
-DM3D = RELEASED
+DM3D = RELEASED_THEN_DISCONTINUED
 ```
 
 ## Related
 
-- [API and CLI contract (v1)](distribution-map-api.md) — frozen endpoints, schema, CLI behavior
-- [Threat model](distribution-map-threat-model.md) — registry and CLI threats
+- [API and CLI contract (v1)](distribution-map-api.md) — historical endpoints, schema, CLI behavior
+- [Threat model](distribution-map-threat-model.md) — historical registry and CLI threats
 - [Security model](security-model.md) — runtime boundaries and Distribution Map subsection
-- [Roadmap](roadmap.md) — `@thierry-gilgen-ict/engawa-map` implemented in repo; [DM3A production launch contract](distribution-map-production-launch.md)
-- [Agent integration playbook](agent-integration-playbook.md) — agents must not register without explicit user request
+- [Roadmap](roadmap.md) — DM3 shipped then discontinued
+- [Agent integration playbook](agent-integration-playbook.md) — agents must not install or register map

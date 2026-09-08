@@ -28,19 +28,17 @@
 - Package metadata `engines.node >=24` published as `@thierry-gilgen-ict/engawa-core@0.1.1`, `@thierry-gilgen-ict/engawa-discovery@0.1.1`, `@thierry-gilgen-ict/engawa-mcp@0.1.1`
 - `@thierry-gilgen-ict/engawa-react` remains at **0.1.0**
 
-## Completed — Distribution Map staging (DM2B)
+## Completed — Distribution Map staging (DM2B) — historical
 
-- `@thierry-gilgen-ict/engawa-map` CLI in monorepo (register / status / unregister)
-- Dedicated registry service ([engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry))
-- Live staging at `https://staging-engawa-map.thierry-gilgen-ict.ch` — DM2B acceptance PASS
-- Canonical URL hostname validation hotfix (PR #18)
+- `@thierry-gilgen-ict/engawa-map` CLI (register / status / unregister) — later removed from monorepo
+- Dedicated registry service ([engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry)) — archived
+- Staging and production hosts were operated, then shut down
 
-## Completed — Distribution Map production release (DM3)
+## Completed then discontinued — Distribution Map production (DM3)
 
-- [DM3A](distribution-map-production-launch.md) — production launch contract
-- DM3B — public showcase, production deploy artifacts, CLI default endpoint
-- DM3C — production deploy and live acceptance PASS
-- DM3D — `@thierry-gilgen-ict/engawa-map@0.1.0` on npm; production showcase live
+- [DM3A](distribution-map-production-launch.md) — production launch contract (historical)
+- DM3B–DM3D shipped `@thierry-gilgen-ict/engawa-map@0.1.0` and a live production registry
+- **Discontinued:** registry offline; npm package deprecated; package removed from this monorepo (`DISTRIBUTION_MAP_STATUS = DISCONTINUED`)
 
 ## Post-CLI adopter feedback track
 
@@ -73,12 +71,12 @@ Do not invent package names (`engawa-html`, `engawa-static`, `engawa-analytics`)
 
 ## Package status
 
-| Package            | npm status  | Notes                                                                                            |
-| ------------------ | ----------- | ------------------------------------------------------------------------------------------------ |
-| `engawa-core`      | 0.1.1       | engines metadata in 0.1.1                                                                        |
-| `engawa-discovery` | 0.2.0       | depends on core 0.1.1; [publish record](publish-npm-discovery-v0.2.0.md)                         |
-| `engawa-mcp`       | 0.1.1       | depends on core 0.1.1                                                                            |
-| `engawa-react`     | 0.1.0       | engines already present                                                                          |
-| `engawa-nextjs`    | Not shipped | Document pattern only                                                                            |
-| `engawa-cli`       | 0.1.0       | `inspect` + `init` + `doctor`; [publish record](publish-npm-cli-v0.1.0.md)                       |
-| `engawa-map`       | 0.1.0       | Production registry live; voluntary PENDING→LISTED flow; [Distribution Map](distribution-map.md) |
+| Package            | npm status  | Notes                                                                                                 |
+| ------------------ | ----------- | ----------------------------------------------------------------------------------------------------- |
+| `engawa-core`      | 0.1.1       | engines metadata in 0.1.1                                                                             |
+| `engawa-discovery` | 0.2.0       | depends on core 0.1.1; [publish record](publish-npm-discovery-v0.2.0.md)                              |
+| `engawa-mcp`       | 0.1.1       | depends on core 0.1.1                                                                                 |
+| `engawa-react`     | 0.1.0       | engines already present                                                                               |
+| `engawa-nextjs`    | Not shipped | Document pattern only                                                                                 |
+| `engawa-cli`       | 0.1.0       | `inspect` + `init` + `doctor`; [publish record](publish-npm-cli-v0.1.0.md)                            |
+| `engawa-map`       | 0.1.0       | **Discontinued** — deprecated on npm; removed from monorepo; [historical policy](distribution-map.md) |

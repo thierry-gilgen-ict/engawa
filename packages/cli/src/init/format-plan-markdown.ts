@@ -148,7 +148,7 @@ export function formatPlanMarkdown(plan: EngawaPlan): string {
   lines.push("## Acceptance criteria");
   lines.push("- See docs/integration-acceptance.md");
   lines.push("- PUBLIC_TOOLS = search_site only");
-  lines.push("- No Distribution Map registration without explicit user request");
+  lines.push("- Distribution Map is discontinued; do not install or register");
 
   return lines.join("\n");
 }

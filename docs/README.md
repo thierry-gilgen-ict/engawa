@@ -47,10 +47,10 @@ Documentation in this directory is licensed under [CC BY 4.0](LICENSE).
 - [Implementation profile v0.1](implementation-profile-v0.1.md)
 - [Security model](security-model.md)
 - [Observability (operator-local)](observability.md) — access-log / structured-log recipe; no phone-home
-- [Distribution Map](distribution-map.md) — optional showcase; opt-in policy
-- [Distribution Map production launch (DM3A)](distribution-map-production-launch.md)
-- [Distribution Map API contract](distribution-map-api.md) — frozen v1 registry/CLI contract (DM1A)
-- [Distribution Map threat model](distribution-map-threat-model.md) — CLI and registry threats (DM1A)
+- [Distribution Map](distribution-map.md) — **discontinued**; historical policy only
+- [Distribution Map production launch (DM3A)](distribution-map-production-launch.md) — historical
+- [Distribution Map API contract](distribution-map-api.md) — historical v1 registry/CLI contract
+- [Distribution Map threat model](distribution-map-threat-model.md) — historical
 - [Roadmap](roadmap.md)
 - [Content negotiation experiment](content-negotiation-experiment.md) — bounded Accept evaluation; dedicated `.md` remains default
 - [Multi-locale guidance](multi-locale.md) — locale-aware resources and machine routes

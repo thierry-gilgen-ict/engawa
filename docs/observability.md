@@ -12,7 +12,7 @@ MCP_REQUEST_BODY_LOGGING = NO
 USER_AGENT == MODEL_CONSUMPTION = NEVER
 ```
 
-Published Engawa packages must not send analytics to Engawa or Thierry Gilgen ICT, call a central analytics endpoint, call the Distribution Map, require an analytics token, or make new outbound runtime network calls for observability.
+Published Engawa packages must not send analytics to Engawa or Thierry Gilgen ICT, call a central analytics endpoint, call a Distribution Map registry, require an analytics token, or make new outbound runtime network calls for observability.
 
 ## Purpose
 
@@ -327,9 +327,10 @@ Concise operator policy (not legal advice):
 
 ```text
 DISTRIBUTION_MAP_IS_OBSERVABILITY = NO
+DISTRIBUTION_MAP_STATUS = DISCONTINUED
 ```
 
-The [Distribution Map](distribution-map.md) is voluntary site registration / showcase — not traffic telemetry.
+The [Distribution Map](distribution-map.md) was voluntary site registration / showcase — not traffic telemetry. It is discontinued; do not treat it as an observability path.
 
 ### Bring Your Agent `onEvent`
 

@@ -1,20 +1,23 @@
 # Distribution Map — production launch contract (DM3A)
 
-Design and freeze contract for production launch. **No production deployment in DM3A.** No npm publication. No domain verification.
+> **DISCONTINUED / HISTORICAL.** DM3 shipped, then the product was shut down. `DISTRIBUTION_MAP_STATUS = DISCONTINUED`. `PRODUCTION_REGISTRY = OFFLINE`. `ENGAWA_MAP_NPM = DEPRECATED`.
 
-## Current implementation status
+Design and freeze contract for the former production launch. Retained for history only.
 
-| Item                         | Status                                                                                 |
-| ---------------------------- | -------------------------------------------------------------------------------------- |
-| `ENGAWA_MAP_CLI_IMPLEMENTED` | YES — `@thierry-gilgen-ict/engawa-map@0.1.0` on npm                                    |
-| `REGISTRY_IMPLEMENTED`       | YES — [engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry) |
-| `LIVE_STAGING`               | YES — `https://staging-engawa-map.thierry-gilgen-ict.ch`                               |
-| `DM2B_STAGING_ACCEPTANCE`    | PASS (accepted SHA `61623df1422206d86fc0b4aee39e1f843440faa9`)                         |
-| `PRODUCTION_REGISTRY`        | NO                                                                                     |
-| `ENGAWA_MAP_NPM_PUBLICATION` | NO                                                                                     |
-| `DOMAIN_VERIFICATION`        | DEFERRED                                                                               |
+## Final status (after discontinuation)
 
-## Production hostname (frozen)
+| Item                         | Status                                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `DISTRIBUTION_MAP_STATUS`    | DISCONTINUED                                                                                                 |
+| `ENGAWA_MAP_CLI_IMPLEMENTED` | YES historically — package removed from monorepo; npm deprecated                                             |
+| `REGISTRY_IMPLEMENTED`       | YES historically — [engawa-map-registry](https://github.com/thierry-gilgen-ict/engawa-map-registry) archived |
+| `LIVE_STAGING`               | NO — offline                                                                                                 |
+| `DM2B_STAGING_ACCEPTANCE`    | PASS (historical; accepted SHA `61623df1422206d86fc0b4aee39e1f843440faa9`)                                   |
+| `PRODUCTION_REGISTRY`        | OFFLINE                                                                                                      |
+| `ENGAWA_MAP_NPM`             | DEPRECATED (`@thierry-gilgen-ict/engawa-map@0.1.0`)                                                          |
+| `DOMAIN_VERIFICATION`        | DEFERRED / moot                                                                                              |
+
+## Production hostname (frozen historically)
 
 | Field                        | Value                                      |
 | ---------------------------- | ------------------------------------------ |
@@ -325,14 +328,14 @@ Do not publish the CLI until production has passed DM3C acceptance.
 
 OAuth, authenticated MCP tools, user accounts, browser admin UI, domain verification, token rotation, telemetry, analytics, `engawa-analytics`, geolocation, automatic crawling, screenshots, provider integrations, `engawa-nextjs`.
 
-## DM3D release status
+## DM3D release status (superseded by discontinuation)
 
 ```text
-PRODUCTION_REGISTRY = LIVE
-PRODUCTION_ACCEPTANCE = PASS
+DISTRIBUTION_MAP_STATUS = DISCONTINUED
+PRODUCTION_REGISTRY = OFFLINE
+ENGAWA_MAP_NPM = DEPRECATED
 ENGAWA_MAP_NPM_PUBLICATION = @thierry-gilgen-ict/engawa-map@0.1.0
-DM3C = CLOSED
-DM3D = RELEASED
+DM3D = RELEASED_THEN_DISCONTINUED
 ```
 
 ## Related documents

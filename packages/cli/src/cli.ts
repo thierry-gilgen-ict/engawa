@@ -90,7 +90,7 @@ function printDoctorUsage(): void {
 Verify that a deployed Engawa public agent interface works.
 Read-only live checks: llms.txt, Markdown, MCP protocol, search_site, bounded security observations.
 Does not prove HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE.
-Does not send credentials or call Distribution Map.
+Does not send credentials or call Distribution Map (discontinued).
 
 Options:
   --profile <full|discovery>  Verification profile (default ${DEFAULT_PROFILE})

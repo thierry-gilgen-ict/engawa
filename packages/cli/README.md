@@ -69,7 +69,7 @@ engawa doctor https://example.com --profile discovery
 
 - Prove `HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE` (always `NOT_PROVABLE_FROM_LIVE_INTERFACE`)
 - Send cookies, Authorization headers, or API keys
-- Call Distribution Map / registry
+- Call Distribution Map / registry (Distribution Map is discontinued)
 - Scan or modify the source repository
 - Invoke any MCP tool other than `search_site`
 - Actively stress rate limits unless `--rate-limit-probe` is set
@@ -86,7 +86,7 @@ Doctor MCP transport uses a guarded custom `fetch`: same-origin lock, private/re
 - Does not assess security (`SECURITY_ASSESSMENT = NOT_PERFORMED`)
 - Does not auto-approve routes for Engawa publication
 - Does not use inspected HTML as your **production Engawa corpus** — inspect is a **readiness probe** only; production Engawa still requires `HUMAN_PUBLIC_SOURCE == ENGAWA_SOURCE` via loaders or build-time extraction ([content-publication.md](../../docs/content-publication.md), [ADR-0008](../../docs/adr/0008-artifact-driven-content-sources.md))
-- No telemetry, no Distribution Map calls, no LLM calls
+- No telemetry, no Distribution Map calls (Map is discontinued), no LLM calls
 
 ## CLI flow
 
