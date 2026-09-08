@@ -1,8 +1,10 @@
 # Distribution Map threat model
 
-Threat analysis for the `@thierry-gilgen-ict/engawa-map` CLI and dedicated registry service (implemented; staging live). Policy: [distribution-map.md](distribution-map.md). API contract: [distribution-map-api.md](distribution-map-api.md).
+> **DISCONTINUED / HISTORICAL.** Service offline. Retained for security review of the former CLI + registry design.
 
-DM1A is the first Engawa component **intentionally capable of outbound network requests**. This boundary requires review before implementation.
+Threat analysis for the former `@thierry-gilgen-ict/engawa-map` CLI and dedicated registry service. Policy: [distribution-map.md](distribution-map.md). API contract: [distribution-map-api.md](distribution-map-api.md).
+
+DM1A was the first Engawa component **intentionally capable of outbound network requests**. That surface is discontinued; do not reintroduce it without a new security phase.
 
 ## Trust zones
 

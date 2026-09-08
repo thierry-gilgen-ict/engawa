@@ -57,11 +57,7 @@ export function buildIntegrationSection(
     "search_site",
   ];
 
-  const optionalSurfaces = [
-    "bring-your-agent-ui",
-    "metadata-only-analytics",
-    "distribution-map-after-explicit-user-request",
-  ];
+  const optionalSurfaces = ["bring-your-agent-ui", "metadata-only-analytics"];
 
   return {
     disposition,

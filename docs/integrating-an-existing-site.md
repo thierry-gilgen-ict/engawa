@@ -197,9 +197,9 @@ Engawa integration is additive. To roll back without disturbing human-facing con
 
 Human HTML routes and CMS content are unaffected when adapters only read existing public loaders.
 
-## Join the map (optional)
+## Distribution Map
 
-Successful Engawa integration does **not** require joining the [Distribution Map](distribution-map.md). Registration is a separate, voluntary operator action after production acceptance passes.
+The [Distribution Map](distribution-map.md) is **discontinued**. Do not install or register. Successful Engawa integration never required it.
 
 ## Related
 

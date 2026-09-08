@@ -8,7 +8,7 @@ NETWORK_CALLS = NONE
 MCP_REQUEST_BODY_LOGGING = NO
 ```
 
-This example does **not** call Engawa packages, the Distribution Map, or any analytics endpoint.
+This example does **not** call Engawa packages, a Distribution Map registry, or any analytics endpoint.
 
 ## Files
 

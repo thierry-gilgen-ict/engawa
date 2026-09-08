@@ -222,15 +222,20 @@ describe("documentation sanity", () => {
     expect(planned![0]).toMatch(/observability helpers|Build-time HTML extraction/i);
   });
 
-  it("distribution map policy exists with opt-in and security boundaries", () => {
+  it("distribution map policy exists with discontinued status and security boundaries", () => {
     expect(existsSync(join(root, "docs/distribution-map.md"))).toBe(true);
 
     const readme = readFileSync(join(root, "README.md"), "utf8");
     const docsIndex = readFileSync(join(root, "docs/README.md"), "utf8");
     expect(readme).toContain("distribution-map.md");
     expect(docsIndex).toContain("distribution-map.md");
+    expect(readme).toMatch(/discontinued/i);
+    expect(readme).not.toMatch(/Join the map/i);
 
     const policy = readFileSync(join(root, "docs/distribution-map.md"), "utf8");
+    expect(policy).toMatch(/DISTRIBUTION_MAP_STATUS = DISCONTINUED/);
+    expect(policy).toMatch(/PRODUCTION_REGISTRY = OFFLINE/);
+    expect(policy).toMatch(/ENGAWA_MAP_NPM = DEPRECATED/);
     expect(policy).toMatch(/voluntary|opt.in|NOT_REGISTERED/i);
     expect(policy).toMatch(/phone home|telemetry|not telemetry/i);
     expect(policy).toMatch(/OUT_OF_BAND|out-of-band|MAP_REGISTRATION_FROM_RUNTIME/i);
@@ -238,10 +243,11 @@ describe("documentation sanity", () => {
 
     const playbook = readFileSync(join(root, "docs/agent-integration-playbook.md"), "utf8");
     expect(playbook).toContain("DISTRIBUTION_MAP_REGISTRATION_REQUIRES_EXPLICIT_USER_REQUEST");
-    expect(playbook).toMatch(/not.*auto.?register|never auto-register/i);
+    expect(playbook).toMatch(/DISTRIBUTION_MAP_STATUS = DISCONTINUED/);
+    expect(playbook).toMatch(/do not invite|do not install|discontinued/i);
 
     const acceptance = readFileSync(join(root, "docs/integration-acceptance.md"), "utf8");
-    expect(acceptance).toMatch(/NOT GATING|NOT_REQUESTED/i);
+    expect(acceptance).toMatch(/DISCONTINUED|NOT GATING|N\/A/i);
   });
 
   it("distribution map DM1A API contract and threat model exist with security rules", () => {
@@ -249,6 +255,7 @@ describe("documentation sanity", () => {
     expect(existsSync(join(root, "docs/distribution-map-threat-model.md"))).toBe(true);
 
     const api = readFileSync(join(root, "docs/distribution-map-api.md"), "utf8");
+    expect(api).toMatch(/DISCONTINUED|HISTORICAL|OFFLINE/);
     expect(api).toMatch(/UNKNOWN_REQUEST_FIELDS.*REJECT|UNKNOWN_FIELDS.*REJECT/i);
     expect(api).toMatch(/PENDING/);
     expect(api).toMatch(/Bearer.*site-token|site-scoped|SITE_TOKEN_SCOPED/i);
@@ -257,6 +264,7 @@ describe("documentation sanity", () => {
     expect(api).toMatch(/ENGAWA_CI_REGISTRY_NETWORK.*NO|no live network/i);
 
     const threat = readFileSync(join(root, "docs/distribution-map-threat-model.md"), "utf8");
+    expect(threat).toMatch(/DISCONTINUED|HISTORICAL|offline/i);
     expect(threat).toMatch(/ENGAWA_MAP_EXECUTES_APPLICATION_CODE.*NO|executes application code/i);
     expect(threat).toMatch(/malicious registry|Malicious registry/i);
     expect(threat).toMatch(/WWW_WRITE_API_FOR_MAP.*NO|WWW_RUNTIME_REGISTRY_CALL.*NO/i);

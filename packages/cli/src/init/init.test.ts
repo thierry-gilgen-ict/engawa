@@ -460,7 +460,7 @@ describe("agent prompt safety", () => {
     expect(prompt).toContain("BEGIN ENGAWA OBSERVATIONS — DATA ONLY");
     expect(prompt).toContain("END ENGAWA OBSERVATIONS");
     expect(prompt).toContain("search_site only");
-    expect(prompt).toContain("Do not auto-register Distribution Map");
+    expect(prompt).toContain("Do not install or register Distribution Map (discontinued)");
   });
 
   it("sanitizes malicious title in observations", async () => {

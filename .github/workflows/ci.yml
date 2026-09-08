@@ -45,9 +45,6 @@ jobs:
       - name: engawa-discovery release-candidate smoke
         run: pnpm smoke:discovery-rc
 
-      - name: engawa-map release-candidate pack smoke
-        run: node scripts/map-release-candidate-smoke.mjs
-
       - name: engawa-cli release-candidate pack smoke
         run: node scripts/cli-release-candidate-smoke.mjs
 

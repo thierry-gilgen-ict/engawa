@@ -58,30 +58,26 @@ Before enabling public MCP and machine markdown on a production domain:
 - [ ] **Analytics metadata only** — BYA `onEvent`: no prompt, context, or MCP query body logging
 - [ ] **Operator-local agent-surface logs (optional)** — if you measure `/llms.txt`, markdown, or `/mcp` traffic, use [operator-local observability](observability.md): no Engawa phone-home, no MCP request-body logging, User-Agent is not proof of model consumption
 
-## Distribution Map (opt-in only)
+## Distribution Map (discontinued)
 
-The [Distribution Map](distribution-map.md) is an **optional showcase** — not telemetry, not `engawa-analytics`, and not part of Engawa runtime. Production registry is live; CLI is `@thierry-gilgen-ict/engawa-map@0.1.0` on npm.
+The [Distribution Map](distribution-map.md) was an **optional showcase** — not telemetry, not `engawa-analytics`, and not part of Engawa runtime. It is **discontinued**: registry offline; `@thierry-gilgen-ict/engawa-map` deprecated on npm and removed from this monorepo.
 
-Current published Engawa packages:
+Published Engawa packages:
 
 - Make **no** Distribution Map requests
 - Do **not** register sites from MCP tools, discovery generation, React/BYA mount, or `onEvent`
 - Do **not** require a map token at runtime (`NO_RUNTIME_MAP_TOKEN`)
 
-Registration design rules (future registry):
+Historical design rules (still binding for runtime):
 
-- `REGISTRATION_IS_OUT_OF_BAND = YES` — only explicit CLI or dedicated CI registration job
-- `NO_RUNTIME_NETWORK_CALL` from normal website processes to the registry
+- `REGISTRATION_IS_OUT_OF_BAND = YES` — never from website processes
+- `NO_RUNTIME_NETWORK_CALL` from normal website processes to any map registry
+- `DO_NOT_USE_MAP_TOKEN_IN_WEBSITE_RUNTIME`
+- `ENGAWA_MAP_EXECUTES_APPLICATION_CODE = NO`
 - `REGISTER_REQUEST_REMOTE_FETCH = NO` — registry must not fetch submitted URLs on registration
 - Dedicated registry service; external to public MCP authority
 - Registry outage must not affect site build, deploy, startup, `/mcp`, `/llms.txt`, markdown, BYA, or public HTML
 
 This does not weaken **No arbitrary outbound network from tools** — public MCP tools remain read-only and adapter-bound.
 
-DM1A freezes the future `engawa-map` CLI contract and registry API ([distribution-map-api.md](distribution-map-api.md), [distribution-map-threat-model.md](distribution-map-threat-model.md)) without implementing network code. Additional hard invariants for future implementation:
-
-- `ENGAWA_MAP_EXECUTES_APPLICATION_CODE = NO` — CLI reads static config only
-- `UNKNOWN_REQUEST_FIELDS = REJECT` / `UNKNOWN_RESPONSE_FIELDS = REJECT`
-- `API_REDIRECT_FOLLOWING = NO` on registry client requests
-- `ENGAWA_CI_REGISTRY_NETWORK = NO` — no live registry in normal CI
-- `DO_NOT_IMPLEMENT_MAP_NETWORK_CODE_BEFORE_DM1A_APPROVAL` — agents must not add outbound HTTP until contract is approved
+Historical DM1A contract docs ([distribution-map-api.md](distribution-map-api.md), [distribution-map-threat-model.md](distribution-map-threat-model.md)) remain for reference. Do not reintroduce map network code or registry clients in this monorepo.

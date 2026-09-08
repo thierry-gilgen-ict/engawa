@@ -16,7 +16,7 @@ const SAFETY_RULES = [
   "Add host/rate-limit/origin protections as required.",
   "Run the consumer repository's existing checks.",
   "Do not deploy or merge without explicit authorization.",
-  "Do not auto-register Distribution Map.",
+  "Do not install or register Distribution Map (discontinued).",
 ];
 
 function formatObservationsData(plan: EngawaPlan): string {
@@ -91,7 +91,7 @@ export function formatAgentPrompt(plan: EngawaPlan): string {
   lines.push("## Do NOT");
   lines.push("- Add authenticated MCP or OAuth to public surfaces");
   lines.push("- Add mutating MCP tools");
-  lines.push("- Auto-register Distribution Map");
+  lines.push("- Install or register Distribution Map (discontinued)");
   lines.push("- Expose drafts, admin, session, or contact submission data");
   lines.push("- Treat inspect crawl HTML as the Engawa corpus");
   lines.push("");
@@ -107,7 +107,7 @@ export function formatAgentPrompt(plan: EngawaPlan): string {
   lines.push("- PUBLIC_TOOLS = search_site only");
   lines.push("- AUTHENTICATED_MCP_STARTED = NO");
   lines.push("- MUTATING_TOOLS_STARTED = NO");
-  lines.push("- JOIN_MAP = NOT_REQUESTED (unless user explicitly requested)");
+  lines.push("- JOIN_MAP = N/A (Distribution Map discontinued)");
   lines.push("- HOST_VALIDATION, RATE_LIMIT, ORIGIN_VALIDATION status");
   lines.push("- APPLICATION_SOURCE_MODIFIED = YES (only after you implement)");
 

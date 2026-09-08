@@ -16,7 +16,6 @@ export const ENGawa_PACKAGES = [
   "@thierry-gilgen-ict/engawa-discovery",
   "@thierry-gilgen-ict/engawa-mcp",
   "@thierry-gilgen-ict/engawa-react",
-  "@thierry-gilgen-ict/engawa-map",
 ] as const;
 
 export const TESTED_PACKAGE_VERSIONS: Record<string, string> = {

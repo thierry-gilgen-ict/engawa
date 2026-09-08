@@ -6,13 +6,13 @@ Engawa v0.1 is on npm. A website gets two first-class interfaces: HTML for human
 
 ## npm packages
 
-| Package                                | Version                               |
-| -------------------------------------- | ------------------------------------- |
-| `@thierry-gilgen-ict/engawa-core`      | 0.1.1                                 |
-| `@thierry-gilgen-ict/engawa-discovery` | 0.2.0                                 |
-| `@thierry-gilgen-ict/engawa-mcp`       | 0.1.1                                 |
-| `@thierry-gilgen-ict/engawa-react`     | 0.1.0 (optional BYA UI)               |
-| `@thierry-gilgen-ict/engawa-map`       | 0.1.0 (optional Distribution Map CLI) |
+| Package                                | Version                 |
+| -------------------------------------- | ----------------------- |
+| `@thierry-gilgen-ict/engawa-core`      | 0.1.1                   |
+| `@thierry-gilgen-ict/engawa-discovery` | 0.2.0                   |
+| `@thierry-gilgen-ict/engawa-mcp`       | 0.1.1                   |
+| `@thierry-gilgen-ict/engawa-react`     | 0.1.0 (optional BYA UI) |
+| `@thierry-gilgen-ict/engawa-cli`       | 0.1.0                   |
 
 Requires **Node.js 24+**.
 
@@ -30,13 +30,13 @@ Framework portability beyond Next.js is not claimed in v0.1 — integration patt
 - Public read-only MCP (`search_site` only)
 - Deterministic `llms.txt` discovery
 - Optional Bring Your Agent React UI
-- Voluntary [Distribution Map](https://engawa-map.thierry-gilgen-ict.ch) listing via `npx engawa-map register`
 
 ## What v0.1 does not include
 
 - Authenticated or mutating MCP
 - `engawa-nextjs` package (documented patterns instead)
-- Runtime phone-home — Engawa does not call the Distribution Map from your website
+- Runtime phone-home — Engawa does not call external registries from your website
+- Distribution Map — **discontinued** (registry offline; historical notes in [distribution-map.md](docs/distribution-map.md))
 
 ## Stability
 
