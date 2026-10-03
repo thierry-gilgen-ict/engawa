@@ -32,7 +32,7 @@
     "@types/react-dom": "^19.0.0",
     "globals": "^16.0.0",
     "@modelcontextprotocol/client": "2.0.0",
-    "@modelcontextprotocol/server": "2.0.0",
+    "@modelcontextprotocol/server": "2.2.0",
     "@thierry-gilgen-ict/engawa-core": "workspace:*",
     "@thierry-gilgen-ict/engawa-discovery": "workspace:*",
     "@thierry-gilgen-ict/engawa-mcp": "workspace:*",
